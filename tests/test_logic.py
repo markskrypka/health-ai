@@ -176,7 +176,7 @@ async def test_reschedule_is_questioned_once_when_the_caller_never_asked_to_move
     s.patients["P1"] = {"insurer": "cigna"}
     s.appointments["A1"] = {"appointment_id": "A1", "patient_id": "P1"}
     s.slots["S1"] = {"provider_id": "PR12", "location_id": "norte", "appointment_type_id": "dermatology_review",
-                     "start_time": "2026-09-21T10:15:00+02:00", "payable_with": ["cigna"]}
+                     "start_time": "2026-09-21T10:15:00+02:00", "payable_with": ["cigna"], "found_for": "P1", "round": 0}
     s.heard = ["I need a dermatology appointment for a rash on my arm.", "I'd like the earliest available, please."]
     assert (await tools.reschedule(s, None, "A1", "S1"))["status"] == "caller_did_not_ask_to_move"
     assert (await tools.book(s, None, "P1", "S1"))["status"] == "recorded"
@@ -301,7 +301,7 @@ def _session_with_a_booking():
     s = CallSession(call_id="t", dry_run=True, persist_log=False)
     s.patients["P3"] = {"insurer": "sanitas"}
     s.slots["S1"] = {"provider_id": "PR10", "location_id": "sur", "appointment_type_id": "orthopaedic_review",
-                     "start_time": "2026-09-21T09:30:00+02:00", "payable_with": ["sanitas"]}
+                     "start_time": "2026-09-21T09:30:00+02:00", "payable_with": ["sanitas"], "found_for": "P3", "round": 0}
     return s
 
 
@@ -514,3 +514,25 @@ def test_the_facts_are_turned_round_for_questions_about_a_clinic():
     assert "General Practice: Dr. Martín Sáez (Monday, Tuesday, Wednesday, Thursday). So at Arenal Sur there is one on Monday, Tuesday, Wednesday, Thursday and none on Friday." in facts
     assert "Orthopaedics: 2 — Dr. Emilio Iglesia at Arenal Centro only; Dra. Nuria Peral at Arenal Norte and Arenal Sur only." in facts
     assert "Dermatology: Dra. Elena Iglesias (Monday, Wednesday)." in facts
+
+
+# --- an offer stands only until a later search or a nearest-clinic answer replaces it, and only for its patient ---
+async def test_a_refused_offer_cannot_be_booked_after_a_newer_search_went_out():
+    from clinic_agent import tools
+    s, api = _session_with_a_booking(), _Catalogue()
+    s.withdraw_offer()                                        # "not mornings" → a new search goes out, and is cut short
+    assert (await tools.book(s, api, "P3", "S1"))["status"] == "stale_offer"
+    assert s.submissions == []
+    await tools.finalize(s, api)                              # …and the hang-up fallback no longer books it either
+    assert [a["action"] for a in s.submissions] == ["no-action"]
+
+
+async def test_a_slot_found_for_one_patient_cannot_be_recorded_for_another():
+    from clinic_agent import tools
+    s, api = _session_with_a_booking(), _Catalogue()
+    s.patients["P9"] = {"insurer": "axa"}
+    s.appointments["A9"] = {"appointment_id": "A9", "patient_id": "P9"}
+    s.heard = ["My father cannot make his appointment."]
+    assert (await tools.book(s, api, "P9", "S1"))["status"] == "slot_of_another_patient"
+    assert (await tools.reschedule(s, api, "A9", "S1"))["status"] == "slot_of_another_patient"
+    assert (await tools.book(s, api, "P3", "S1"))["status"] == "recorded"

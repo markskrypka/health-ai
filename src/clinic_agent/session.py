@@ -25,6 +25,9 @@ class CallSession:
     slots: dict[str, dict] = field(default_factory=dict)
     appointments: dict[str, dict] = field(default_factory=dict)
     last_offered_slot: str | None = None
+    # Every search that goes out opens a new round. A slot belongs to the patient it was found for and to its
+    # round: once a later search or a nearest-clinic answer has replaced an offer, its slots are off the table.
+    offer_round: int = 0
     last_offered_patient: str | None = None
     # The reason the last search gave for not offering anything (blocked rule, no availability…).
     last_refusal_reason: str | None = None
@@ -74,7 +77,12 @@ class CallSession:
         with open(config.CALL_LOG_DIR / f"{self.call_id}.jsonl", "a", encoding="utf-8") as fh:
             fh.write(json.dumps(event, ensure_ascii=False, default=str) + "\n")
 
-    def remember_slot(self, slot: dict) -> str:
+    def remember_slot(self, slot: dict, found_for: str) -> str:
         ref = f"S{len(self.slots) + 1}"
-        self.slots[ref] = slot
+        self.slots[ref] = {**slot, "found_for": found_for, "round": self.offer_round}
         return ref
+
+    def withdraw_offer(self) -> None:
+        """The offer on the table is no longer what the caller is answering."""
+        self.last_offered_slot = None
+        self.offer_round += 1

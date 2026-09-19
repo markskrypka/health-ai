@@ -177,6 +177,10 @@ async def nearest_site(s: CallSession, api: ClinicClient, caller_address: str, s
         result["note"] = f'{ranked[0]["name"]} is closer ({ranked[0]["distance_km"]} km) but has nobody for {specialty_id}; say so in one sentence.'
     if not specialty_id:
         result["say"] += " If they have not said which kind of doctor they need, ask, and call nearest_site again with specialty_id."
+    offered = s.slots.get(s.last_offered_slot or "")
+    if offered and offered["location_id"] != best["id"]:
+        s.withdraw_offer()  # the caller asked for the closest clinic: an offer made at another one no longer stands
+        result["say"] += f' Your earlier offer was at another clinic and is off the table: search again and offer the first slot at {best["name"]}.'
     s.log("nearest_site", address=caller_address, position=where, ranked=[(loc["id"], loc["distance_km"]) for loc in ranked], named=best["id"])
     return result
 
@@ -245,6 +249,8 @@ async def find_slots(s: CallSession, api: ClinicClient, patient_id: str, special
         if anchor is None:
             return {"status": "error", "say": "after_appointment_id must be an appointment_id from list_appointments "
                                               "(to move it later) or the slot_ref you just offered (for the next one)."}
+        if after_appointment_id in s.appointments and anchor["patient_id"] != patient_id:
+            return {"status": "error", "say": "That appointment belongs to another patient. Search for this patient without after_appointment_id."}
         s.move_intended = s.move_intended or after_appointment_id in s.appointments
         location_id = location_id or anchor["location_id"]
 
@@ -310,6 +316,9 @@ async def find_slots(s: CallSession, api: ClinicClient, patient_id: str, special
     if speaks and not allowed:
         return {"status": "no_provider_speaks", "say": f"No {specialty_id} doctor speaks that language. Say so and offer Spanish."}
 
+    # A search that goes out withdraws the offer on the table. Seen live twice: the caller turned an offer down,
+    # their next words cut the new search short, and the refused slot was still bookable — and was booked.
+    s.withdraw_offer()
     calendar_end = date.fromisoformat(cat["calendar"]["ends"])
     # The API still lists slots on a published closure day (as it does for today); neither is ever accepted.
     closed_days = set(cat["calendar"]["closure_days"])
@@ -385,7 +394,7 @@ def _offer(s: CallSession, cat: dict, picked: list[dict], wanted_day: date | Non
         if slot["start_time"] in seen:
             continue
         seen.add(slot["start_time"])
-        ref = s.remember_slot(slot)
+        ref = s.remember_slot(slot, found_for=patient_id)
         t = datetime.fromisoformat(slot["start_time"]).astimezone(MADRID)
         offers.append({"slot_ref": ref, "when": dates.spoken(t), "doctor": slot["provider_name"],
                        "site": site_names.get(slot["location_id"], slot["location_id"]),
@@ -520,10 +529,24 @@ def _policy(s: CallSession, slot: dict, patient_id: str, insurer: str) -> str:
     return next((p for p in (insurer, on_file) if p in payable), payable[0] if payable else on_file)
 
 
+def _not_on_the_table(s: CallSession, slot: dict, patient_id: str) -> dict | None:
+    """A slot can be recorded only for the patient it was found for, and only while its offer stands."""
+    if slot["found_for"] != patient_id:
+        return {"status": "slot_of_another_patient",
+                "say": "That slot was found for another patient. Call find_slots for this patient and offer what it returns."}
+    if slot["round"] != s.offer_round:
+        return {"status": "stale_offer",
+                "say": "That offer was replaced by a later search or by the nearest-clinic answer, so it is off the table. "
+                       "Call find_slots again for what the caller wants now, offer its first slot, and record it once they agree."}
+    return None
+
+
 async def book(s: CallSession, api: ClinicClient, patient_id: str, slot_ref: str, insurer: str = "") -> dict:
     slot = s.slots.get(slot_ref)
     if slot is None or patient_id not in s.patients:
         return {"status": "error", "say": "Use a patient_id from find_patient and a slot_ref from find_slots in this call."}
+    if refusal := _not_on_the_table(s, slot, patient_id):
+        return refusal
     return await _record(s, api, "book", {
         "patient_id": patient_id, "provider_id": slot["provider_id"], "location_id": slot["location_id"],
         "appointment_type_id": slot["appointment_type_id"], "slot": slot["start_time"],
@@ -550,6 +573,8 @@ async def reschedule(s: CallSession, api: ClinicClient, appointment_id: str, slo
     slot, appt = s.slots.get(slot_ref), s.appointments.get(appointment_id)
     if slot is None or appt is None:
         return {"status": "error", "say": "Use an appointment_id from list_appointments and a slot_ref from find_slots in this call."}
+    if refusal := _not_on_the_table(s, slot, appt["patient_id"]):
+        return refusal
     if not s.move_challenged and not _caller_asked_to_move(s):
         s.move_challenged = True
         return {"status": "caller_did_not_ask_to_move",
