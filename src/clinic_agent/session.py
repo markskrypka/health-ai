@@ -43,6 +43,8 @@ class CallSession:
     language: str = "en"
     catalan: bool = False
     move_challenged: bool = False
+    # A search for "later than the appointment I hold" is itself the caller asking to move it.
+    move_intended: bool = False
     # Set when the wrap-up clock fires with an offer on the table, cleared by the caller's next turn:
     # the clock alone must never make the model search again and book something the caller never heard.
     search_locked: bool = False

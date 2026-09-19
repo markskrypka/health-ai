@@ -88,10 +88,13 @@ problems 15–18 (60 points) and by the jury.
      was sound and on file and she rang from her own number: the lookup that carried the NIE no longer carried
      the caller id. Confirmed against the live directory. **Fixed and deployed 19:35** (caller id is always
      evidence; a sound id forgives a mangled name; 3 regression tests). The harness redialled her and she passed.
-   - The one no_slot_free miss: "That time doesn't work, what's the next one?" — we offered the next time across
-     all doctors (09:15 Ortiz, Centro) instead of the next with the offered doctor and site (09:15 Sáez, Sur
-     existed). The answer is hidden until Monday; *inferred* that "next" keeps doctor and site. In both such
-     calls the model also misused `after_appointment_id` with a slot ref before searching again.
+   - The one no_slot_free miss: "That time doesn't work, what's the next one?" — first offer 09:00 Sáez at Sur; we
+     answered with 09:15 Ortiz at Centro and were marked wrong (09:15 Sáez at Sur existed). My first reading, "next
+     keeps doctor and site", was **refuted by a targeted text eval**: today's accepted answer to the published
+     "ask for the next one" case at Centro is another doctor's 09:30, not the same doctor's 11:45. The rule that
+     fits both: **the next one keeps the clinic, not the doctor** — *strong; the private answer stays hidden until
+     Monday*. Fixed 20:20. In both such calls the model also misused `after_appointment_id` with a slot ref; that
+     now means exactly "the next one after this offer".
    - A scored run now dials **four calls at once**; `scripts/scored.py` logs only the first case's verdict.
    - Platform GETs have no retry (10 s timeout); a timeout costs a spoken apology and a repeated lookup. Their
      diary shows 11 platform timeouts in one 23-call batch this morning.
@@ -104,8 +107,10 @@ problems 15–18 (60 points) and by the jury.
 2. second_policy: "cannot name the plan → ask them to check the card and wait"; bill only a plan the caller said.
 3. nearest_site: a `nearest_site(address)` step before identification that stores the ranked order; `find_slots`
    uses it and ignores a model-supplied site; geocoder fallbacks (full address → street + town → town).
-4. "The next one": later offers keep the first offer's doctor and site; the tool result tells the model to offer
-   the next in the list instead of searching again.
+4. "The next one": later offers keep the first offer's clinic (any doctor); the tool result tells the model to
+   offer the next in the list instead of searching again — **done 20:20, with the first half of item 1** (move
+   recognised from the search itself and from "cannot make his appointment"/"no va a poder"; doctor and site
+   pinned on a later move; no goodbye while something the caller asked for is open).
 5. Small, safe: bind slots to their patient; emergency latch; edit-distance-1 doctor names return "confirm";
    phone/email normalisation; one in-code retry on platform GETs; log every case of a scored run.
 6. the_questions: a generated "by site" facts block with explicit negatives.

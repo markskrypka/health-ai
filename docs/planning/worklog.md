@@ -2,6 +2,12 @@
 
 Newest first. One entry per change, written when the change lands.
 
+## 2026-09-19 · fix · a later move keeps its doctor and clinic; "the next one" keeps the clinic
+By: Mark Skrypka
+Why: the reschedule path had never run live (all four change_and_cancel scored calls were cancels) and "The Real Call" (weight 5, not open yet) leans on it in 2 of 3 published cases: the move guard did not recognise "cannot make his appointment"/"no va a poder ir" and answered "book instead", and doctor and site were left to the model. Separately, the one no_slot_free scored miss: asked for "the next one" after 09:00 Sáez at Sur, we offered 09:15 Ortiz at Centro; twice the model also passed a slot ref as `after_appointment_id` and got an error.
+How: `tools.find_slots`: `after_appointment_id` takes an appointment (keeps its doctor and site unless the caller named others, only later times, and marks the call as a move so `reschedule` is not questioned) or the slot just offered (keeps the site, any doctor). `_offer` lists later times at the first offer's site before other sites'. Move words for a relative's appointment. Prompt: offer the next in the list; a later move passes nothing about doctor or site; no goodbye while something asked for is still open. My first rule ("next keeps the doctor too") was refuted by a targeted text eval against today's accepted answer (another doctor's 09:30 at the same site) and corrected before deploy. Verified: 90 tests (6 new); text evals on exactly the touched cases — the_real_call 3/3 (6/6 on the first cut), the published later move 1/1, no_slot_free 4/4 against today's answers; deployed 20:20 with the line idle. Not yet run through the harness.
+Ref: pending
+
 ## 2026-09-19 · fix · the line's own number always counts; a sound id forgives a mangled name
 By: Mark Skrypka
 Why: on a scored languages call "Alice Collins Davies" reached us as "Alys Davis"; her NIE was sound and on file and she rang from her own number, yet three lookups ended not_found and the call closed as patient_not_found at the wrap-up clock. The lookup that carried the NIE no longer carried the caller id (the model passes `use_caller_id` only with the first try), so the record had one exact detail and a name that did not agree. Confirmed against the live directory. The harness redialled her and the redial passed.
@@ -12,7 +18,7 @@ Ref: 59f3154
 By: Mark Skrypka
 Why: Mark asked whether cachopo's approach (1st at 18:30, 132 points to our 96) is better, why, and what would make ours smarter and more reliable.
 How: their public repo cloned read-only to the scratchpad; four parallel probes (brain and write path, voice, deterministic helpers, readiness for problems 15–18) cross-checked against our code, 176 call logs and the live read-only API → `active/clinic-voice-agent/research/2026-09-19-competitor-cachopo.md`. Verdict: their lead was calls banked, not a better agent — during the read our loop took every open problem to 4/4 (148 points, rank 1 at 19:30). Worth taking: doctor and site pinned on a later move, slots bound to their patient, a refusal gate, nearest-site before identification. Not worth taking: immutable mid-call writes and the confirm-in-a-new-turn flow (12 of their 23 calls hit the wall).
-Ref: pending
+Ref: 6cc92b6
 
 ## 2026-09-19 · feat · call console for the jury; the loop dials scored calls only; a night script
 By: Mark Skrypka

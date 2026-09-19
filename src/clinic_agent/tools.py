@@ -204,8 +204,27 @@ async def find_slots(s: CallSession, api: ClinicClient, patient_id: str, special
     today = s.now.astimezone(MADRID).date()
     notes: list[str] = []
 
+    # "The next time after the appointment I have" — or after the slot just offered ("what's the next one?").
+    # A move keeps its doctor and its clinic unless the caller named others: every published move reads "same
+    # doctor, same clinic, nothing earlier". The next one after an offer keeps the clinic only: the published
+    # answer to "ask for the next one" at Centro is another doctor's half past nine, not the same doctor's 11:45 —
+    # and a scored call that answered it with another CLINIC's quarter past nine was marked wrong.
+    anchor: dict | None = None
+    if after_appointment_id:
+        anchor = s.appointments.get(after_appointment_id) or s.slots.get(after_appointment_id)
+        if anchor is None:
+            return {"status": "error", "say": "after_appointment_id must be an appointment_id from list_appointments "
+                                              "(to move it later) or the slot_ref you just offered (for the next one)."}
+        s.move_intended = s.move_intended or after_appointment_id in s.appointments
+        location_id = location_id or anchor["location_id"]
+
     # who
     provider: dict | None = None
+    if anchor and not provider_name:
+        theirs = next((p for p in cat["providers"] if p["id"] == anchor["provider_id"]), None)
+        specialty_id = specialty_id or (theirs["specialty_id"] if theirs else "")
+        if after_appointment_id in s.appointments and theirs:
+            provider, specialty_id = theirs, theirs["specialty_id"]
     if provider_name:
         found = _resolve_provider(cat, provider_name, specialty_id or None)
         if not found:
@@ -227,13 +246,10 @@ async def find_slots(s: CallSession, api: ClinicClient, patient_id: str, special
     except ValueError as err:
         return {"status": "error", "say": str(err)}
     start = wanted_day or dates.earliest_bookable(today)
-    # "The next time after the appointment I already have": later that same day counts, anything earlier never does.
+    # Later that same day counts, anything earlier never does.
     not_before: datetime | None = None
-    if after_appointment_id:
-        existing = s.appointments.get(after_appointment_id)
-        if existing is None:
-            return {"status": "error", "say": "Call list_appointments first; after_appointment_id must come from it."}
-        not_before = datetime.fromisoformat(existing["start_time"]).astimezone(MADRID)
+    if anchor:
+        not_before = datetime.fromisoformat(anchor["start_time"]).astimezone(MADRID)
         start = max(start, not_before.date())
     if start <= today:
         return {"status": "error", "say": "Nothing is booked for today or the past. The earliest is tomorrow."}
@@ -325,6 +341,11 @@ def _offer(s: CallSession, cat: dict, picked: list[dict], wanted_day: date | Non
             "the clinic or that kind of doctor is not in that day. This is the earliest on the next day one is, same site and time of day."
             if closed else "that day is full. This is the nearest that matches; ask if it works."))
     site_names = {l["id"]: l["name"] for l in cat["locations"]}
+    # "What's the next one?" turns down a time, not a clinic: after the earliest come the later times at the same
+    # site, whoever the doctor, then the other sites'. (See the note on after_appointment_id in find_slots.)
+    first = picked[0]
+    same = [sl for sl in picked[1:] if sl["location_id"] == first["location_id"]]
+    picked = [first] + same + [sl for sl in picked[1:] if sl not in same]
     # One offer per distinct time keeps the call short: the earliest, then two later ones.
     offers, seen = [], set()
     for slot in picked:
@@ -341,7 +362,8 @@ def _offer(s: CallSession, cat: dict, picked: list[dict], wanted_day: date | Non
     s.last_offered_slot, s.last_offered_patient, s.last_refusal_reason = offers[0]["slot_ref"], patient_id, None
     s.log("offer", offers=offers, notes=notes)
     return {"status": "slots_found", "offers": offers, "notes": notes,
-            "say": "Offer the FIRST one only. Read back day, date, time, doctor and site; book(slot_ref) once the caller says yes."}
+            "say": "Offer the FIRST one only. Read back day, date, time, doctor and site; book(slot_ref) once the caller says yes. "
+                   "If they only turn down the time and ask for the next one, offer the next in this list — do not search again."}
 
 
 async def list_appointments(s: CallSession, api: ClinicClient, patient_id: str) -> dict:
@@ -480,12 +502,15 @@ async def book(s: CallSession, api: ClinicClient, patient_id: str, slot_ref: str
 _MOVE_WORDS = ["reschedul", "move", "chang", "cancel", "make it", "make my", "make the", "instead", "another time",
                "another day", "different", "postpone", "push", "bring forward", "earlier", "later", "swap", "rebook",
                "rearrange", "cambi", "mover", "muev", "anul", "no puedo", "no podre", "no voy a poder", "aplaz",
-               "adelant", "retras", "pospon", "otro dia", "otra hora", "otra fecha", "reprogram"]
+               "adelant", "retras", "pospon", "otro dia", "otra hora", "otra fecha", "reprogram",
+               # a relative's appointment: "my father cannot make his appointment", "no va a poder ir"
+               "can't make", "cant make", "cannot make", "make his", "make her", "make their",
+               "no va a poder", "no podra", "no podran"]
 
 
 def _caller_asked_to_move(s: CallSession) -> bool:
     said = " ".join(fold(t) for t in s.heard)
-    return any(w in said for w in _MOVE_WORDS)
+    return s.move_intended or any(w in said for w in _MOVE_WORDS)
 
 
 async def reschedule(s: CallSession, api: ClinicClient, appointment_id: str, slot_ref: str, insurer: str = "") -> dict:
@@ -673,7 +698,7 @@ TOOLS: dict[str, tuple[Tool, str, dict, list[str]]] = {
          "language": {"type": "string", "description": "ISO code, only if the caller needs a doctor who speaks it, e.g. ca"},
          "insurer": {**_E(INSURERS), "description": "only a SECOND plan the caller named on this call"},
          "caller_address": {"type": "string", "description": "only when they ask for the nearest site"},
-         "after_appointment_id": {"type": "string", "description": "when moving an appointment to 'the next time after the one I have': that appointment's id. Only later slots come back."}}, ["patient_id"]),
+         "after_appointment_id": {"type": "string", "description": "only later times come back. Moving an appointment to 'the next time after the one I have': that appointment_id — same doctor and same site unless you also pass others. The caller turns down the time you offered and asks for the next one: the slot_ref you offered — same site, any doctor."}}, ["patient_id"]),
     "list_appointments": (list_appointments, "The patient's upcoming appointments — the only source of an appointment_id.",
         {"patient_id": _S}, ["patient_id"]),
     "book": (book, "Book an offered slot after the caller said yes. Booking again for the same patient replaces the earlier booking.",

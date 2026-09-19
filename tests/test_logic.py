@@ -391,6 +391,88 @@ async def test_a_mother_ringing_for_her_child_still_gets_the_child_not_herself()
     assert (with_birthday["status"], with_birthday["patient_id"]) == ("identified", "P00901")
 
 
+# --- "the next one" and a later move keep the doctor and the site; only the time moves ---
+class _Diary:
+    """Monday's GP slots as the clinic listed them on the scored call that went wrong; the real catalogue."""
+    SLOTS = [("09:00", "PR03", "sur"), ("09:15", "PR01", "centro"), ("09:15", "PR03", "sur"), ("09:30", "PR03", "sur"),
+             ("09:30", "PR07", "centro"), ("09:45", "PR03", "sur"), ("10:00", "PR07", "centro")]
+
+    def __init__(self):
+        self.asked = []
+
+    async def catalogue(self):
+        import json
+        from clinic_agent import config
+        return json.loads((config.ORGANIZERS_DIR / "clinic.json").read_text())
+
+    async def availability(self, date_from, date_to, *, provider_id=None, specialty_id=None, location_id=None,
+                           patient_id=None, insurers=None):
+        self.asked.append({"provider_id": provider_id, "specialty_id": specialty_id, "location_id": location_id})
+        names = {p["id"]: p["name"] for p in (await self.catalogue())["providers"]}
+        return {"blocked": [], "slots": [
+            {"provider_id": p, "provider_name": names[p], "specialty_id": "general_practice", "location_id": site,
+             "appointment_type_id": "review", "start_time": f"2026-09-21T{hhmm}:00+02:00", "duration_minutes": 15,
+             "payable_with": ["dkv"]}
+            for hhmm, p, site in self.SLOTS
+            if (not provider_id or p == provider_id) and (not location_id or site == location_id)]}
+
+
+def _saturday_evening_call():
+    from datetime import datetime
+    from clinic_agent import config
+    from clinic_agent.session import CallSession
+    s = CallSession(call_id="t", dry_run=True, persist_log=False, now=datetime(2026, 9, 19, 19, 0, tzinfo=config.MADRID))
+    s.patients["P00902"] = {"insurer": "dkv"}
+    return s
+
+
+async def test_the_next_one_stays_at_the_site_of_the_offer_they_turned_down():
+    from clinic_agent import tools
+    s, api = _saturday_evening_call(), _Diary()
+    first = await tools.find_slots(s, api, "P00902", specialty_id="general_practice")
+    assert [(o["when"], o["site"]) for o in first["offers"]] == [
+        ("Monday 21 September at 09:00", "Arenal Sur"), ("Monday 21 September at 09:15", "Arenal Sur"),
+        ("Monday 21 September at 09:30", "Arenal Sur")]                # not Centro's 09:15: marked wrong on a scored call
+    # "That time doesn't work for me. What's the next one?" — the model passes the slot it offered
+    nxt = await tools.find_slots(s, api, "P00902", after_appointment_id=first["offers"][0]["slot_ref"])
+    assert api.asked[-1] == {"provider_id": None, "specialty_id": "general_practice", "location_id": "sur"}
+    assert (nxt["offers"][0]["when"], nxt["offers"][0]["site"]) == ("Monday 21 September at 09:15", "Arenal Sur")
+
+
+async def test_the_next_one_may_be_another_doctor_as_in_the_published_answer():
+    from clinic_agent import tools
+    s, api = _saturday_evening_call(), _Diary()
+    first = await tools.find_slots(s, api, "P00902", specialty_id="general_practice", location_id="centro")
+    assert [(o["when"], o["doctor"]) for o in first["offers"]][:2] == [
+        ("Monday 21 September at 09:15", "Dra. Carmen Ortiz Vidal"), ("Monday 21 September at 09:30", "Dra. Laura Benítez Roca")]
+    nxt = await tools.find_slots(s, api, "P00902", after_appointment_id=first["offers"][0]["slot_ref"])
+    assert (nxt["offers"][0]["when"], nxt["offers"][0]["doctor"]) == ("Monday 21 September at 09:30", "Dra. Laura Benítez Roca")
+
+
+async def test_a_later_move_keeps_the_doctor_and_site_of_the_appointment_and_is_not_questioned():
+    from clinic_agent import tools
+    s, api = _saturday_evening_call(), _Diary()
+    s.heard.append("My father cannot go on Monday, what is there after it?")   # none of the usual move words
+    s.appointments["A1"] = {"appointment_id": "A1", "patient_id": "P00902", "provider_id": "PR07", "location_id": "centro",
+                            "start_time": "2026-09-21T09:30:00+02:00"}
+    found = await tools.find_slots(s, api, "P00902", after_appointment_id="A1")     # no doctor, no site, no specialty
+    assert api.asked[-1] == {"provider_id": "PR07", "specialty_id": None, "location_id": "centro"}
+    assert found["offers"][0]["when"] == "Monday 21 September at 10:00"            # nothing at or before 09:30
+    moved = await tools.reschedule(s, api, "A1", found["offers"][0]["slot_ref"])
+    assert moved["status"] == "recorded" and s.submissions[0]["action"] == "reschedule"
+
+
+def test_a_relative_who_cannot_make_it_is_asking_to_move():
+    from clinic_agent import tools
+    for said in ("He cannot make his appointment on Tuesday with Dra. Benítez.", "Mi madre no va a poder ir a su cita del martes."):
+        s = _saturday_evening_call()
+        s.heard.append(said)
+        assert tools._caller_asked_to_move(s), said
+    s = _saturday_evening_call()
+    s.heard.append("I'd like the earliest appointment with a GP, please.")
+    assert not tools._caller_asked_to_move(s)
+
+
 # --- the call console reads the same event logs the calls write ---
 def test_console_puts_a_decision_in_words_and_times_the_lookups():
     from clinic_agent.console import _in_words, _lookup_times
