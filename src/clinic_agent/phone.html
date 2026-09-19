@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica Arenal - Web Phone Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .pulse-ring {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
+        }
+        @keyframes pulse {
+            to {
+                box-shadow: 0 0 0 24px rgba(16, 185, 129, 0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Card Principal -->
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 flex flex-col gap-6">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-hospital-user"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white">Clínica Arenal</h1>
+                    <p class="text-xs text-slate-400">Simulador de Teléfono Web</p>
+                </div>
+            </div>
+            <span id="badge-status" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-medium">
+                Desconectado
+            </span>
+        </div>
+
+        <!-- Configuración de Conexión -->
+        <div class="space-y-4 bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 text-sm">
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">URL WebSocket del Agente (/ws)</label>
+                <input id="ws-url" type="text" value="wss://4959-188-84-193-200.ngrok-free.app/ws" 
+                    placeholder="wss://xxxx.ngrok-free.app/ws o ws://localhost:7860/ws"
+                    class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500 transition">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Simular Número de Teléfono (Caller ID)</label>
+                <input id="from-phone" type="text" value="+34711330529" 
+                    placeholder="+34..."
+                    class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500 transition">
+                <div class="flex gap-2 mt-2">
+                    <button type="button" onclick="setPhone('+34711330529', 'Josefa Domínguez (P00001)')" 
+                        class="text-[11px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition">
+                        Josefa (Registrada)
+                    </button>
+                    <button type="button" onclick="setPhone('+34600999888', 'Desconocido (Nuevo paciente)')" 
+                        class="text-[11px] px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition">
+                        Nuevo Paciente
+                    </button>
+                </div>
+                <p id="patient-hint" class="text-[11px] text-emerald-400 mt-1 font-mono">Paciente: Josefa Domínguez</p>
+            </div>
+        </div>
+
+        <!-- Pantalla de Estado de Llamada -->
+        <div class="text-center py-4 flex flex-col items-center justify-center">
+            <div id="call-timer" class="text-3xl font-mono font-bold text-slate-400 tracking-wider mb-2">00:00</div>
+            <div id="status-subtext" class="text-xs text-slate-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-slate-600 inline-block" id="status-dot"></span>
+                <span id="call-state-desc">Listo para marcar</span>
+            </div>
+
+            <!-- Indicador Visual de Audio (Voz) -->
+            <div class="flex items-center gap-1 mt-4 h-6">
+                <div class="w-1 bg-slate-700 rounded-full h-2 transition-all duration-75" id="bar1"></div>
+                <div class="w-1 bg-slate-700 rounded-full h-3 transition-all duration-75" id="bar2"></div>
+                <div class="w-1 bg-slate-700 rounded-full h-5 transition-all duration-75" id="bar3"></div>
+                <div class="w-1 bg-slate-700 rounded-full h-4 transition-all duration-75" id="bar4"></div>
+                <div class="w-1 bg-slate-700 rounded-full h-2 transition-all duration-75" id="bar5"></div>
+            </div>
+        </div>
+
+        <!-- Botón de Llamada / Colgar -->
+        <div class="flex justify-center">
+            <button id="btn-call" onclick="toggleCall()" 
+                class="w-20 h-20 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-2xl flex items-center justify-center shadow-lg transition-all transform active:scale-95">
+                <i id="btn-icon" class="fa-solid fa-phone"></i>
+            </button>
+        </div>
+
+        <!-- Consola de Eventos -->
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-[11px] font-mono text-slate-400 max-h-32 overflow-y-auto space-y-1" id="log-box">
+            <div>[Sistema] Listo. Introduce la URL de tu túnel o localhost y pulsa Llamar.</div>
+        </div>
+
+    </div>
+
+    <script>
+        let isCalling = false;
+        let ws = null;
+        let audioCtx = null;
+        let micStream = null;
+        let scriptProcessor = null;
+        let timerInterval = null;
+        let callSeconds = 0;
+        let streamSid = "stream-" + Math.floor(Math.random() * 1000000);
+        let callSid = crypto.randomUUID ? crypto.randomUUID() : ("call-" + Date.now());
+        let nextPlayTime = 0;
+        let activeSources = [];
+
+        // Tablas de conversión G.711 mu-law <-> PCM Float32
+        const MULAW_TO_PCM = new Float32Array(256);
+        for (let i = 0; i < 256; i++) {
+            let byte = ~i;
+            let sign = (byte & 0x80) ? -1 : 1;
+            let exponent = (byte >> 4) & 0x07;
+            let mantissa = byte & 0x0F;
+            let sample = ((mantissa << 3) + 0x84) << exponent;
+            sample -= 0x84;
+            MULAW_TO_PCM[i] = (sign * sample) / 32768.0;
+        }
+
+        function pcmToMuLaw(sample) {
+            let pcm = Math.max(-1, Math.min(1, sample));
+            let intPcm = Math.floor(pcm * 32767);
+            const BIAS = 0x84;
+            const CLIP = 32635;
+            let sign = (intPcm < 0) ? 0x80 : 0;
+            if (intPcm < 0) intPcm = -intPcm;
+            if (intPcm > CLIP) intPcm = CLIP;
+            intPcm += BIAS;
+            let exponent = 7;
+            for (let expMask = 0x4000; (intPcm & expMask) === 0 && exponent > 0; expMask >>= 1) {
+                exponent--;
+            }
+            let mantissa = (intPcm >> (exponent + 3)) & 0x0F;
+            let byte = ~(sign | (exponent << 4) | mantissa);
+            return byte & 0xFF;
+        }
+
+        function setPhone(phone, desc) {
+            document.getElementById('from-phone').value = phone;
+            document.getElementById('patient-hint').innerText = "Paciente: " + desc;
+        }
+
+        function log(msg) {
+            const box = document.getElementById('log-box');
+            const row = document.createElement('div');
+            const time = new Date().toLocaleTimeString();
+            row.innerText = `[${time}] ${msg}`;
+            box.appendChild(row);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function updateUI(state) {
+            const badge = document.getElementById('badge-status');
+            const btn = document.getElementById('btn-call');
+            const btnIcon = document.getElementById('btn-icon');
+            const dot = document.getElementById('status-dot');
+            const desc = document.getElementById('call-state-desc');
+
+            if (state === 'idle') {
+                badge.className = "text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-medium";
+                badge.innerText = "Desconectado";
+                btn.className = "w-20 h-20 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-2xl flex items-center justify-center shadow-lg transition-all transform active:scale-95";
+                btn.classList.remove('pulse-ring');
+                btnIcon.className = "fa-solid fa-phone";
+                dot.className = "w-2 h-2 rounded-full bg-slate-600 inline-block";
+                desc.innerText = "Listo para marcar";
+            } else if (state === 'connecting') {
+                badge.className = "text-xs px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 font-medium";
+                badge.innerText = "Conectando...";
+                btn.className = "w-20 h-20 rounded-full bg-amber-500 text-slate-950 font-bold text-2xl flex items-center justify-center shadow-lg";
+                btnIcon.className = "fa-solid fa-spinner fa-spin";
+                dot.className = "w-2 h-2 rounded-full bg-amber-400 inline-block";
+                desc.innerText = "Estableciendo llamada...";
+            } else if (state === 'active') {
+                badge.className = "text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium";
+                badge.innerText = "En Llamada";
+                btn.className = "w-20 h-20 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-2xl flex items-center justify-center shadow-lg pulse-ring transition-all transform active:scale-95";
+                btnIcon.className = "fa-solid fa-phone-slash";
+                dot.className = "w-2 h-2 rounded-full bg-emerald-400 inline-block";
+                desc.innerText = "Habla con la recepcionista";
+            }
+        }
+
+        function startTimer() {
+            callSeconds = 0;
+            const timerEl = document.getElementById('call-timer');
+            timerEl.className = "text-3xl font-mono font-bold text-emerald-400 tracking-wider mb-2";
+            timerInterval = setInterval(() => {
+                callSeconds++;
+                const mins = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+                const secs = String(callSeconds % 60).padStart(2, '0');
+                timerEl.innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            const timerEl = document.getElementById('call-timer');
+            timerEl.className = "text-3xl font-mono font-bold text-slate-400 tracking-wider mb-2";
+            timerEl.innerText = "00:00";
+        }
+
+        async function toggleCall() {
+            if (isCalling) {
+                endCall();
+            } else {
+                await startCall();
+            }
+        }
+
+        async function startCall() {
+            const wsUrl = document.getElementById('ws-url').value.trim();
+            const phone = document.getElementById('from-phone').value.trim();
+
+            if (!wsUrl) {
+                alert("Por favor, introduce una URL de WebSocket válida.");
+                return;
+            }
+
+            updateUI('connecting');
+            log(`Conectando con ${wsUrl}...`);
+
+            try {
+                // Solicitar acceso al micrófono
+                micStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') {
+                    await audioCtx.resume();
+                }
+                nextPlayTime = audioCtx.currentTime;
+
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    isCalling = true;
+                    updateUI('active');
+                    startTimer();
+                    log("Llamada conectada con el agente.");
+
+                    // Enviar protocolo inicial Twilio
+                    streamSid = "stream-" + Math.floor(Math.random() * 1000000);
+                    callSid = crypto.randomUUID ? crypto.randomUUID() : ("call-" + Date.now());
+
+                    ws.send(JSON.stringify({ event: "connected" }));
+                    ws.send(JSON.stringify({
+                        event: "start",
+                        start: {
+                            streamSid: streamSid,
+                            callSid: callSid,
+                            customParameters: {
+                                from_number: phone
+                            }
+                        }
+                    }));
+
+                    // Iniciar captura y streaming de audio del micrófono
+                    setupMicStreaming();
+                };
+
+                ws.onmessage = async (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.event === "media" && data.media && data.media.payload) {
+                            playIncomingMulaw(data.media.payload);
+                        } else if (data.event === "clear") {
+                            log("Barge-in recibido (corte de audio del bot)");
+                            stopScheduledAudio();
+                        }
+                    } catch (err) {
+                        console.error("Error parseando mensaje WS:", err);
+                    }
+                };
+
+                ws.onerror = (err) => {
+                    log("Error en WebSocket. Comprueba que el servidor está levantado y la URL es accesible.");
+                    console.error("WS Error:", err);
+                    endCall();
+                };
+
+                ws.onclose = () => {
+                    log("Llamada finalizada por el servidor.");
+                    endCall();
+                };
+
+            } catch (err) {
+                log("Error accediendo al micrófono: " + err.message);
+                alert("Error al iniciar audio: " + err.message);
+                endCall();
+            }
+        }
+
+        function setupMicStreaming() {
+            const micSource = audioCtx.createMediaStreamSource(micStream);
+            // ScriptProcessor para downsamplear a 8000Hz y convertir a mu-law
+            const bufferSize = 2048;
+            scriptProcessor = audioCtx.createScriptProcessor(bufferSize, 1, 1);
+
+            let sampleBuffer = [];
+            const sampleRateRatio = audioCtx.sampleRate / 8000;
+
+            scriptProcessor.onaudioprocess = (e) => {
+                if (!isCalling || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+                const inputData = e.inputBuffer.getChannelData(0);
+                
+                // Animación simple de niveles
+                let sum = 0;
+                for (let i = 0; i < inputData.length; i++) sum += Math.abs(inputData[i]);
+                const avg = sum / inputData.length;
+                animateBars(avg);
+
+                // Re-muestreo a 8000 Hz
+                for (let i = 0; i < inputData.length; i += sampleRateRatio) {
+                    const idx = Math.floor(i);
+                    sampleBuffer.push(inputData[idx]);
+                }
+
+                // Enviar chunks de 160 muestras (20ms a 8000Hz)
+                while (sampleBuffer.length >= 160) {
+                    const chunk = sampleBuffer.splice(0, 160);
+                    const mulawBytes = new Uint8Array(160);
+                    for (let j = 0; j < 160; j++) {
+                        mulawBytes[j] = pcmToMuLaw(chunk[j]);
+                    }
+
+                    // Convertir a base64
+                    let binary = '';
+                    for (let b = 0; b < mulawBytes.length; b++) {
+                        binary += String.fromCharCode(mulawBytes[b]);
+                    }
+                    const b64Payload = btoa(binary);
+
+                    ws.send(JSON.stringify({
+                        event: "media",
+                        streamSid: streamSid,
+                        media: { payload: b64Payload }
+                    }));
+                }
+            };
+
+            micSource.connect(scriptProcessor);
+            scriptProcessor.connect(audioCtx.destination);
+        }
+
+        function playIncomingMulaw(base64Data) {
+            if (!audioCtx) return;
+
+            const binaryStr = atob(base64Data);
+            const len = binaryStr.length;
+            const pcmData = new Float32Array(len);
+
+            for (let i = 0; i < len; i++) {
+                const byte = binaryStr.charCodeAt(i);
+                pcmData[i] = MULAW_TO_PCM[byte];
+            }
+
+            const audioBuffer = audioCtx.createBuffer(1, len, 8000);
+            audioBuffer.copyToChannel(pcmData, 0);
+
+            const source = audioCtx.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioCtx.destination);
+
+            const startTime = Math.max(audioCtx.currentTime, nextPlayTime);
+            source.start(startTime);
+            nextPlayTime = startTime + audioBuffer.duration;
+
+            activeSources.push(source);
+            source.onended = () => {
+                const idx = activeSources.indexOf(source);
+                if (idx !== -1) activeSources.splice(idx, 1);
+            };
+        }
+
+        function stopScheduledAudio() {
+            activeSources.forEach(s => {
+                try { s.stop(); } catch (e) {}
+            });
+            activeSources = [];
+            if (audioCtx) nextPlayTime = audioCtx.currentTime;
+        }
+
+        function animateBars(volume) {
+            const h = Math.min(24, Math.max(4, volume * 150));
+            document.getElementById('bar3').style.height = `${h}px`;
+            document.getElementById('bar2').style.height = `${Math.max(3, h * 0.7)}px`;
+            document.getElementById('bar4').style.height = `${Math.max(3, h * 0.7)}px`;
+            document.getElementById('bar1').style.height = `${Math.max(2, h * 0.4)}px`;
+            document.getElementById('bar5').style.height = `${Math.max(2, h * 0.4)}px`;
+        }
+
+        function endCall() {
+            isCalling = false;
+            stopTimer();
+            stopScheduledAudio();
+
+            if (ws) {
+                try {
+                    ws.send(JSON.stringify({ event: "stop", streamSid: streamSid }));
+                    ws.close();
+                } catch (e) {}
+                ws = null;
+            }
+
+            if (scriptProcessor) {
+                try { scriptProcessor.disconnect(); } catch (e) {}
+                scriptProcessor = null;
+            }
+
+            if (micStream) {
+                micStream.getTracks().forEach(t => t.stop());
+                micStream = null;
+            }
+
+            if (audioCtx) {
+                audioCtx.close();
+                audioCtx = null;
+            }
+
+            updateUI('idle');
+            log("Llamada desconectada.");
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const wsInput = document.getElementById('ws-url');
+            if (wsInput && window.location.host) {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                wsInput.value = `${protocol}//${window.location.host}/ws`;
+            }
+        });
+    </script>
+</body>
+</html>
