@@ -29,8 +29,10 @@ and enough visibility to explain why the agent said what it said.
    to pay for whatever your agent runs on.
 2. **Build and rehearse.** You can dial yourself as often as you like against
    published practice cases, answers included.
-3. **Run for score** when you think you are ready. We call your agent with
-   every problem, check what it did, and your points go on the leaderboard.
+3. **Run for score** when you think you are ready. You pick a problem, we call
+   your agent with a case of it you have never seen, check what it did, and
+   your points go on the leaderboard. One scored call at a time, twelve
+   minutes apart, and they add up.
 4. **Checkpoints.** Twice over the weekend the board freezes and prizes go to
    whoever is leading. Being early pays.
 5. **Sunday: the final boss.** The jury calls your agent themselves, and you
@@ -44,7 +46,7 @@ and enough visibility to explain why the agent said what it said.
 isolates a single thing that makes a real front desk hard, sitting on top of
 the same ordinary booking:
 
-- The straightforward booking, and ten of them at once.
+- The straightforward booking, and five of them at once.
 - A caller the records do not know yet, and a caller who matches four people.
 - Someone asking for a specific doctor, a specific site, or "the soonest".
 - Vague times — "next Thursday", "first thing Monday" — that have to resolve.

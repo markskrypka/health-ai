@@ -2,6 +2,12 @@
 
 Newest first. One entry per change, written when the change lands.
 
+## 2026-09-19 · feat · the scored lane on a clock, after the organizers changed the rules
+By: Mark Skrypka
+Why: rules 2.1 (19 Sep) replaced Run All with one scored call per problem, 12 minutes apart, four credited passes per problem, pooled. We held 40 points, 8th; problems 7–10 opened, worth 40 more; every idle cooldown is a lost slot.
+How: re-extracted the organizers' docs from the new dashboard bundle into `docs/organizers/` (rules, problems, contract, quickstart, overview, challenge changed; the 73 published cases did not). `scripts/scored.py`: `status`, and `loop`, which fires a scored call the moment `eligibility.private_wait` reaches zero at the heaviest problem still owed passes, and dials practice cases in the gaps. `scripts/restart.sh` raises `logs/.hold` and waits for `logs/.run-in-flight` to clear, so a restart never lands on a call. `scripts/practice.py` got a `batch` command and rides out platform hiccups. Removed the test hook left in `speech.py`. Practice on the new problems before the first scored call: 6 of 6 passed.
+Ref: pending
+
 ## 2026-09-19 · fix · submissions retry inside the 30-second window
 By: Mark Skrypka
 Why: in the second Run All the platform's submit endpoint timed out on 8 of 22 calls (its API was answering in 4–6 s instead of 0.2 s); we made one attempt each, and 3 cases failed.

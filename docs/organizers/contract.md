@@ -41,9 +41,15 @@ interruption are entirely yours**. We implement no server-side barge-in;
 
 ### More than one call at a time
 
-One URL, many calls. A Run All opens **ten** sockets to your endpoint at once,
-each with its own `start.callSid`, overlapping for the whole conversation.
-Problem 2's largest burst opens twenty.
+One URL, many calls. A scored run is **one** call and opens one socket, and so
+is a practice call. Problem 2's burst opens **five** at once, each with its own
+`start.callSid`, overlapping for the whole conversation — that is the one thing
+we dial that is deliberately concurrent, and it is the readiness check we want
+you to run before you spend a scored call.
+
+Concurrency is not optional just because the scored lane stopped dialling it.
+The jury asks to see ten concurrent calls hold up, and a receptionist that can
+only take one call at a time is not a switchboard.
 
 Everything a call owns — the conversation, its `call_id`, its submission — is
 per socket. Sharing one conversation, one session object or one in-flight

@@ -1,5 +1,13 @@
 # Work — Clinic voice agent
 
+**State (2026-09-19, ~16:00 Madrid) — new rules, scored loop running.**
+- Rules 2.1: one scored call per problem, 12 min cooldown from the finish, a problem credits its first four passes, calls pool, ties share a rank, wall freezes Sunday 06:00. We hold 40 (problems 1–6 fully credited), 8th; leader 78. Problems 7–10 are open (40 more points); 11–18 not yet.
+- `scripts/scored.py loop third_party triage no_slot_free change_and_cancel` runs in the assistant's session → `logs/scored-loop.log`. It owns both lanes (Mark: nobody else dials). First scored call 15:50. Practice on the new problems before it: 6/6 passed.
+- To change code under the loop: edit, test, `scripts/restart.sh` (it pauses the loop and waits for the run in flight), commit.
+- Follow-up for clarity: `tools.recover_leaked_calls` only serves the text evals now (live, `GuardedGoogleLLM` recovers a written call when it happens); give the eval loop the same guard and delete it.
+**Next action:** watch `logs/scored-loop.log`; read every failed scored call from `logs/calls/<call_id>.jsonl`, fix, restart, commit. Then wire languages (`languages.py`: Spanish voice, Catalan listening model) before problem 11 opens; then the jury material.
+**Waiting on Mark:** nothing.
+
 **State (2026-09-19, ~12:55 Madrid) — second Run All had 3 failures; submissions now retry; first commit made.**
 - Run All 2 (12:09–12:32), from our logs: 22 calls, none lost to a tool call written as text (the guard recovered one live), but 8 submissions got `ReadTimeout` from the platform and two calls ran 185 s and 211 s: the platform's API was answering in 4–6 s per request. Mark reports 3 failed cases. Fix deployed 12:45: `finalize` retries inside the 30 s window (see worklog).
 - Committed as `f69cb71` on branch `clinic-voice-agent` (main is the default branch and still has no commit; `git branch -m main` puts it there).

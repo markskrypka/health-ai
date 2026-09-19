@@ -2,6 +2,18 @@
 
 Newest first. Each decision carries its why.
 
+## 2026-09-19 · Scored runs are fired by script, on the platform's clock, day and night
+Decided by Mark (15:40). Why: rules 2.1 made the scored lane one call per problem with a 12-minute cooldown counted from the finish, a problem credits its first four passes, and scored calls pool — a scored call can only raise the score, so nothing is gained by a human deciding each one, and every idle quarter of an hour is a lost slot. `scripts/scored.py loop` owns both lanes: it fires the next scored call the moment the cooldown allows (heaviest owed problem first) and practises published cases in the gaps. Nobody else starts runs from the dashboard — the platform allows one queued or active run per team. Needs the laptop awake and online until the wall freezes, Sunday 06:00.
+
+## 2026-09-19 · Commit after each verified fix, without asking; no pushes
+Decided by Mark (15:40). Why: he wants a readable history and nothing lost if the session dies. Small commits on `clinic-voice-agent` after tests pass. There is no remote.
+
+## 2026-09-19 · Points first; jury material once the open problems are banked
+Decided by Mark (15:40). Why: scored slots are the scarce thing while we are 8th. The jury on Sunday judges what the board ignores — how the call sounds, interruptions, whether the clinic knows the caller, what we see live, what we learn afterwards, how we know the agent works, and ten calls at once — so a live call view, an eval report and a demo script follow, built in the cooldown gaps and after the freeze.
+
+## 2026-09-19 · One voice per language; Catalan needs its own listening model (measured, not yet wired)
+Why: on an 8 kHz line the English voice `aura-2-thalia-en` is understood at 96% of words and speaks a third faster than Deepgram's bilingual Spanish voices (86–88%), so one bilingual voice for the whole call was rejected; Spanish goes to `aura-2-carina-es` (99%). Deepgram Nova-3 `multi` has no Catalan and destroys Catalan dates ("dijous que ve al matí" → "Villosca de Almaty"); Nova-2 `ca` transcribes the same audio word for word. Pipecat can change both mid-call with a settings-update frame. Parked by Mark at noon for the scored runs; problem 11 "Languages" is not open yet.
+
 ## 2026-09-19 · Decisions are recorded during the call and POSTed when it ends
 Why: an accepted action can never be withdrawn, and the evals showed a caller who changes their mind after "book it" producing `BOOK + BOOK` — a certain fail (problem 13 scores the FINAL request). The submission window stays open until 30 s after the socket closes, so nothing is lost by waiting. A later decision replaces the one it contradicts (same patient's booking, same appointment's move or cancel, any refusal once something is written; an escalation clears everything). Risk accepted: a crash mid-call loses the record — `finalize` runs shielded in the call's `finally`.
 

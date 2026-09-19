@@ -10,9 +10,9 @@ from loguru import logger
 from pipecat.frames.frames import LLMContextFrame
 from pipecat.services.google.llm import GoogleLLMService
 from pipecat.services.llm_service import FunctionCallFromLLM
+from pipecat.turns.user_stop.speech_timeout_user_turn_stop_strategy import SpeechTimeoutUserTurnStopStrategy
 
 from . import tools
-from pipecat.turns.user_stop.speech_timeout_user_turn_stop_strategy import SpeechTimeoutUserTurnStopStrategy
 
 
 def looks_unfinished(text: str) -> bool:
@@ -101,7 +101,6 @@ class ReplayFilter:
 _SENTENCE_END = re.compile(r"[.?!…][\"')\]]?\s")
 # Nothing a receptionist says has braces, code fences or "default_api" in it.
 _NOT_SPEECH = re.compile(r"default_api|```|[{}]|\[\]|\bcat\s*=|\bcall\s*:")
-_FORCE_SYNTHETIC = __import__("os").getenv("FORCE_SYNTHETIC_CALLS") == "1"
 _CORRECTION = ("[SYSTEM] Your last reply was a tool call written out as text. Nothing ran and the caller heard nothing. "
                "Make that call now through function calling, or answer the caller in plain words.")
 
@@ -162,7 +161,4 @@ class GuardedGoogleLLM(GoogleLLMService):
                 await self.queue_frame(LLMContextFrame(context=self._context))
         if function_calls:
             self._corrections = 0
-        if _FORCE_SYNTHETIC and function_calls:  # test hook: every call takes the path a recovered one takes
-            function_calls = [FunctionCallFromLLM(context=self._context, tool_call_id=str(uuid.uuid4()),
-                                                  function_name=fc.function_name, arguments=fc.arguments) for fc in function_calls]
         await super().run_function_calls(function_calls)

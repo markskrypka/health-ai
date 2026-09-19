@@ -1,11 +1,23 @@
 # Scoring
 
-**Version 2.0-draft · 17 September 2026 · HackSpain, 18–20 September 2026**
+**Version 2.1-draft · 19 September 2026 · HackSpain, 18–20 September 2026**
 
 This page is the automatic score: what passes a case, how points are counted,
 what the limits are, and what happens when a call fails. The jury's *final
 boss* is scored separately and is described in
 [what the challenge is](challenge.md#who-wins).
+
+**Changed on Saturday 19 September: a scored run is now one problem and one
+call.** Until this morning the scored lane was *Run All* — four private cases
+of every open problem at once — and the board ranked each team's best one. It
+is now a single call at a problem you choose, the cooldown between scored runs
+is twelve minutes, a problem credits your first four passed cases, and your
+scored calls **pool** instead of competing. Nothing was re-judged and **no
+team's score fell**: a Run All dialled exactly four cases of each problem,
+which is exactly what a problem now credits, so every case you have already
+passed still counts. Teams who took more than one Run All gain, because those
+runs now add up instead of one replacing another. The reason is capacity, and
+it is spelled out under [the two lanes](#the-two-lanes).
 
 ## What passes a case
 
@@ -36,17 +48,36 @@ so a case can never expect an appointment the API would not have offered.
 
 ## The two lanes
 
-**Practice** dials one published case, answer and all. As often as you like
-within the rate limit. It scores nothing.
+**Practice** dials one published case, answer and all. You pick the problem
+and you pick the case. As often as you like within the rate limit. It scores
+nothing.
 
-**Run All** is the scored lane: four private cases for every scored problem
-that is currently open, dialled 10 at a time. You choose nothing about it —
-the point of it is the whole open set. Take as many as you like, one at a
-time. It grows as problems open: the roster starts at two scored problems
-(8 calls, a couple of minutes) and ends at seventeen (68 calls, about
-eighteen). [The problem set](problems.md) says what is open now.
+**Scored** is the lane the standings come from: **one private case of one
+problem, one call.** You pick the problem. You do not pick the case, and its
+answer is never published. Take as many as you like, one at a time, with a
+cooldown between them. [The problem set](problems.md) says which problems are
+open to dial now.
 
-Private cases are generated per run and their answers are never published.
+**One queued or active run at a time, in either lane**, and **12 minutes**
+between scored runs, counted from the moment your last one *finished*. From
+finished rather than requested, because timing it from the request would let a
+busy harness pay its own queue wait out of your cooldown — the throttle would
+slacken exactly when it is needed. That cooldown is **global**: it is one
+clock for the team, so a scored run at any problem blocks a scored run at
+every problem until it completes and the twelve minutes elapse. Practice is on
+its own clock at 30 seconds, which exists only to stop a tight retry loop.
+
+One call rather than a sweep of the whole open set because that is what the
+wire can serve. The harness carries **ten calls at once for the entire field**
+— one judge process on one event loop, a measured ceiling rather than a policy
+— and a call holds a line for about three and a half minutes, so it clears
+roughly 170 calls an hour in total. Sixty teams each taking a twenty-call
+sweep every forty minutes asks for about ten times that, and the open set
+would have grown to sixty-eight calls by Sunday. One call per scored run,
+spaced by the cooldown, is the shape that fits — which is why the cooldown,
+and not the size of a run, is now the throttle.
+
+Private cases are generated per call and their answers are never published.
 
 While scoring is open, a private case tells you **whether it passed, whose
 failure it was, and a failure signal** such as `missing_record` or
@@ -71,9 +102,17 @@ denominator.**
 points = sum over problems of (its passed cases × its weight)
 ```
 
-Pass every case of *The Real Call* and 20 points go on the board; pass every
-case of *The Simple Booking* and 4 do. The most the full roster can give is
-**196**.
+**A problem credits your first four passed cases.** Passes beyond the fourth
+at the same problem are worth nothing, so the sum above counts at most four
+cases per problem however many you dial. Bank four cases of *The Real Call*
+and 20 points go on the board; bank four of *The Simple Booking* and 4 do. The
+most the full roster can give is **196** — the 49 weights, four times over.
+
+Four rather than one because one binary call per run would make the board ask
+only "did this agent ever pass this problem once", and at the ten or so
+attempts per problem a weekend affords, an agent that is right well under half
+the time clears that bar nearly every time. Two agents that are plainly not
+the same would tie. Four passes is a sample rather than a coin flip.
 
 A sum rather than a percentage because the set opens across the weekend. Under
 a percentage, the same agent's score would fall every time we released a
@@ -82,25 +121,39 @@ while it sat there unchanged. A sum only ever grows as you solve more, and a
 score from Friday means the same thing on Sunday.
 
 **A problem nobody attempted scores nothing**, exactly like one that was
-dialled and failed. There is no credit for what you did not get to, so
-running only the problems you are good at buys nothing. A call that never
-produced a submission is an attempted, failed case: silence is never cheaper
-than a wrong answer.
+dialled and failed. There is no credit for what you did not get to. A call
+that never produced a submission is an attempted, failed case: silence is
+never cheaper than a wrong answer.
 
-The leaderboard ranks each team's **best** Run All. Not latest, which would
-punish experimenting late on Sunday; not cumulative, which would punish
-iterating at all. Best rewards the thing the weekend is for. It is not free of
-luck — four cases per problem is a sample — so the board shows how many runs
-backed a score beside it. Once the whole roster is open, a 70%-correct agent
-has no realistic chance of a perfect 196 across 68 calls.
+**Where you spend your calls is now a real decision.** Every credited case is
+one call you chose to make, and the cooldown fixes how many you get. Dialling
+only the problems you are already good at is allowed, and it caps you at what
+those problems are worth: four cases of *The Simple Booking* is 4 points,
+four of *The Real Call* is 20. Once a problem has credited its four, dialling
+it again pays nothing at all, so the next call is better spent on a problem
+that still owes you something.
 
-Problem 2 scores nothing at all — it carries no weight and Run All never
-dials it. Practice calls never score either.
+**Your scored calls pool.** Every one the harness has judged counts, whenever
+you made it — not your best run, not your latest. A scored call can only ever
+raise your score, so an experiment on Sunday evening can never cost you what
+you banked on Friday, and iterating is never punished. It is not free of luck
+— four cases per problem is a sample — so the board shows how many scored runs
+backed a score beside it.
+
+**Your own page shows where you stand per problem**: how many of the four
+credited cases you have banked there, and how many you have dialled. That is
+what tells you a problem is finished and the next call belongs somewhere else.
+A scored call itself still shows only whether it passed, whose failure it was
+and a failure signal — no answer, no fields, no transcript and no audio before
+the reveal.
+
+Problem 2 scores nothing at all — it carries no weight and the scored lane
+never dials it. Practice calls never score either.
 
 **Problems open progressively.** The set is released as each problem is
-verified end to end. What you have already earned is yours: opening a new
-problem never changes the score of a run that was taken before it, because
-there is no denominator for it to move.
+verified end to end. What you have already earned is yours: whether a problem
+is open decides what you may dial, never what a call you already made was
+worth, and there is no denominator for a release to move.
 
 [Attributed harness failures](#when-a-call-fails) are excluded rather than failed.
 
@@ -109,8 +162,10 @@ there is no denominator for it to move.
 Every call is capped at **three minutes** — an agent that cannot book in three
 minutes has failed. A call is also cut off if it takes too long to connect or
 goes quiet, which means **no audible audio** from your agent: streaming silence
-keeps the socket open but counts as saying nothing, and the call is cut off and
-attributed to your agent.
+keeps the socket open but counts as saying nothing. Before cutting off, the
+patient prompts a quiet agent twice, about ten seconds into each silence
+("hello? are you still there?"), repeating what they had just asked; an agent
+that stays silent after that is cut off and the call attributed to your agent.
 
 A call cut off this way is still an attempt. Without an accepted record it
 scores nothing.
@@ -162,8 +217,8 @@ Each settled case retains its comparison and observed failure signals.
 | Endpoint unreachable, malformed agent message, or clean early hang-up | agent_issue | Case fails |
 | No audible audio from your agent for the silence window | agent_issue | Case fails |
 | Wall-clock limit, turn cap, unexplained disconnect, unidentified pipeline error | inconclusive | Case fails; evidence is available for investigation |
-| Identified harness STT/LLM/TTS error, or confirmed local socket defect | harness_issue | Case is voided: it leaves its problem's denominator |
-| Confirmed harness defect and independently observed agent failure | mixed | Case is voided: it leaves its problem's denominator |
+| Identified harness STT/LLM/TTS error, or confirmed local socket defect | harness_issue | Case is voided: it leaves its problem's tally |
+| Confirmed harness defect and independently observed agent failure | mixed | Case is voided: it leaves its problem's tally |
 
 **A call our side spoiled is dialled again before it is judged.** If any
 harness signal — an STT, LLM or TTS error, dropped agent audio on our line, or
@@ -190,6 +245,15 @@ response contains `status: "voided"`, a notification, and per-call attribution
 and signal codes. Request a replacement run explicitly. A later run can still occupy the team's
 active slot or start a new cooldown. Retrying delivery of an old settlement does
 not reset that later cooldown.
+
+**A scored run cannot be called off once its call is in the air.** Cancelling
+one that has started never stopped a call already in flight — and a scored run
+is now that one call, so there is nothing left for cancellation to stop. The
+call runs to its end and is judged normally: you keep the result, because you
+have already spent the cooldown on it and throwing away a case that passed
+would make Cancel cost you a point for nothing. A run that recorded no call at
+all settles as cancelled, which scores nothing and does not release its
+cooldown — that is what stops an abandoned run being a way to skip the wait.
 
 For evidence, organisers use the existing `X-Admin-Key` with
 `GET /admin/teams/{team_id}/runs/{run_id}/evidence`. It returns retained error

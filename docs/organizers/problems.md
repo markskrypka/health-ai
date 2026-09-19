@@ -8,34 +8,35 @@ say so.
 
 Every problem has 3–6 **public cases** — published, fixed, answers printed on
 the problem page, dialled one at a time, worth nothing — and a pool of private
-cases generated from the same template, which is what Run All dials and what
-the leaderboard counts. See [scoring](rules.md). The one exception is
-*The Switchboard*, which has no cases of its own: its three rows are bursts of
+cases generated from the same template, which is what the scored lane dials
+and what the leaderboard counts. See [scoring](rules.md). The one exception is
+*The Switchboard*, which has no cases of its own: its one row is a burst of
 problem 1.
 
 **Weight** is what each passed case of a problem is worth in points. Your
 score is the *sum* of each problem's passed cases times its weight — no
-percentage, no denominator — so *The Real Call* puts up to 20 on the board
-where *The Simple Booking* puts up to 4, and the full roster is worth 196. The
-Switchboard carries none: Run All never dials it, and it earns nothing.
+percentage, no denominator — and a problem credits **your first four passed
+cases**, so *The Real Call* puts up to 20 on the board where *The Simple
+Booking* puts up to 4, and the full roster is worth 196. The Switchboard
+carries none: the scored lane never dials it, and it earns nothing.
 
 **Open** is whether you can dial it yet. Problems are released as each is
 verified end to end against a real agent; an unopened one is absent from the
-problem list, and a Run All is only ever scored against the problems that were
-open when you ran it. This table is the roadmap — read ahead and build for it.
+problem list and cannot be picked for a scored run. This table is the roadmap
+— read ahead and build for it.
 
 | # | Problem | `problem_id` | Public | Weight | Open |
 |---|---|---|---|---|---|
 | 1 | [The Simple Booking](#1-the-simple-booking) | `simple_booking` | 4 | 1 | yes |
-| 2 | [The Switchboard](#2-the-switchboard) | `switchboard` | 0 (3 bursts) | — | yes |
+| 2 | [The Switchboard](#2-the-switchboard) | `switchboard` | 0 (1 burst) | — | yes |
 | 3 | [The Doctor and the Site](#3-the-doctor-and-the-site) | `doctor_and_site` | 5 | 2 | yes |
 | 4 | [The New Patient](#4-the-new-patient) | `the_new_patient` | 4 | 2 | yes |
 | 5 | [When Exactly](#5-when-exactly) | `when_exactly` | 5 | 2 | yes |
 | 6 | [The Rules](#6-the-rules) | `the_rules` | 5 | 3 | yes |
-| 7 | [No Slot Free](#7-no-slot-free) | `no_slot_free` | 4 | 2 | not yet |
-| 8 | [Change and Cancel](#8-change-and-cancel) | `change_and_cancel` | 4 | 2 | not yet |
-| 9 | [The Third Party](#9-the-third-party) | `third_party` | 4 | 3 | not yet |
-| 10 | [Triage](#10-triage) | `triage` | 5 | 3 | not yet |
+| 7 | [No Slot Free](#7-no-slot-free) | `no_slot_free` | 4 | 2 | yes |
+| 8 | [Change and Cancel](#8-change-and-cancel) | `change_and_cancel` | 4 | 2 | yes |
+| 9 | [The Third Party](#9-the-third-party) | `third_party` | 4 | 3 | yes |
+| 10 | [Triage](#10-triage) | `triage` | 5 | 3 | yes |
 | 11 | [Languages](#11-languages) | `languages` | 4 | 3 | not yet |
 | 12 | [Noise](#12-noise) | `noise` | 4 | 3 | not yet |
 | 13 | [The Difficult Caller](#13-the-difficult-caller) | `difficult_caller` | 5 | 4 | not yet |
@@ -81,7 +82,8 @@ field lost, and not the transcript or the audio, which open at the
 [reveal](rules.md#recordings) on Monday. No two runs pose the same case, so
 there is nothing to hard-code and nothing to look up.
 
-Run All dials private cases only, and it is the only lane the standings count.
+The scored lane dials private cases only, and it is the only lane the
+standings count. One scored run is one private case of the problem you picked.
 See [scoring](rules.md#the-two-lanes).
 
 ---
@@ -105,17 +107,26 @@ them is right.
 
 ## 2. The Switchboard
 
-[Problem 1](#1-the-simple-booking), five, ten or twenty times at once. Every call
+[Problem 1](#1-the-simple-booking), five times at once. Every call
 in a burst is an ordinary *cita simple* case, drawn exactly as problem 1 draws
 its private ones, and your agent has to pick all of them up without falling
 over. There is nothing new to book here, only more of it -- so read problem
 1's examples for what a line asks and what answers it accepts.
 
-**Run All does not dial this one.** Run All is itself parallel, so concurrency
-is already under test on every scored call; a dedicated burst inside it would
-measure the same capability twice and hand a slice of the score to
-infrastructure. It stays as a readiness check you trigger yourself, and Friday
-afternoon is when you want to find out. Public bursts are 5, 10 and 20.
+**The scored lane does not dial this one, and it carries no weight.** It used
+to be excused on the grounds that Run All was itself parallel, so concurrency
+was already under test on every scored call. That argument no longer holds: a
+scored run is one call and opens one socket, so **nothing in the scored lane
+tests concurrency any more.** The exemption stands on its own instead. This
+problem measures whether your machine stays up under load, not whether it can
+book an appointment — it poses no scheduling question problem 1 does not
+already pose — and putting points on it would pay for infrastructure inside a
+score that is meant to be about handling a call. It is a readiness check you
+trigger yourself, and Friday afternoon is when you want to find out. The
+public burst is five: that is what the harness carries at once without falling
+behind its audio, so the number measures your switchboard rather than our
+throttle. The jury looks at concurrency separately — "whether ten concurrent
+calls hold up" is one of the things they ask to see.
 
 **Answer** problem 1's, on every line, reported as the fraction that
 succeeded. Diagnostic only; it contributes nothing to the leaderboard.

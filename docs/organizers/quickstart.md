@@ -88,7 +88,7 @@ Four things that bite teams:
 - **`https://` is not the endpoint.** The scheme is `wss://` and the path is
   whatever your server routes. Forgetting the path is the commonest mistake.
 - **Keep the tunnel up for the whole run.** A dropped connection is a failed
-  case, and Run All holds ten sockets open at once.
+  case, and problem 2's burst holds five sockets open at once.
 
 ## 4. Tell us where to call you
 
@@ -119,13 +119,24 @@ two buttons:
 | Button | Where | What it does |
 | --- | --- | --- |
 | **Call** | Beside each published case on a problem's Statement | One practice call on that case. Scores nothing |
-| **Run All** | Top of the problems list | One scored run: private cases across every scored problem. This is the one the standings come from |
+| **Run for score** | Beside each problem in the problems list | One scored run: one private case of that problem, one call. This is the one the standings come from |
 
 Each problem lists its public cases with their answers beside the button. For a
 practice call the submissions tab gives you the transcript, the recording, and
 which fields your record lost — never what they should have been. A run's page
 shows its state and its per-case verdicts as they land, and cancelling one is
 safe at any point.
+
+**A `Call` can dial somewhere other than your registered endpoint, just for
+that one call.** Open *Override endpoint for this call* above the case list
+(or pass `endpoint`/`headers` to `POST /api/v1/runs` with `lane: practice`)
+and it dials that socket instead — the endpoint on Settings is untouched, so
+one teammate can point a call at their own local tunnel while everyone else
+keeps calling whatever is actually deployed. It is not saved anywhere and only
+applies while the override is filled in; leave it blank and `Call` dials the
+registered endpoint as before. A scored run never takes one — a scored result
+is only worth anything if it was defended by the endpoint registered at the
+desk.
 
 Your records are also readable from your agent, for a health check or your own
 tooling:
@@ -136,16 +147,25 @@ curl -sS -H "X-Api-Key: $PLATFORM_API_KEY" \
 ```
 
 The problem ids behind the page are in [the problem set](problems.md).
+Problem 2 has no **Run for score** button: it carries no weight, so the scored
+lane refuses it rather than spend a cooldown on a call that cannot pay.
 
 **One queued or active run at a time**, in either lane; both buttons are
 disabled while that slot is occupied. Two clocks on top of that: 30 seconds
-between practice calls, and 15 minutes after your last Run All **finished**
-before the next may start. The page counts the wait down for you. A Run All
-takes about eighteen minutes, so expect to start one roughly every thirty-three.
+between practice calls, and **12 minutes after your last scored run
+finished** before the next may start. From finished, not from requested, so
+the queue wait a busy harness adds is not quietly subtracted from the
+cooldown. The page counts it down for you.
+
+The scored cooldown is **global**: it is one clock for the whole team, not one
+per problem. A scored run at any problem blocks a scored run at every problem
+until it has completed and the twelve minutes have elapsed. Budget accordingly
+— a scored call plus its cooldown is roughly a quarter of an hour, so plan
+which problem each one is spent on rather than working down the list.
 
 Practice is where the feedback is. A **scored** case tells you only whether it
 passed, whose failure it was and a failure signal until the reveal on Monday,
-so debug against published cases and spend Run Alls on measuring. See
+so debug against published cases and spend scored runs on measuring. See
 [scoring](rules.md).
 
 ## 6. What to build first

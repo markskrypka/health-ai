@@ -47,15 +47,17 @@ mind mid-call, someone asking for something the clinic cannot give them, a bad
 line, a caller who is not the patient. You have to handle all of them — a
 single-path happy-flow agent will not get far.
 
-You submit your agent, and we call it. We run every persona against it and
-check what your agent actually did against what the case accepts. Each problem
-you handle correctly earns points, and those points place you on the
-**leaderboard**.
+You submit your agent, and we call it. You ask for a scored call at a problem,
+we pose a case of it you have never seen, and we check what your agent actually
+did against what the case accepts. Each case you handle correctly earns that
+problem's weight in points — up to four cases per problem — and those points
+place you on the **leaderboard**.
 
 ## Who wins
 
-**The leaderboard decides the main prize.** Every persona your agent handles
-correctly adds points; the team on top when the wall freezes wins.
+**The leaderboard decides the main prize.** Every scored case your agent
+handles correctly adds points, and they pool across every scored call you make;
+the team on top when the wall freezes wins.
 
 **Checkpoints.** Twice over the weekend we freeze the board and hand a prize to
 whoever is leading at that moment, so being early pays. The desk announces the
