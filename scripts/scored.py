@@ -1,8 +1,9 @@
 """The scored lane on a clock: one scored call the moment the cooldown allows, practice calls in the gaps.
 
   scored.py status                        credited cases per problem, cooldown, rank
-  scored.py loop <problem> [<problem>…]   bank four passes per problem, highest weight first among those named;
-                                          between scored calls, practise the same problems' published cases
+  scored.py loop [<problem>…]             bank four passes at every open scored problem (or only those named);
+                                          each scored call goes where weight x observed pass rate is highest,
+                                          and the gaps go to practising the problem with the least evidence
 
 Rules 2.1 (19 Sep): a scored run is one private case of one problem; 12 minutes between scored runs, counted
 from when the last one finished; one queued or active run per team in either lane; a problem credits the first
@@ -14,7 +15,6 @@ logs/.run-in-flight from the moment a run is requested until its verdict, so a r
 
 import sys
 import time
-from itertools import cycle
 from pathlib import Path
 
 import practice
@@ -62,49 +62,62 @@ def scored_call(http, problem: str) -> dict:
         IN_FLIGHT.unlink(missing_ok=True)
 
 
-def practice_call(http, problem: str, case: dict) -> None:
+def practice_call(http, problem: str, case: dict) -> bool:
     IN_FLIGHT.write_text("practice")
     try:
         print(f'  practice {problem} — {case["caller"]}: {case["summary"][:90]}', flush=True)
-        practice.report(practice.dial(http, problem, case), verbose=False)
+        return practice.report(practice.dial(http, problem, case), verbose=False)
     except SystemExit as gave_up:  # the platform's queue can sit on a call for minutes; the loop must outlive that
         print(f"    practice call abandoned: {gave_up}", flush=True)
+        return False
     finally:
         IN_FLIGHT.unlink(missing_ok=True)
 
 
-def loop(http, problems: list[str]) -> None:
-    listed = fetch(http, "GET", "/problems", want="problems").json()["problems"]
-    weights = {p["id"]: p["weight"] for p in listed}
-    rehearsals = cycle([(pid, case) for pid in problems
-                        for case in fetch(http, "GET", f"/problems/{pid}", want="examples").json()["examples"]])
-    dialled = dict.fromkeys(problems, 0)
+def worth(problem: str, weights: dict, evidence: dict) -> float:
+    """What the next scored call at a problem is worth: its weight times the pass rate seen so far on this
+    build, practice and scored calls alike. Unknown counts as one in two, so a new problem is tried."""
+    passes, calls = evidence.get(problem, (0, 0))
+    return weights[problem] * (passes + 1) / (calls + 2)
+
+
+def loop(http, only: list[str]) -> None:
+    evidence: dict[str, tuple[int, int]] = {}  # problem -> (passes, calls) seen by this loop
+    rehearsed: dict[str, int] = {}             # problem -> index of the next published case to practise
+
+    def saw(problem: str, passed: bool) -> None:
+        passes, calls = evidence.get(problem, (0, 0))
+        evidence[problem] = (passes + passed, calls + 1)
+
     while True:
         if HOLD.exists():
             time.sleep(5)
             continue
         t = team(http)
-        credited = {p["problem_id"]: p["credited"] for p in t["progress"]}
-        owed = [p for p in problems if credited.get(p, 0) < CREDITED_PER_PROBLEM]
         wait = t["eligibility"]
-        if not owed:
-            print("every named problem has its four credited cases — nothing left to dial", flush=True)
-            return
-        if wait["active_run"]:
-            time.sleep(10)
+        if not wait["active_run"]:
+            IN_FLIGHT.unlink(missing_ok=True)  # left behind if an earlier loop was killed mid-run
+        # Problems open through the weekend: read the list every time, so a new one is dialled without a restart.
+        weights = {p["id"]: p["weight"] for p in fetch(http, "GET", "/problems", want="problems").json()["problems"]
+                   if p["weight"] and (not only or p["id"] in only)}
+        credited = {p["problem_id"]: p["credited"] for p in t["progress"]}
+        owed = [p for p in weights if credited.get(p, 0) < CREDITED_PER_PROBLEM]
+        if wait["active_run"] or not owed:
+            time.sleep(10 if wait["active_run"] else 120)
         elif wait["private_wait"] <= 0:
-            problem = max(owed, key=lambda p: (weights[p], -dialled[p]))  # heaviest first; spread among equals
-            dialled[problem] += 1
+            problem = max(owed, key=lambda p: worth(p, weights, evidence))
             print(f'{time.strftime("%H:%M:%S")} SCORED {problem} (credited {credited.get(problem, 0)}/4) …', flush=True)
             case = scored_call(http, problem)
+            if case.get("status") in ("passed", "failed") and case.get("attribution") not in ("harness_issue", "mixed"):
+                saw(problem, case["status"] == "passed")
             print(f'{time.strftime("%H:%M:%S")}   → {str(case.get("status")).upper()}  attribution={case.get("attribution")}  '
                   f'signals={case.get("signal_codes")}  call_id={case.get("call_id")}', flush=True)
         elif wait["private_wait"] >= PRACTICE_NEEDS_SECS and wait["public_wait"] <= 0:
-            pid, case = next(rehearsals)
-            if pid in owed:
-                practice_call(http, pid, case)
-            else:
-                time.sleep(1)
+            problem = min(owed, key=lambda p: (evidence.get(p, (0, 0))[1], -weights[p]))  # least evidence first
+            cases = fetch(http, "GET", f"/problems/{problem}", want="examples").json()["examples"]
+            case = cases[rehearsed.get(problem, 0) % len(cases)]
+            rehearsed[problem] = rehearsed.get(problem, 0) + 1
+            saw(problem, practice_call(http, problem, case))
         else:
             time.sleep(min(max(wait["private_wait"], wait["public_wait"], 1), 15))
 
@@ -114,7 +127,7 @@ def main() -> None:
     http = practice.login()
     if cmd == "status":
         status(http)
-    elif cmd == "loop" and len(sys.argv) > 2:
+    elif cmd == "loop":
         loop(http, sys.argv[2:])
     else:
         raise SystemExit(__doc__)
