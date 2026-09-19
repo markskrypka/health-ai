@@ -45,6 +45,22 @@ def status(http) -> None:
     print(f'active run: {e["active_run"]}   scored cooldown: {e["private_wait"]} s   practice cooldown: {e["public_wait"]} s')
 
 
+def line_is_up(http) -> bool:
+    """A scored call at a dead address is a slot thrown away, and at night nobody would notice. The tunnel's
+    address changes whenever ngrok restarts, so answer for the address the platform holds, and if the tunnel
+    now has another one, register that."""
+    try:
+        registered = team(http)["integration"]["endpoint"]
+        if practice.tunnel_url() != registered:
+            print(f"  tunnel address changed — registered {practice.set_endpoint(http)}", flush=True)
+            registered = practice.tunnel_url()
+        health = registered.replace("wss://", "https://").removesuffix("/ws") + "/health"
+        return practice.httpx.get(health, timeout=10).status_code == 200
+    except Exception as err:  # no tunnel, no server, no network
+        print(f'{time.strftime("%H:%M:%S")} LINE DOWN ({type(err).__name__}) — holding scored calls until it is back', flush=True)
+        return False
+
+
 def scored_call(http, problem: str) -> dict:
     """Request one scored call and wait for its verdict. The case and its answer stay hidden until the reveal."""
     r = fetch(http, "POST", f"/problems/{problem}/scored-runs")
@@ -105,6 +121,9 @@ def loop(http, only: list[str]) -> None:
         if wait["active_run"] or not owed:
             time.sleep(10 if wait["active_run"] else 120)
         elif wait["private_wait"] <= 0:
+            if not line_is_up(http):
+                time.sleep(30)
+                continue
             problem = max(owed, key=lambda p: worth(p, weights, evidence))
             print(f'{time.strftime("%H:%M:%S")} SCORED {problem} (credited {credited.get(problem, 0)}/4) …', flush=True)
             case = scored_call(http, problem)
