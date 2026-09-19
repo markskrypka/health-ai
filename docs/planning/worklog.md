@@ -2,6 +2,12 @@
 
 Newest first. One entry per change, written when the change lands.
 
+## 2026-09-19 · feat · call console for the jury; the loop dials scored calls only; a night script
+By: Mark Skrypka
+Why: the jury judges "what you can see while it is happening" and "what you can learn from it afterwards"; the platform's queue grew to 10–15 minutes per run, so a practice call in a gap was costing a scored slot; and the tunnel and the loop lived inside the assistant's session, which would not survive the night.
+How: `clinic_agent/console.py` + `console.html`, a separate read-only process on port 7870 over `logs/calls/*.jsonl` (live and finished calls, each call's timeline with lookups, offers, decisions and what replaced what, submissions, and the numbers of the last hours). `scripts/scored.py`: practice calls removed, a line check before each scored call (re-registers the endpoint if the tunnel's address changed, holds while the line is down). `scripts/night.sh`: server, a tunnel of its own, endpoint and loop in one terminal under `caffeinate`. Checked "The Real Call" (not open yet) in text on today's code: 3/3.
+Ref: 4627ec1
+
 ## 2026-09-19 · feat · a voice per language, a Catalan listening model; a refusal takes back the booking it follows
 By: Mark Skrypka
 Why: "Languages" opened. On the deployed build the three Spanish cases passed practice, but the Catalan one either failed (the multilingual model heard "la data de naixement" as the name "Ana Xamen") or crawled to 236 s, the caller asking again and again what time we had said: an English voice reading Spanish is not understood. Separately, "No Slot Free" failed practice with BOOK + NO_ACTION after "okay … oh no, not mornings".

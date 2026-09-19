@@ -1,5 +1,7 @@
 # Work — Clinic voice agent
 
+**State (2026-09-19, ~18:25 Madrid).** 99 points once the "Noise" pass lands (17 of 18 scored calls passed). The platform's queue is 10–15 minutes per run this evening. The loop (scored calls only, line check) runs in the assistant's session; **Mark should run `scripts/night.sh` in his own terminal so the night does not depend on that session.** Call console: `.venv/bin/python -m uvicorn clinic_agent.console:app --port 7870`. Jury material still to do: an eval/verification page ("how we know it works"), a demo script, ten calls at once, and ElevenLabs as a voice-only option for the jury call.
+
 **State (2026-09-19, ~18:10 Madrid) — 96 points, the loop is banking; language build deployed.**
 - Scored so far: 17 calls, 16 passed. Fully credited: problems 1, 3–6, third_party, difficult_caller, adversarial, triage. Owed: languages, noise, no_slot_free, change_and_cancel (4 each). Problems 15–18 are not open yet; the loop picks them up when they open.
 - Deployed 17:58: a voice per language, the Catalan listening model, two-exact-details identification, a refusal that takes back the booking it follows. The published Catalan case passed on it (117 s; 236 s on the build before).
