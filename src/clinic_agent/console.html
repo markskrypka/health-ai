@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Clínica Arenal — call console</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg:#f6f4ef; --card:#fff; --ink:#1d1b18; --soft:#6f6a61; --line:#e3ded3; --accent:#e4572e; --good:#2f7d4f; --warn:#b26a00; --tool:#34495e; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); background:var(--card); display:flex; gap:28px; align-items:baseline; flex-wrap:wrap; }
+  header h1 { font-size:16px; margin:0; }
+  .num b { font-size:18px; } .num span { color:var(--soft); margin-left:4px; }
+  main { display:grid; grid-template-columns:minmax(300px, 380px) 1fr; height:calc(100vh - 58px); }
+  #calls { overflow:auto; border-right:1px solid var(--line); background:var(--card); }
+  .call { padding:10px 14px; border-bottom:1px solid var(--line); cursor:pointer; }
+  .call:hover, .call.on { background:#faf1ec; }
+  .call .top { display:flex; justify-content:space-between; color:var(--soft); font-size:12px; }
+  .call .what { font-weight:600; margin:2px 0; word-break:break-word; }
+  .call .said { color:var(--soft); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .badge { display:inline-block; font-size:11px; padding:1px 6px; border-radius:9px; background:#eee8dc; color:var(--soft); margin:3px 4px 0 0; }
+  .live { background:var(--accent); color:#fff; }
+  .bad { background:#fbe3dc; color:#a3311a; }
+  #timeline { overflow:auto; padding:18px 24px 60px; }
+  .row { display:flex; gap:12px; margin:6px 0; align-items:flex-start; }
+  .t { width:52px; flex:none; color:var(--soft); font-variant-numeric:tabular-nums; text-align:right; font-size:12px; padding-top:3px; }
+  .bubble { max-width:70%; padding:8px 12px; border-radius:12px; background:var(--card); border:1px solid var(--line); }
+  .agent .bubble { margin-left:auto; background:#fdf0ea; border-color:#f3d3c6; }
+  .who { font-size:11px; color:var(--soft); display:block; }
+  .note { color:var(--soft); font-size:12.5px; padding-top:2px; }
+  .tool { font:12px/1.4 ui-monospace, Menlo, monospace; color:var(--tool); white-space:pre-wrap; word-break:break-word; }
+  .decision { color:var(--good); font-weight:600; } .sent { color:var(--good); } .trouble { color:var(--warn); font-weight:600; }
+  details summary { cursor:pointer; color:var(--soft); font-size:12px; }
+  .empty { color:var(--soft); padding:40px; text-align:center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Clínica Arenal · call console</h1>
+  <div id="numbers"></div>
+</header>
+<main>
+  <div id="calls"></div>
+  <div id="timeline"><div class="empty">Pick a call on the left. A call in progress updates as it happens.</div></div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+const clock = (epoch) => new Date(epoch * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+let chosen = null, shown = 0, follow = true;
+
+async function refreshList() {
+  const calls = await (await fetch("/api/calls")).json();
+  if (follow && calls.length && calls[0].live && calls[0].call_id !== chosen) choose(calls[0].call_id);
+  $("calls").innerHTML = calls.map((c) => `
+    <div class="call ${c.call_id === chosen ? "on" : ""}" onclick="follow=false; choose('${c.call_id}')">
+      <div class="top"><span>${clock(c.started_at)} · ${Math.round(c.seconds)} s · ${c.turns} turns · ${c.lookups} lookups</span>
+        ${c.live ? '<span class="badge live">LIVE</span>' : ""}</div>
+      <div class="what">${c.outcome.length ? c.outcome.map(esc).join("<br>") : (c.live ? "in progress…" : "—")}</div>
+      <div class="said">${esc(c.first_words)}</div>
+      ${c.flags.map((f) => `<span class="badge">${esc(f)}</span>`).join("")}
+      ${c.delivered ? "" : '<span class="badge bad">not delivered</span>'}
+    </div>`).join("");
+}
+
+async function refreshNumbers() {
+  const n = await (await fetch("/api/numbers")).json();
+  const item = (value, label) => `<span class="num"><b>${value ?? "—"}</b><span>${label}</span></span>`;
+  $("numbers").innerHTML = [
+    item(n.calls, "calls in 12 h"), item(n.median_call_secs, "s median call"), item(n.median_decided_at_secs, "s to a decision"),
+    item(n.median_lookup_ms, "ms median lookup"), item(n.over_150_secs, "calls over 150 s"), item(n.not_delivered, "not delivered"),
+    item(Object.entries(n.outcomes).map(([k, v]) => `${k} ${v}`).join(" · "), ""),
+  ].join(" &nbsp; ");
+}
+
+function line(e) {
+  const t = `<div class="t">${e.t.toFixed(1)}</div>`;
+  const note = (html, cls = "note") => `<div class="row">${t}<div class="${cls}">${html}</div></div>`;
+  switch (e.kind) {
+    case "caller": return `<div class="row caller">${t}<div class="bubble"><span class="who">caller</span>${esc(e.text)}</div></div>`;
+    case "agent": return e.text ? `<div class="row agent">${t}<div class="bubble"><span class="who">agent</span>${esc(e.text)}</div></div>` : "";
+    case "call_started": return note(`call connected · caller id ${e.has_caller_id ? "shown" : "withheld"}`);
+    case "tool_call": return note(`→ ${esc(e.name)}(${esc(JSON.stringify(e.args))})`, "tool");
+    case "tool_result": return note(`← ${esc(e.name)}: ${esc(e.result.status ?? "")}
+      <details><summary>what the model was told</summary>${esc(JSON.stringify(e.result, null, 1))}</details>`, "tool");
+    case "patient": return note(`identified <b>${esc(e.patient_id)}</b> on ${esc((e.matched_on || []).join(" + "))} (${esc(e.status)})`);
+    case "offer": return note("offered: " + e.offers.map((o) => `${esc(o.when)} · ${esc(o.doctor)} · ${esc(o.site)}`).join(" | ")
+      + (e.notes.length ? `<br>told the caller: ${esc(e.notes.join(" "))}` : ""));
+    case "blocked": return note(`a clinic rule applies: ${esc(JSON.stringify(e))}`);
+    case "recorded": return note(`DECISION ${esc(e.action)} ${esc(JSON.stringify(e.payload))}`
+      + (e.replaced.length ? `<br>replaces ${esc(JSON.stringify(e.replaced))}` : ""), "note decision");
+    case "refusal_not_recorded": return note("refusal not recorded: another decision stands");
+    case "voice": return note(`voice → ${esc(e.language)}`);
+    case "listening_model": return note("caller speaks Catalan → Catalan listening model");
+    case "quiet_line": return note("quiet line → asked whether they are still there");
+    case "wrap_up_clock": return note("wrap-up clock: thirty seconds left, record the outcome", "note trouble");
+    case "inferred_at_hangup": return note("caller hung up before a decision: sent the likeliest answer", "note trouble");
+    case "recovered_leaked_call": return note(`recovered a tool call the model wrote as text: ${esc(e.name)}`, "note trouble");
+    case "submit": return note(`SENT ${esc(e.action)} → HTTP ${e.http}${e.attempts > 1 ? ` after ${e.attempts} attempts` : ""}`, e.http === 200 ? "note sent" : "note trouble");
+    case "call_ended": return note("call ended");
+    default: return note(esc(e.kind));
+  }
+}
+
+async function choose(id) {
+  chosen = id; shown = 0;
+  $("timeline").innerHTML = "";
+  await refreshCall();
+  refreshList();
+}
+
+async function refreshCall() {
+  if (!chosen) return;
+  const data = await (await fetch(`/api/calls/${chosen}?after=${shown}`)).json();
+  if (data.events.length) {
+    const box = $("timeline"), atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+    box.insertAdjacentHTML("beforeend", data.events.map(line).join(""));
+    shown = data.next;
+    if (atBottom) box.scrollTop = box.scrollHeight;
+  }
+}
+
+refreshList(); refreshNumbers();
+setInterval(refreshList, 2000); setInterval(refreshCall, 1000); setInterval(refreshNumbers, 15000);
+</script>
+</body>
+</html>

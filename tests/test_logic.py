@@ -328,3 +328,13 @@ def test_two_exact_details_identify_the_patient_whatever_the_name_was_heard_as()
     assert _two_exact_details({"matched_fields": ["name", "phone", "date_of_birth"]})
     assert _two_exact_details({"matched_fields": ["national_id", "date_of_birth"]})
     assert not _two_exact_details({"matched_fields": ["name", "phone"]})  # a shared surname plus the caller's own number
+
+
+# --- the call console reads the same event logs the calls write ---
+def test_console_puts_a_decision_in_words_and_times_the_lookups():
+    from clinic_agent.console import _in_words, _lookup_times
+    assert _in_words({"action": "book", "patient_id": "P00004", "provider_id": "PR10", "location_id": "norte",
+                      "slot": "2026-09-25T10:45:00+02:00"}) == "BOOK P00004 · PR10 · norte · 2026-09-25 10:45"
+    assert _in_words({"action": "no-action", "reason": "no_availability"}) == "NO_ACTION no_availability"
+    events = [{"kind": "tool_call", "name": "find_slots", "t": 10.0}, {"kind": "tool_result", "name": "find_slots", "t": 10.4}]
+    assert [round(s, 1) for s in _lookup_times(events)] == [0.4]
