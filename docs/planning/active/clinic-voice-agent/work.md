@@ -1,5 +1,12 @@
 # Work — Clinic voice agent
 
+**State (2026-09-19, ~18:10 Madrid) — 96 points, the loop is banking; language build deployed.**
+- Scored so far: 17 calls, 16 passed. Fully credited: problems 1, 3–6, third_party, difficult_caller, adversarial, triage. Owed: languages, noise, no_slot_free, change_and_cancel (4 each). Problems 15–18 are not open yet; the loop picks them up when they open.
+- Deployed 17:58: a voice per language, the Catalan listening model, two-exact-details identification, a refusal that takes back the booking it follows. The published Catalan case passed on it (117 s; 236 s on the build before).
+- Learned from the platform today: a matching record passes even with a `wall_clock` signal; the cooldown between scored calls is about 5–7 min in practice, not 12; practice calls can sit in the queue for more than 6 minutes (the scripts give up waiting, the call still happens).
+**Next action:** let the loop bank the four owed problems; read any failed scored call from `logs/calls/`; then the jury material (live call view, eval report, demo script, ten calls at once), and ElevenLabs as a voice-only option for the jury call.
+**Waiting on Mark:** nothing.
+
 **State (2026-09-19, ~16:00 Madrid) — new rules, scored loop running.**
 - Rules 2.1: one scored call per problem, 12 min cooldown from the finish, a problem credits its first four passes, calls pool, ties share a rank, wall freezes Sunday 06:00. We hold 40 (problems 1–6 fully credited), 8th; leader 78. Problems 7–10 are open (40 more points); 11–18 not yet.
 - `scripts/scored.py loop third_party triage no_slot_free change_and_cancel` runs in the assistant's session → `logs/scored-loop.log`. It owns both lanes (Mark: nobody else dials). First scored call 15:50. Practice on the new problems before it: 6/6 passed.

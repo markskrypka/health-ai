@@ -2,6 +2,12 @@
 
 Newest first. One entry per change, written when the change lands.
 
+## 2026-09-19 · feat · a voice per language, a Catalan listening model; a refusal takes back the booking it follows
+By: Mark Skrypka
+Why: "Languages" opened. On the deployed build the three Spanish cases passed practice, but the Catalan one either failed (the multilingual model heard "la data de naixement" as the name "Ana Xamen") or crawled to 236 s, the caller asking again and again what time we had said: an English voice reading Spanish is not understood. Separately, "No Slot Free" failed practice with BOOK + NO_ACTION after "okay … oh no, not mornings".
+How: `languages.py` + `speech.VoiceRouter`: each sentence the model writes is spoken by the voice of its language (`aura-2-thalia-en`, `aura-2-carina-es`; measured 96% and 99% word match on an 8 kHz line), stock phrases follow; two Catalan words in what the caller said move the listening model to Deepgram Nova-2 `ca` by a settings update; the prompt allows replies in English or Spanish only. `find_patient`: two exact details on one record beat a mangled name. `_record`: a NO_ACTION replaces a booking for the same patient and kind of doctor, and is never recorded beside another action (true of all 73 published answers). Mark chose to finish on Deepgram rather than move to ElevenLabs (asked 16:05). Verified: 82 tests; local calls in English, Spanish and Catalan; the published Catalan case through the harness: passed in 117 s.
+Ref: 7fda07d
+
 ## 2026-09-19 · feat · the scored lane on a clock, after the organizers changed the rules
 By: Mark Skrypka
 Why: rules 2.1 (19 Sep) replaced Run All with one scored call per problem, 12 minutes apart, four credited passes per problem, pooled. We held 40 points, 8th; problems 7–10 opened, worth 40 more; every idle cooldown is a lost slot.
