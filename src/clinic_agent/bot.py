@@ -12,7 +12,7 @@ from loguru import logger
 from pipecat.adapters.schemas.function_schema import FunctionSchema
 from pipecat.adapters.schemas.tools_schema import ToolsSchema
 from pipecat.audio.vad.silero import SileroVADAnalyzer
-from pipecat.frames.frames import LLMMessagesAppendFrame, TTSSpeakFrame
+from pipecat.frames.frames import LLMMessagesAppendFrame, STTUpdateSettingsFrame, TTSSpeakFrame
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import WorkerRunner
 from pipecat.pipeline.task import PipelineParams, PipelineWorker
@@ -26,14 +26,12 @@ from pipecat.services.llm_service import FunctionCallParams
 from pipecat.transports.websocket.fastapi import FastAPIWebsocketParams, FastAPIWebsocketTransport
 from pipecat.turns.user_turn_strategies import UserTurnStrategies
 
-from . import config, prompt, tools
+from . import config, languages, prompt, tools
 from .clinic import ClinicClient
 from .session import CallSession
-from .speech import GuardedGoogleLLM, PatientTurnStop
+from .speech import GuardedGoogleLLM, PatientTurnStop, VoiceRouter
 
 GREETING = "Clínica Arenal, good morning. How can I help you?"
-HOLDING_PHRASE = "One moment, please."  # English only for now; Spanish comes with the languages problem
-VOICE_EN = "aura-2-thalia-en"
 LINE_RATE = 8000  # Twilio Media Streams: 8 kHz µ-law
 # One published caller goes silent for eight seconds on purpose, and the harness's caller loses its sentence
 # whenever we talk over it: a nudge at seven seconds landed exactly on callers who were about to speak.
@@ -100,7 +98,7 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
         model=config.LLM_MODEL,
         system_instruction=prompt.build(catalogue, session.now, bool(session.from_number)),
         thinking=GoogleThinkingConfig(thinking_level="minimal")))
-    tts = DeepgramTTSService(api_key=config.DEEPGRAM_API_KEY, settings=DeepgramTTSSettings(voice=VOICE_EN))
+    tts = DeepgramTTSService(api_key=config.DEEPGRAM_API_KEY, settings=DeepgramTTSSettings(voice=languages.VOICES[session.language]))
 
     schemas = [FunctionSchema(name=n, description=desc, properties=props, required=req)
                for n, (_, desc, props, req) in tools.TOOLS.items()]
@@ -115,7 +113,7 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
             stop=[PatientTurnStop(user_speech_timeout=TURN_END_SILENCE_SECS,
                                   unfinished_extra_secs=UNFINISHED_EXTRA_SECS)])))
 
-    pipeline = Pipeline([transport.input(), stt, user_agg, llm, tts, transport.output(), assistant_agg])
+    pipeline = Pipeline([transport.input(), stt, user_agg, llm, VoiceRouter(session), tts, transport.output(), assistant_agg])
     worker = PipelineWorker(pipeline, enable_rtvi=False, params=PipelineParams(
         audio_in_sample_rate=LINE_RATE, audio_out_sample_rate=LINE_RATE, enable_metrics=True, enable_usage_metrics=True))
 
@@ -139,7 +137,7 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
         if not holding["said"] and names & {"find_patient", "find_slots", "list_appointments"}:
             holding["said"] = True
             # Kept out of the context: a model that reads its own holding phrases starts writing them too.
-            await worker.queue_frames([TTSSpeakFrame(HOLDING_PHRASE, append_to_context=False)])
+            await worker.queue_frames([TTSSpeakFrame(languages.HOLDING[session.language], append_to_context=False)])
 
     @user_agg.event_handler("on_user_turn_stopped")
     async def on_user_said(_agg, _strategy, message):
@@ -148,6 +146,12 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
         text = getattr(message, "content", str(message))
         session.heard.append(text)
         session.log("caller", text=text)
+        if not session.catalan and languages.sounds_catalan(session.heard):
+            # Deepgram's multilingual model has no Catalan and mangles its dates; the Catalan model (Nova-2,
+            # which takes no keyterms) hears it word for word. The service reconnects with the new settings.
+            session.catalan = True
+            session.log("listening_model", language="ca")
+            await worker.queue_frames([STTUpdateSettingsFrame(delta=DeepgramSTTSettings(model="nova-2", language="ca", keyterm=None))])
 
     @assistant_agg.event_handler("on_assistant_turn_stopped")
     async def on_agent_said(_agg, message):
@@ -161,7 +165,7 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
         # Once the outcome is submitted the call is over: the caller is just hanging up.
         session.log("quiet_line")
         if not session.submissions:
-            await worker.queue_frames([TTSSpeakFrame("Are you still there?")])
+            await worker.queue_frames([TTSSpeakFrame(languages.NUDGE[session.language])])
 
     async def wrap_up_clock() -> None:
         await asyncio.sleep(WRAP_UP_AT_SECS)

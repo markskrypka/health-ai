@@ -265,3 +265,66 @@ async def test_an_identical_repeat_counts_as_delivered_and_a_rejection_is_not_re
         api = Api(status)
         await tools.finalize(s, api)
         assert api.calls == 1 and s.posted[0]["http"] == status
+
+
+# --- languages: the voice follows the language the reply is written in; a Catalan caller is recognised ---
+@pytest.mark.parametrize("reply, current, expected", [
+    ("The earliest appointment is with Dra. Carmen Ortiz Vidal at Arenal Centro on Monday.", "en", "en"),
+    ("La primera cita libre es con el doctor Martín Sáez en Arenal Sur, el lunes veintiuno.", "en", "es"),
+    ("¿Me puede decir su nombre completo?", "en", "es"),
+    ("Perfecto.", "en", "es"),
+    ("Thank you, Señor Vázquez.", "es", "en"),
+    ("OK.", "es", "es"),  # nothing to go on: the voice stays as it is
+])
+def test_the_voice_follows_the_language_of_the_reply(reply, current, expected):
+    from clinic_agent.languages import reply_language
+    assert reply_language(reply, current) == expected
+
+
+def test_a_catalan_caller_is_recognised_through_the_multilingual_models_spelling():
+    from clinic_agent.languages import sounds_catalan
+    heard_by_nova3_multi = "Bon dia. Voldría de mandar la 1º hora liura da traumatologia. Que mantengue algo amquipugui parlar en catalá."
+    assert sounds_catalan([heard_by_nova3_multi])
+    assert sounds_catalan(["Bon dia.", "Em dic Teresa López García."])
+    assert not sounds_catalan(["Hola, buenos días. Quería pedir la primera cita libre de medicina general."])
+    assert not sounds_catalan(["Hi, I'd like the earliest appointment with Dr. Sáez at Arenal Centro, please."])
+
+
+# --- a refusal takes back the booking the caller walked away from, and never sits beside another action ---
+class _Catalogue:
+    async def catalogue(self):
+        return {"providers": [{"id": "PR10", "specialty_id": "orthopaedics"}, {"id": "PR03", "specialty_id": "general_practice"}]}
+
+
+def _session_with_a_booking():
+    from clinic_agent.session import CallSession
+    s = CallSession(call_id="t", dry_run=True, persist_log=False)
+    s.patients["P3"] = {"insurer": "sanitas"}
+    s.slots["S1"] = {"provider_id": "PR10", "location_id": "sur", "appointment_type_id": "orthopaedic_review",
+                     "start_time": "2026-09-21T09:30:00+02:00", "payable_with": ["sanitas"]}
+    return s
+
+
+async def test_okay_then_no_mornings_then_nothing_free_ends_as_a_single_refusal():
+    from clinic_agent import tools
+    s, api = _session_with_a_booking(), _Catalogue()
+    await tools.book(s, api, "P3", "S1")                      # the caller said "Okay"
+    s.last_search = ("P3", "orthopaedics")                    # "I can't make mornings" → afternoon search → nothing
+    await tools.end_without_booking(s, api, "no_availability")
+    assert s.submissions == [{"action": "no-action", "reason": "no_availability"}]
+
+
+async def test_a_refused_second_request_leaves_the_first_booking_alone():
+    from clinic_agent import tools
+    s, api = _session_with_a_booking(), _Catalogue()
+    await tools.book(s, api, "P3", "S1")
+    s.last_search = ("P3", "dermatology")                     # a second request, blocked by a rule
+    await tools.end_without_booking(s, api, "referral_required")
+    assert [a["action"] for a in s.submissions] == ["book"]
+
+
+def test_two_exact_details_identify_the_patient_whatever_the_name_was_heard_as():
+    from clinic_agent.tools import _two_exact_details
+    assert _two_exact_details({"matched_fields": ["name", "phone", "date_of_birth"]})
+    assert _two_exact_details({"matched_fields": ["national_id", "date_of_birth"]})
+    assert not _two_exact_details({"matched_fields": ["name", "phone"]})  # a shared surname plus the caller's own number

@@ -3,10 +3,11 @@
 A scripted caller, not a simulated one — it says its next line whenever the agent stops talking.
 Good for one thing: proving the wire, the audio loop and the tools work before the real harness dials.
 
-Run the server with DRY_RUN_SUBMIT=1, then:  .venv/bin/python scripts/local_call.py
+Run the server with DRY_RUN_SUBMIT=1, then:  .venv/bin/python scripts/local_call.py [english|spanish|catalan] [ws url]
 """
 
 import asyncio
+import audioop
 import base64
 import json
 import sys
@@ -18,26 +19,53 @@ import websockets
 
 from clinic_agent import config
 
-URL = sys.argv[1] if len(sys.argv) > 1 else "ws://localhost:7860/ws"
 FRAME = 160  # 20 ms of 8 kHz µ-law
 SILENCE = b"\xff" * FRAME
-LINES = [
-    "Hi, I'd like to book a general practice appointment, the earliest one you have please.",
-    "My name is Josefa Domínguez Navarro.",
-    "My D N I is 4 8 0 6 4 7 1 6 Y.",
-    "Yes, that works for me. Please book it.",
-    "Thank you very much. Goodbye.",
-]
+# scenario -> (the number the call comes from, the caller's voice, what the caller says). The callers are
+# published personas, so the clinic knows them. Deepgram has no Catalan voice: Gemini speaks that caller.
+SCENARIOS = {
+    "english": ("+34711330529", "aura-2-luna-en", [
+        "Hi, I'd like to book a general practice appointment, the earliest one you have please.",
+        "My name is Josefa Domínguez Navarro.",
+        "My D N I is 4 8 0 6 4 7 1 6 Y.",
+        "Yes, that works for me. Please book it.",
+        "Thank you very much. Goodbye."]),
+    "spanish": ("+34711330529", "aura-2-nestor-es", [
+        "Hola, buenos días. Quería pedir la primera cita libre de medicina general.",
+        "Me llamo Josefa Domínguez Navarro.",
+        "Sí, me viene bien. Resérvela, por favor.",
+        "Muchas gracias. Adiós."]),
+    "catalan": ("+34669394942", "gemini", [
+        "Bon dia. Voldria demanar la primera hora lliure de traumatologia. Necessito que m'atengui algú amb qui pugui parlar en català.",
+        "Em dic Teresa López García.",
+        "Sí, em va bé. Reservi-la, si us plau.",
+        "Moltes gràcies. Adéu."]),
+}
+SCENARIO = sys.argv[1] if len(sys.argv) > 1 else "english"
+URL = sys.argv[2] if len(sys.argv) > 2 else "ws://localhost:7860/ws"
+FROM_NUMBER, VOICE, LINES = SCENARIOS[SCENARIO]
 DG = {"Authorization": f"Token {config.DEEPGRAM_API_KEY}"}
 
 
 async def synthesize(text: str) -> bytes:
     async with httpx.AsyncClient(timeout=30) as http:
         r = await http.post("https://api.deepgram.com/v1/speak",
-                            params={"model": "aura-2-luna-en", "encoding": "mulaw", "sample_rate": 8000, "container": "none"},
+                            params={"model": VOICE, "encoding": "mulaw", "sample_rate": 8000, "container": "none"},
                             headers=DG, json={"text": text})
         r.raise_for_status()
         return r.content
+
+
+def gemini_speech(client, text: str) -> bytes:
+    from google.genai import types
+
+    reply = client.models.generate_content(
+        model="gemini-2.5-flash-preview-tts", contents=f"Say this in Catalan, naturally, as a phone caller: {text}",
+        config=types.GenerateContentConfig(response_modalities=["AUDIO"], speech_config=types.SpeechConfig(
+            voice_config=types.VoiceConfig(prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name="Kore")))))
+    pcm_24k = reply.candidates[0].content.parts[0].inline_data.data  # 16-bit mono
+    pcm_8k, _ = audioop.ratecv(pcm_24k, 2, 1, 24000, 8000, None)
+    return audioop.lin2ulaw(pcm_8k, 2)
 
 
 async def transcribe(ulaw: bytes) -> str:
@@ -55,7 +83,12 @@ def loud(payload: bytes) -> bool:
 
 
 async def main() -> None:
-    clips = await asyncio.gather(*(synthesize(line) for line in LINES))
+    if VOICE == "gemini":
+        from google import genai
+        client = genai.Client(api_key=config.GOOGLE_API_KEY)
+        clips = [gemini_speech(client, line) for line in LINES]  # one after another: the client is not thread-safe
+    else:
+        clips = await asyncio.gather(*(synthesize(line) for line in LINES))
     call_sid, stream_sid = str(uuid.uuid4()), "MZ" + uuid.uuid4().hex
     heard: list[tuple[float, bytes]] = []  # (time, agent audio)
     last_loud = [0.0]
@@ -66,7 +99,7 @@ async def main() -> None:
         await ws.send(json.dumps({"event": "start", "sequenceNumber": "1", "streamSid": stream_sid, "start": {
             "accountSid": "AC-local", "streamSid": stream_sid, "callSid": call_sid, "tracks": ["inbound"],
             "mediaFormat": {"encoding": "audio/x-mulaw", "sampleRate": 8000, "channels": 1},
-            "customParameters": {"call_id": call_sid, "from_number": "+34711330529"}}}))
+            "customParameters": {"call_id": call_sid, "from_number": FROM_NUMBER}}}))
 
         async def listen() -> None:
             async for raw in ws:

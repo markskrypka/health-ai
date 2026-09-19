@@ -41,10 +41,8 @@ def reply_language(text: str, current: str) -> str:
     return "es" if es > en else "en" if en > es else current
 
 
-def sounds_catalan(heard: list[str], tags: list[str]) -> bool:
-    """Two Catalan words, or one plus a language tag that is neither Spanish nor English (the multilingual
-    model hears Catalan as a blend of Spanish, Portuguese, French and Italian)."""
+def sounds_catalan(heard: list[str]) -> bool:
+    """Two different Catalan words in what the caller has said so far. A typical opening carries four
+    ("Bon dia, voldria … parlar en català"), even through the multilingual model's spelling."""
     said = " ".join(fold(t) for t in heard)
-    markers = sum(1 for rx in _CA_RE if rx.search(said))
-    foreign = any(t and t[:2] not in ("es", "en") for t in tags)
-    return markers >= 2 or (markers >= 1 and foreign)
+    return sum(1 for rx in _CA_RE if rx.search(said)) >= 2

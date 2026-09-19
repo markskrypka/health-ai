@@ -28,6 +28,8 @@ class CallSession:
     last_offered_patient: str | None = None
     # The reason the last search gave for not offering anything (blocked rule, no availability…).
     last_refusal_reason: str | None = None
+    # Who and what the latest search was for: (patient_id, specialty_id). A refusal is about that request.
+    last_search: tuple[str, str] | None = None
     # Whose chart the caller id opened, when that is not the patient being booked for.
     caller_record: dict | None = None
 
@@ -36,6 +38,10 @@ class CallSession:
     heard: list[str] = field(default_factory=list)
     said: list[str] = field(default_factory=list)
     insurer_challenged: bool = False
+    # The language the agent is speaking right now ("en" or "es") — it picks the voice and the stock phrases —
+    # and whether the caller turned out to speak Catalan, which needs its own listening model.
+    language: str = "en"
+    catalan: bool = False
     move_challenged: bool = False
     # Set when the wrap-up clock fires with an offer on the table, cleared by the caller's next turn:
     # the clock alone must never make the model search again and book something the caller never heard.

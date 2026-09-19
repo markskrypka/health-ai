@@ -7,12 +7,15 @@ import re
 import uuid
 
 from loguru import logger
-from pipecat.frames.frames import LLMContextFrame
+from pipecat.frames.frames import Frame, LLMContextFrame, LLMTextFrame, TTSUpdateSettingsFrame
+from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
+from pipecat.services.deepgram.tts import DeepgramTTSSettings
 from pipecat.services.google.llm import GoogleLLMService
 from pipecat.services.llm_service import FunctionCallFromLLM
 from pipecat.turns.user_stop.speech_timeout_user_turn_stop_strategy import SpeechTimeoutUserTurnStopStrategy
 
-from . import tools
+from . import languages, tools
+from .session import CallSession
 
 
 def looks_unfinished(text: str) -> bool:
@@ -162,3 +165,23 @@ class GuardedGoogleLLM(GoogleLLMService):
         if function_calls:
             self._corrections = 0
         await super().run_function_calls(function_calls)
+
+
+class VoiceRouter(FrameProcessor):
+    """Sits between the model and the voice. The model answers in the caller's language; each sentence it
+    releases is spoken by the voice of the language it is written in. The voice changes with a settings
+    update sent just ahead of the sentence, so the two can never be out of step."""
+
+    def __init__(self, session: CallSession):
+        super().__init__()
+        self._session = session
+
+    async def process_frame(self, frame: Frame, direction: FrameDirection):
+        await super().process_frame(frame, direction)
+        if isinstance(frame, LLMTextFrame):
+            language = languages.reply_language(frame.text, self._session.language)
+            if language != self._session.language:
+                self._session.language = language
+                self._session.log("voice", language=language)
+                await self.push_frame(TTSUpdateSettingsFrame(delta=DeepgramTTSSettings(voice=languages.VOICES[language])))
+        await self.push_frame(frame, direction)

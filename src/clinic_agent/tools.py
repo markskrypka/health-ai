@@ -46,6 +46,13 @@ def fold(text: str) -> str:
 
 # ---------------------------------------------------------------- identification
 
+def _two_exact_details(match: dict) -> bool:
+    """Phone, id and date of birth match exactly or not at all; two of them on one record identify the patient,
+    whatever speech-to-text made of the name. Seen live: a Catalan caller's "la data de naixement" arrived as
+    the name "Ana Xamen", and a record matching on phone and date of birth was thrown away over it."""
+    return len({"national_id", "phone", "date_of_birth"} & set(match.get("matched_fields", []))) >= 2
+
+
 def _name_agrees(said: str, record: dict) -> bool:
     """Most of the name the caller said must be in the record's name; one mangled token is forgiven."""
     have = fold(f'{record["given_name"]} {record["first_surname"]} {record["second_surname"]}').split()
@@ -81,7 +88,7 @@ async def find_patient(s: CallSession, api: ClinicClient, name: str = "", nation
         matches = await api.directory(**query)
         # The API scores additively and reports a shared surname as a name match: the child's name plus the
         # mother's caller id returns the MOTHER, flagged name+phone. So the name is compared here, in code.
-        strong = [m for m in matches if not name or _name_agrees(name, m)]
+        strong = [m for m in matches if not name or _name_agrees(name, m) or _two_exact_details(m)]
         via_caller_id = "phone" in query and not phone
         if not strong and matches and name and via_caller_id:
             s.caller_record = matches[0]
@@ -191,6 +198,7 @@ async def find_slots(s: CallSession, api: ClinicClient, patient_id: str, special
         provider, specialty_id = found[0], found[0]["specialty_id"]
     if not specialty_id:
         return {"status": "error", "say": "Give specialty_id or provider_name."}
+    s.last_search = (patient_id, specialty_id)
 
     # when
     try:
@@ -398,6 +406,7 @@ async def _record(s: CallSession, api: ClinicClient, action: str, payload: dict)
     """Record a decision. Nothing is POSTed until finalize(): an accepted action can never be withdrawn,
     and problem 13 scores the caller's FINAL request — so a later decision replaces the one it contradicts."""
     record = {"action": action, **payload}
+    specialty_of = {p["id"]: p["specialty_id"] for p in (await api.catalogue())["providers"]} if action == "no-action" else {}
 
     def contradicted(old: dict) -> bool:
         if old == record:
@@ -405,7 +414,10 @@ async def _record(s: CallSession, api: ClinicClient, action: str, payload: dict)
         if action == "escalate":
             return True  # an emergency: book nothing
         if action == "no-action":
-            return old["action"] in ("no-action", "escalate")
+            # Seen live: "Okay" → booked → "oh no, I can't make mornings" → nothing else free → refusal. The
+            # booking the caller walked away from — same patient, same kind of doctor — goes with it.
+            walked_away = old["action"] == "book" and s.last_search == (old["patient_id"], specialty_of.get(old["provider_id"]))
+            return walked_away or old["action"] in ("no-action", "escalate")
         if old["action"] in ("no-action", "escalate"):
             return True  # something is being written after all
         if action == "book":
@@ -415,8 +427,14 @@ async def _record(s: CallSession, api: ClinicClient, action: str, payload: dict)
         return old["action"] == "register"
 
     replaced = [old for old in s.submissions if contradicted(old)]
-    s.submissions = [old for old in s.submissions if not contradicted(old)] + [record]
-    s.log("recorded", action=action, payload=payload, replaced=replaced)
+    standing = [old for old in s.submissions if not contradicted(old)]
+    if action == "no-action" and standing:
+        # No accepted answer ever pairs NO_ACTION with another action: a refused second request leaves the first as it is.
+        s.submissions = standing
+        s.log("refusal_not_recorded", payload=payload, standing=standing)
+    else:
+        s.submissions = standing + [record]
+        s.log("recorded", action=action, payload=payload, replaced=replaced)
     return {"status": "recorded", "say": _RECORDED}
 
 
