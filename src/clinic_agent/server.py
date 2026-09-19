@@ -6,11 +6,13 @@ Run:  .venv/bin/python -m uvicorn clinic_agent.server:app --host 0.0.0.0 --port 
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from loguru import logger
 from pipecat.runner.utils import parse_telephony_websocket
 
 from .bot import run_call
 from .clinic import ClinicClient
+from .dashboard import DASHBOARD_HTML, get_call_history, live_events_generator
 from .session import CallSession
 
 
@@ -25,6 +27,24 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+@app.get("/", response_class=HTMLResponse)
+async def dashboard_index() -> HTMLResponse:
+    """The live visual control room for the jury and real-time monitoring."""
+    return HTMLResponse(content=DASHBOARD_HTML)
+
+
+@app.get("/api/live")
+async def live_stream() -> StreamingResponse:
+    """SSE stream emitting live call events in real time."""
+    return StreamingResponse(live_events_generator(), media_type="text/event-stream")
+
+
+@app.get("/api/calls")
+async def call_history() -> JSONResponse:
+    """List recent calls and audit metrics."""
+    return JSONResponse(content=get_call_history())
 
 
 @app.get("/health")

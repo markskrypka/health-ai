@@ -9,6 +9,23 @@ from typing import Any
 from . import config
 
 
+_SUBSCRIBERS: list[Any] = []
+
+
+def subscribe(callback: Any) -> Any:
+    """Register a listener for real-time call events (used by the live dashboard)."""
+    _SUBSCRIBERS.append(callback)
+    return lambda: _SUBSCRIBERS.remove(callback) if callback in _SUBSCRIBERS else None
+
+
+def broadcast(call_id: str, event: dict) -> None:
+    for sub in list(_SUBSCRIBERS):
+        try:
+            sub(call_id, event)
+        except Exception:
+            pass
+
+
 @dataclass
 class CallSession:
     call_id: str
@@ -63,6 +80,7 @@ class CallSession:
         """Append-only event log: the answer to 'why did it say that?'."""
         event = {"t": round(time.monotonic() - self._t0, 3), "kind": kind, **data}
         self.events.append(event)
+        broadcast(self.call_id, event)
         if not self.persist_log:
             return
         config.CALL_LOG_DIR.mkdir(parents=True, exist_ok=True)

@@ -192,9 +192,10 @@ async def find_slots(s: CallSession, api: ClinicClient, patient_id: str, special
             return {"status": "provider_not_found",
                     "say": "No doctor of that name works here. Offer another doctor of the kind they need; if they will see nobody else, end_without_booking(provider_not_found)."}
         if len(found) > 1:
+            opts = ", ".join(f'{p["name"]} ({p["specialty_name"]})' for p in found)
             return {"status": "ambiguous_provider",
                     "options": [{"name": p["name"], "specialty": p["specialty_name"]} for p in found],
-                    "say": "Two doctors sound alike. Ask which one, then search again with specialty_id set."}
+                    "say": f"Two doctors sound alike: {opts}. Ask the caller which specialty or doctor they mean, then search again with specialty_id set."}
         provider, specialty_id = found[0], found[0]["specialty_id"]
     if not specialty_id:
         return {"status": "error", "say": "Give specialty_id or provider_name."}

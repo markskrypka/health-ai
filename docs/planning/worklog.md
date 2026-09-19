@@ -2,6 +2,20 @@
 
 Newest first. One entry per change, written when the change lands.
 
+## 2026-09-19 · fix · Dashboard UI layout viewport containment and auto-scrolling
+By: javier portatil trabajo
+Why: when conversation transcripts or tool histories grew large, the CSS Grid container stretched beyond viewport height and broke the layout; additionally, new turns required manual scrolling.
+How: locked `html, body` to `100vh` with `overflow: hidden`; constrained `main` and `.panel` with `min-height: 0` and `min-width: 0` so child panels scroll independently; added end anchor elements, `scrollTranscriptToBottom()`, and `MutationObserver` to ensure the view stays pinned to the latest messages and tool calls automatically without user intervention.
+
+## 2026-09-19 · feat · Jury Final Boss defense, Live Control Room, and edge-case hardening
+By: javier portatil trabajo
+Why: the jury evaluates live calls directly as humans (how it sounds, interruption handling, caller context, orchestration, live visibility, post-call analytics, safety and defense against trick inputs).
+How:
+1. Hardened system prompt and tools against jury edge cases: homophones disambiguation (Sáez/Sáenz, Iglesias/Iglesia), honorifics (Don Álvaro Cid), spelling confirmation for rare/foreign names, emergency 112 escalation, prompt injection and patient privacy isolation.
+2. Built Live Control Room UI in `clinic_agent/dashboard.py` and `clinic_agent/server.py` with real-time SSE event streaming (`/api/live`), live call state cards, audio VU indicators, turn metrics, and post-call inspection (`/api/calls`).
+3. Added dynamic bilingual TTS voice switching (`aura-2-carina-es` and `aura-2-thalia-en`), natural prosody cues, filler/nudge handling, and calibrated barge-in sensitivity.
+4. Added comprehensive test suite in `tests/test_jury_defense.py` covering all jury edge cases; 100% pass across all 83 tests.
+
 ## 2026-09-19 · feat · call console for the jury; the loop dials scored calls only; a night script
 By: Mark Skrypka
 Why: the jury judges "what you can see while it is happening" and "what you can learn from it afterwards"; the platform's queue grew to 10–15 minutes per run, so a practice call in a gap was costing a scored slot; and the tunnel and the loop lived inside the assistant's session, which would not survive the night.

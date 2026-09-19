@@ -22,8 +22,10 @@ class ClinicError(Exception):
 
 class ClinicClient:
     def __init__(self, base_url: str | None = None, api_key: str | None = None):
+        root_url = (base_url or config.PROSPER_BASE_URL).rstrip("/")
+        api_url = root_url if root_url.endswith("/api/v1") else f"{root_url}/api/v1"
         self._http = httpx.AsyncClient(
-            base_url=(base_url or config.PROSPER_BASE_URL) + "/api/v1",
+            base_url=api_url,
             headers={"X-Api-Key": api_key or config.PROSPER_API_KEY},
             timeout=httpx.Timeout(10.0, connect=5.0),
         )

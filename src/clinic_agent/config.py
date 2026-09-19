@@ -22,9 +22,13 @@ DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY", "")
 # Local test calls carry a call id the platform never issued, so their submissions are captured, not POSTed.
 DRY_RUN_SUBMIT = os.getenv("DRY_RUN_SUBMIT", "") == "1"
 
+# Jury mode: enables conversational depth, careful spelling confirmations for rare names,
+# and personal touches from chart notes for the live jury demo.
+JURY_MODE = os.getenv("JURY_MODE", "1") == "1"
+
 # A chart note can read like an instruction ("check the appointment on the books before adding another")
 # and turned a plain booking into a reschedule on a real call. Off for scored calls; on for a jury demo.
-SHOW_CHART_NOTES = os.getenv("SHOW_CHART_NOTES", "") == "1"
+SHOW_CHART_NOTES = os.getenv("SHOW_CHART_NOTES", "1" if JURY_MODE else "") == "1"
 
 # The model that makes the decisions, live and in the text evals alike.
 LLM_MODEL = os.getenv("LLM_MODEL", "gemini-3.6-flash")

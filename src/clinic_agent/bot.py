@@ -31,7 +31,7 @@ from .clinic import ClinicClient
 from .session import CallSession
 from .speech import GuardedGoogleLLM, PatientTurnStop, VoiceRouter
 
-GREETING = "Clínica Arenal, good morning. How can I help you?"
+GREETING = "Clínica Arenal, buenos días. / Good morning. ¿En qué puedo ayudarle?"
 LINE_RATE = 8000  # Twilio Media Streams: 8 kHz µ-law
 # One published caller goes silent for eight seconds on purpose, and the harness's caller loses its sentence
 # whenever we talk over it: a nudge at seven seconds landed exactly on callers who were about to speak.
