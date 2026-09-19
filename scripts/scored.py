@@ -1,9 +1,12 @@
-"""The scored lane on a clock: one scored call the moment the cooldown allows, practice calls in the gaps.
+"""The scored lane on a clock: one scored call the moment the cooldown allows.
 
   scored.py status                        credited cases per problem, cooldown, rank
   scored.py loop [<problem>…]             bank four passes at every open scored problem (or only those named);
-                                          each scored call goes where weight x observed pass rate is highest,
-                                          and the gaps go to practising the problem with the least evidence
+                                          each scored call goes where weight x observed pass rate is highest
+
+The loop dials no practice calls: a practice call waits in the same queue as a scored one (one queued or active
+run per team, either lane), and on a busy evening that queue was ten minutes long. Practise by hand, with
+scripts/practice.py, when there is a failure to understand.
 
 Rules 2.1 (19 Sep): a scored run is one private case of one problem; 12 minutes between scored runs, counted
 from when the last one finished; one queued or active run per team in either lane; a problem credits the first
@@ -23,7 +26,6 @@ from practice import DONE, fetch
 LOGS = Path(practice.ROOT) / "logs"
 HOLD, IN_FLIGHT = LOGS / ".hold", LOGS / ".run-in-flight"
 CREDITED_PER_PROBLEM = 4
-PRACTICE_NEEDS_SECS = 210  # a practice call must be over before the cooldown is, or it delays the scored call
 
 
 def team(http) -> dict:
@@ -78,28 +80,15 @@ def scored_call(http, problem: str) -> dict:
         IN_FLIGHT.unlink(missing_ok=True)
 
 
-def practice_call(http, problem: str, case: dict) -> bool:
-    IN_FLIGHT.write_text("practice")
-    try:
-        print(f'  practice {problem} — {case["caller"]}: {case["summary"][:90]}', flush=True)
-        return practice.report(practice.dial(http, problem, case), verbose=False)
-    except SystemExit as gave_up:  # the platform's queue can sit on a call for minutes; the loop must outlive that
-        print(f"    practice call abandoned: {gave_up}", flush=True)
-        return False
-    finally:
-        IN_FLIGHT.unlink(missing_ok=True)
-
-
 def worth(problem: str, weights: dict, evidence: dict) -> float:
-    """What the next scored call at a problem is worth: its weight times the pass rate seen so far on this
-    build, practice and scored calls alike. Unknown counts as one in two, so a new problem is tried."""
+    """What the next scored call at a problem is worth: its weight times the pass rate its scored calls have
+    shown so far. Unknown counts as one in two, so a new problem is tried."""
     passes, calls = evidence.get(problem, (0, 0))
     return weights[problem] * (passes + 1) / (calls + 2)
 
 
 def loop(http, only: list[str]) -> None:
-    evidence: dict[str, tuple[int, int]] = {}  # problem -> (passes, calls) seen by this loop
-    rehearsed: dict[str, int] = {}             # problem -> index of the next published case to practise
+    evidence: dict[str, tuple[int, int]] = {}  # problem -> (passes, scored calls) seen by this loop
 
     def saw(problem: str, passed: bool) -> None:
         passes, calls = evidence.get(problem, (0, 0))
@@ -131,14 +120,8 @@ def loop(http, only: list[str]) -> None:
                 saw(problem, case["status"] == "passed")
             print(f'{time.strftime("%H:%M:%S")}   → {str(case.get("status")).upper()}  attribution={case.get("attribution")}  '
                   f'signals={case.get("signal_codes")}  call_id={case.get("call_id")}', flush=True)
-        elif wait["private_wait"] >= PRACTICE_NEEDS_SECS and wait["public_wait"] <= 0:
-            problem = min(owed, key=lambda p: (evidence.get(p, (0, 0))[1], -weights[p]))  # least evidence first
-            cases = fetch(http, "GET", f"/problems/{problem}", want="examples").json()["examples"]
-            case = cases[rehearsed.get(problem, 0) % len(cases)]
-            rehearsed[problem] = rehearsed.get(problem, 0) + 1
-            saw(problem, practice_call(http, problem, case))
         else:
-            time.sleep(min(max(wait["private_wait"], wait["public_wait"], 1), 15))
+            time.sleep(min(max(wait["private_wait"], 1), 15))
 
 
 def main() -> None:
