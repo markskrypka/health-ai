@@ -2,6 +2,12 @@
 
 Newest first. One entry per change, written when the change lands.
 
+## 2026-09-19 · fix · a question about the clinic gets only what was asked
+By: Mark Skrypka
+Why: the first scored run of "The Questions" passed 3 of 4. In the fourth the agent answered "Mondays and Wednesdays, from four to eight in the afternoon" to "which days is she there?" — the days were right, the caller's judge took the hours for a mistake and hung up; the same answer passed in another call of that run.
+How: one prompt rule — answer only what was asked, in one short sentence, nothing added, then wait for the next question. An 18-question quiz of the deployed prompt and model (the five published questions plus thirteen variants) was 18 of 18 correct before and after, and carried no extras after. Deployed 22:05 inside the cooldown; the re-run passed 4 of 4: 172 points, every open problem credited 4/4.
+Ref: b0e49f3
+
 ## 2026-09-19 · feat · the last two problems of the evening: the nearest clinic with directions, clinic facts turned round
 By: Mark Skrypka
 Why: at 21:00 the organizers opened "The Nearest Site" and "The Questions" (12 points each) and announced that the first team to reach the maximum wins the evening's prize. Their fresh docs showed two things ours could not do: a caller who asks how to get to the clinic hangs up on "I do not know", and a caller who asks about the clinic hangs up on one wrong fact. Our geocoder also failed on two of the three published addresses.
