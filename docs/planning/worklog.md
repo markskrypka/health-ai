@@ -2,6 +2,18 @@
 
 Newest first. One entry per change, written when the change lands.
 
+## 2026-09-19 · fix · the line's own number always counts; a sound id forgives a mangled name
+By: Mark Skrypka
+Why: on a scored languages call "Alice Collins Davies" reached us as "Alys Davis"; her NIE was sound and on file and she rang from her own number, yet three lookups ended not_found and the call closed as patient_not_found at the wrap-up clock. The lookup that carried the NIE no longer carried the caller id (the model passes `use_caller_id` only with the first try), so the record had one exact detail and a name that did not agree. Confirmed against the live directory. The harness redialled her and the redial passed.
+How: `tools.find_patient` adds the caller id to every lookup the caller gave a detail for, and retries without it whenever it finds nobody (a relative's phone); `_identifies`: a record found by a check-letter-sound DNI/NIE needs only one recognisable word of the name — a phone is shared by mother and child, an id is not; a corrected letter still needs the full name. Three regression tests (they fail on the old code); 86 pass; a local dry-run call booked the published answer in 64 s; deployed 19:35 with the line idle.
+Ref: 59f3154
+
+## 2026-09-19 · docs · the leader's repo read against ours
+By: Mark Skrypka
+Why: Mark asked whether cachopo's approach (1st at 18:30, 132 points to our 96) is better, why, and what would make ours smarter and more reliable.
+How: their public repo cloned read-only to the scratchpad; four parallel probes (brain and write path, voice, deterministic helpers, readiness for problems 15–18) cross-checked against our code, 176 call logs and the live read-only API → `active/clinic-voice-agent/research/2026-09-19-competitor-cachopo.md`. Verdict: their lead was calls banked, not a better agent — during the read our loop took every open problem to 4/4 (148 points, rank 1 at 19:30). Worth taking: doctor and site pinned on a later move, slots bound to their patient, a refusal gate, nearest-site before identification. Not worth taking: immutable mid-call writes and the confirm-in-a-new-turn flow (12 of their 23 calls hit the wall).
+Ref: pending
+
 ## 2026-09-19 · feat · call console for the jury; the loop dials scored calls only; a night script
 By: Mark Skrypka
 Why: the jury judges "what you can see while it is happening" and "what you can learn from it afterwards"; the platform's queue grew to 10–15 minutes per run, so a practice call in a gap was costing a scored slot; and the tunnel and the loop lived inside the assistant's session, which would not survive the night.
