@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "stem": {
+      "source": "markskrypka/stem",
+      "sourceType": "github",
+      "skillPath": "skills/stem/SKILL.md",
+      "computedHash": "86b8c6febf3682a9df45273c253777bb1e7bfd278f50ec16a29a7d0bcb58d2c0"
+    }
+  }
+}
