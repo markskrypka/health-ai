@@ -36,13 +36,10 @@ LINE_RATE = 8000  # Twilio Media Streams: 8 kHz µ-law
 # One published caller goes silent for eight seconds on purpose, and the harness's caller loses its sentence
 # whenever we talk over it: a nudge at seven seconds landed exactly on callers who were about to speak.
 QUIET_LINE_SECS = 10.0
-# Calls are cut at 180 s, and a confirmation plus goodbyes take about thirty. At this point the model is
-# told to stop confirming and record the outcome.
-WRAP_UP_AT_SECS = 140.0
-_WRAP_UP = ("[CLOCK] This call will be cut off in about thirty seconds. Stop asking and stop confirming. "
+_WRAP_UP = ("[CLOCK] This call will be cut off in about a minute. Stop asking and stop confirming. "
             "Call the tool that records the outcome NOW with the best information you have — register_patient, book, "
             "reschedule, cancel or end_without_booking — then say goodbye in one short sentence.")
-_WRAP_UP_WITH_OFFER = ("[CLOCK] This call will be cut off in about thirty seconds. Do NOT search again and do not ask "
+_WRAP_UP_WITH_OFFER = ("[CLOCK] This call will be cut off in about a minute. Do NOT search again and do not ask "
                        "anything else. Your last offer, slot_ref {ref}, is what the caller is answering: unless they "
                        "refused it, record it NOW with book — or with reschedule if they asked to move an appointment — "
                        "then say goodbye in one short sentence.")
@@ -168,7 +165,7 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
             await worker.queue_frames([TTSSpeakFrame(languages.NUDGE[session.language])])
 
     async def wrap_up_clock() -> None:
-        await asyncio.sleep(WRAP_UP_AT_SECS)
+        await asyncio.sleep(config.WRAP_UP_AT_SECS)
         if not session.submissions:  # a wrong-ish record can pass; an empty one cannot
             offer = session.last_offered_slot
             session.search_locked = bool(offer)

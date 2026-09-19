@@ -581,10 +581,10 @@ async def register_patient(s: CallSession, api: ClinicClient, given_name: str, f
     # A model under time pressure fills a required field it never collected (seen live: "privado").
     # One challenge, then trust: a mangled transcript must not block a real registration for ever.
     digits = re.sub(r"\D", "", phone)[-9:]
-    if len(digits) != 9 and s.elapsed() < 140:
+    if len(digits) != 9 and s.elapsed() < config.WRAP_UP_AT_SECS:
         return {"status": "phone_incomplete", "say": "A Spanish phone number has nine digits. Ask them to repeat the phone number slowly."}
-    # Past ~140 s there is no time left for another question: record what we have rather than nothing.
-    if not _caller_said_insurer(s, insurer) and not s.insurer_challenged and s.elapsed() < 140:
+    # Once the wrap-up clock has fired there is no time left for another question: record what we have.
+    if not _caller_said_insurer(s, insurer) and not s.insurer_challenged and s.elapsed() < config.WRAP_UP_AT_SECS:
         s.insurer_challenged = True
         return {"status": "insurer_not_heard",
                 "say": "The caller has not said which insurer they are with. Ask them now, then call register_patient again. Never assume privado."}

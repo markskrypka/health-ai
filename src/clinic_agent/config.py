@@ -26,6 +26,11 @@ DRY_RUN_SUBMIT = os.getenv("DRY_RUN_SUBMIT", "") == "1"
 # and turned a plain booking into a reschedule on a real call. Off for scored calls; on for a jury demo.
 SHOW_CHART_NOTES = os.getenv("SHOW_CHART_NOTES", "") == "1"
 
+# The organizers cap a call at ten minutes (rules of 19 Sep, evening; it was three until then, and a wrap-up
+# clock built for three ended live calls that could have been saved). With a minute left the model is told to
+# record the outcome with what it has; the same moment ends the patience of the registration checks.
+WRAP_UP_AT_SECS = 540.0
+
 # The model that makes the decisions, live and in the text evals alike.
 LLM_MODEL = os.getenv("LLM_MODEL", "gemini-3.6-flash")
 

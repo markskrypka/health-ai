@@ -61,7 +61,7 @@ class CallSession:
     _t0: float = field(default_factory=time.monotonic)
 
     def elapsed(self) -> float:
-        """Seconds since the call connected. Calls are cut off at 180."""
+        """Seconds since the call connected. Calls are cut off at ten minutes."""
         return time.monotonic() - self._t0
 
     def log(self, kind: str, **data: Any) -> None:
