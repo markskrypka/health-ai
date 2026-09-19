@@ -330,6 +330,67 @@ def test_two_exact_details_identify_the_patient_whatever_the_name_was_heard_as()
     assert not _two_exact_details({"matched_fields": ["name", "phone"]})  # a shared surname plus the caller's own number
 
 
+# --- the line's own number is evidence even when the model forgets it; a sound id forgives a mangled name ---
+class _Directory:
+    """Two patients on one phone number, mother and child; an exact field that does not match excludes a record
+    and a shared surname is flagged as a name match — both as the real directory does."""
+    def __init__(self):
+        base = {"has_visited_before": True, "insurer": "dkv", "referrals": [], "note": ""}
+        self.records = [
+            dict(base, patient_id="P00820", given_name="Alice", first_surname="Collins", second_surname="Davies",
+                 national_id="Z7873425R", phone="600111222", date_of_birth="2001-04-05"),
+            dict(base, patient_id="P00900", given_name="Amparo", first_surname="Medina", second_surname="Domínguez",
+                 national_id="92641944Z", phone="600333444", date_of_birth="1996-12-17"),
+            dict(base, patient_id="P00901", given_name="Sonia", first_surname="Álvarez", second_surname="Medina",
+                 national_id="62819257R", phone="600555666", date_of_birth="2017-05-12"),
+        ]
+
+    async def directory(self, **query):
+        from clinic_agent.tools import fold
+        found = []
+        for rec in self.records:
+            exact = [k for k in ("national_id", "phone", "date_of_birth") if k in query]
+            if any(query[k] != rec[k] for k in exact):
+                continue
+            said = set(fold(query.get("name", "")).split())
+            named = bool(said & set(fold(f'{rec["given_name"]} {rec["first_surname"]} {rec["second_surname"]}').split()))
+            if exact or named:
+                found.append(dict(rec, matched_fields=(["name"] if "name" in query else []) + exact))
+        return found
+
+
+def _ringing_from(number):
+    from clinic_agent.session import CallSession
+    return CallSession(call_id="t", from_number=number, dry_run=True, persist_log=False)
+
+
+async def test_a_sound_id_and_the_lines_own_number_identify_a_patient_whose_name_was_misheard():
+    from clinic_agent import tools
+    s = _ringing_from("600111222")
+    first = await tools.find_patient(s, _Directory(), name="Alys Davis", use_caller_id=True)
+    assert first["status"] == "not_found"                     # one exact detail and a name that is not hers: not enough
+    found = await tools.find_patient(s, _Directory(), name="Alys Davis", national_id="Z7873425R")  # the model dropped use_caller_id
+    assert (found["status"], found["patient_id"]) == ("identified", "P00820")
+
+
+async def test_a_sound_id_forgives_a_mangled_name_from_any_phone_but_a_corrected_letter_does_not():
+    from clinic_agent import tools
+    found = await tools.find_patient(_ringing_from(None), _Directory(), name="Alys Davis", national_id="Z7873425R")
+    assert (found["status"], found["patient_id"]) == ("identified", "P00820")
+    wrong_letter = await tools.find_patient(_ringing_from(None), _Directory(), name="Alys Davis", national_id="Z7873425A")
+    assert wrong_letter["status"] == "not_found"
+
+
+async def test_a_mother_ringing_for_her_child_still_gets_the_child_not_herself():
+    from clinic_agent import tools
+    s = _ringing_from("600333444")                            # the mother's number; the child's record has its own
+    by_name = await tools.find_patient(s, _Directory(), name="Sonia Álvarez Medina")
+    assert (by_name["status"], by_name["patient_id"]) == ("one_field_only", "P00901")
+    assert "caller" in by_name                                # and the model is told whose number it is
+    with_birthday = await tools.find_patient(s, _Directory(), name="Sonia Álvarez Medina", date_of_birth="2017-05-12")
+    assert (with_birthday["status"], with_birthday["patient_id"]) == ("identified", "P00901")
+
+
 # --- the call console reads the same event logs the calls write ---
 def test_console_puts_a_decision_in_words_and_times_the_lookups():
     from clinic_agent.console import _in_words, _lookup_times

@@ -63,6 +63,20 @@ def _name_agrees(said: str, record: dict) -> bool:
     return hits >= min(2, len(want)) and hits >= len(want) - 1
 
 
+def _name_is_recognisable(said: str, record: dict) -> bool:
+    """One word of the name survived. Enough only beside a sound id found on file: the check letter rules out
+    a misheard digit, and an id belongs to one person — unlike a phone number, which a mother and child share."""
+    have = fold(f'{record["given_name"]} {record["first_surname"]} {record["second_surname"]}').split()
+    want = [t for t in fold(said).replace(",", " ").split() if len(t) > 2]
+    return any(SequenceMatcher(None, w, h).ratio() >= 0.8 for w in want for h in have)
+
+
+def _identifies(said: str, id_is_sound: bool, match: dict) -> bool:
+    if not said or _name_agrees(said, match) or _two_exact_details(match):
+        return True
+    return id_is_sound and "national_id" in match.get("matched_fields", []) and _name_is_recognisable(said, match)
+
+
 async def find_patient(s: CallSession, api: ClinicClient, name: str = "", national_id: str = "",
                        phone: str = "", date_of_birth: str = "", use_caller_id: bool = False) -> dict:
     query: dict[str, str] = {}
@@ -72,8 +86,7 @@ async def find_patient(s: CallSession, api: ClinicClient, name: str = "", nation
         query["date_of_birth"] = date_of_birth
     if phone:
         query["phone"] = phone
-    elif use_caller_id and s.from_number:
-        query["phone"] = s.from_number
+    id_is_sound = False
     if national_id:
         nid = ids.parse(national_id)
         if nid.kind is None:
@@ -81,6 +94,12 @@ async def find_patient(s: CallSession, api: ClinicClient, name: str = "", nation
                     "say": "That id is not 8 digits and a letter (or X/Y/Z, 7 digits and a letter). Ask the caller to repeat it one character at a time."}
         # A misheard letter is recoverable: the digits determine it. The name must then agree.
         query["national_id"] = nid.normalized if nid.valid else nid.corrected
+        id_is_sound = nid.valid
+    # The number they ring from is evidence whether or not the model thinks to pass it. Seen on a scored call:
+    # "Alice Collins Davies" heard as "Alys Davis", her NIE sound and on file, her own number on the line — and
+    # she was turned away, because the lookup that carried the NIE no longer carried the number.
+    if not phone and s.from_number and (query or use_caller_id):
+        query["phone"] = s.from_number
     if not query:
         return {"status": "need_identifier", "say": "Ask for the full name and the DNI/NIE, phone number or date of birth."}
 
@@ -88,12 +107,14 @@ async def find_patient(s: CallSession, api: ClinicClient, name: str = "", nation
         matches = await api.directory(**query)
         # The API scores additively and reports a shared surname as a name match: the child's name plus the
         # mother's caller id returns the MOTHER, flagged name+phone. So the name is compared here, in code.
-        strong = [m for m in matches if not name or _name_agrees(name, m) or _two_exact_details(m)]
+        strong = [m for m in matches if _identifies(name, id_is_sound, m)]
         via_caller_id = "phone" in query and not phone
-        if not strong and matches and name and via_caller_id:
-            s.caller_record = matches[0]
+        if not strong and via_caller_id:
+            if matches and name:
+                s.caller_record = matches[0]
             del query["phone"]  # the number belongs to someone else — most likely the caller, ringing for the patient
-            strong = [m for m in await api.directory(**query) if _name_agrees(name, m)]
+            if query:
+                strong = [m for m in await api.directory(**query) if _identifies(name, id_is_sound, m)]
     except ClinicError as err:
         return {"status": "error", "detail": str(err.detail)[:200]}
 
