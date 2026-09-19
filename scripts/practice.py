@@ -38,7 +38,7 @@ def login() -> httpx.Client:
 def fetch(http: httpx.Client, method: str, path: str, want: str | None = None, **kw) -> httpx.Response:
     """The platform has bad minutes (invalid JSON, dropped TLS, error bodies, an expired session).
     A batch of calls must ride them out, not die: retry for up to five minutes."""
-    for _ in range(50):
+    for attempt in range(50):
         try:
             r = http.request(method, f"{BASE}{path}", **kw)
             if r.status_code == 401:
@@ -53,7 +53,8 @@ def fetch(http: httpx.Client, method: str, path: str, want: str | None = None, *
                 return r
         except (httpx.HTTPError, ValueError) as err:
             problem = type(err).__name__
-        print(f"    platform hiccup ({problem}) — retrying in 6 s")
+        if attempt % 10 == 0:  # an outage can last an hour; one line a minute tells the story
+            print(f"    platform hiccup ({problem}) — retrying every 6 s", flush=True)
         time.sleep(6)
     raise SystemExit(f"platform unreachable: {method} {path}")
 

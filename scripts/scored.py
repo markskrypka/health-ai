@@ -89,39 +89,47 @@ def worth(problem: str, weights: dict, evidence: dict) -> float:
 
 def loop(http, only: list[str]) -> None:
     evidence: dict[str, tuple[int, int]] = {}  # problem -> (passes, scored calls) seen by this loop
-
-    def saw(problem: str, passed: bool) -> None:
-        passes, calls = evidence.get(problem, (0, 0))
-        evidence[problem] = (passes + passed, calls + 1)
-
     while True:
-        if HOLD.exists():
-            time.sleep(5)
-            continue
-        t = team(http)
-        wait = t["eligibility"]
-        if not wait["active_run"]:
-            IN_FLIGHT.unlink(missing_ok=True)  # left behind if an earlier loop was killed mid-run
-        # Problems open through the weekend: read the list every time, so a new one is dialled without a restart.
-        weights = {p["id"]: p["weight"] for p in fetch(http, "GET", "/problems", want="problems").json()["problems"]
-                   if p["weight"] and (not only or p["id"] in only)}
-        credited = {p["problem_id"]: p["credited"] for p in t["progress"]}
-        owed = [p for p in weights if credited.get(p, 0) < CREDITED_PER_PROBLEM]
-        if wait["active_run"] or not owed:
-            time.sleep(10 if wait["active_run"] else 120)
-        elif wait["private_wait"] <= 0:
-            if not line_is_up(http):
-                time.sleep(30)
-                continue
-            problem = max(owed, key=lambda p: worth(p, weights, evidence))
-            print(f'{time.strftime("%H:%M:%S")} SCORED {problem} (credited {credited.get(problem, 0)}/4) …', flush=True)
-            case = scored_call(http, problem)
-            if case.get("status") in ("passed", "failed") and case.get("attribution") not in ("harness_issue", "mixed"):
-                saw(problem, case["status"] == "passed")
-            print(f'{time.strftime("%H:%M:%S")}   → {str(case.get("status")).upper()}  attribution={case.get("attribution")}  '
-                  f'signals={case.get("signal_codes")}  call_id={case.get("call_id")}', flush=True)
-        else:
-            time.sleep(min(max(wait["private_wait"], 1), 15))
+        try:
+            pause = _step(http, only, evidence)
+        except (Exception, SystemExit) as trouble:
+            # Seen at midnight: the platform answered 500 for five minutes, the retry helper gave up, and its
+            # exit ended the loop — and with it the night's scoring. Whatever it is, wait a minute and go on.
+            print(f'{time.strftime("%H:%M:%S")} platform trouble ({type(trouble).__name__}: {str(trouble)[:120]}) — trying again in a minute', flush=True)
+            pause = 60
+        time.sleep(pause)
+
+
+def _step(http, only: list[str], evidence: dict[str, tuple[int, int]]) -> float:
+    """One look at the platform and at most one scored call. Returns how long to wait before the next look."""
+    if HOLD.exists():
+        return 5
+    t = team(http)
+    wait = t["eligibility"]
+    if not wait["active_run"]:
+        IN_FLIGHT.unlink(missing_ok=True)  # left behind if an earlier loop was killed mid-run
+    # Problems open through the weekend: read the list every time, so a new one is dialled without a restart.
+    weights = {p["id"]: p["weight"] for p in fetch(http, "GET", "/problems", want="problems").json()["problems"]
+               if p["weight"] and (not only or p["id"] in only)}
+    credited = {p["problem_id"]: p["credited"] for p in t["progress"]}
+    owed = [p for p in weights if credited.get(p, 0) < CREDITED_PER_PROBLEM]
+    if wait["active_run"]:
+        return 10
+    if not owed:
+        return 120
+    if wait["private_wait"] > 0:
+        return min(wait["private_wait"], 15)
+    if not line_is_up(http):
+        return 30
+    problem = max(owed, key=lambda p: worth(p, weights, evidence))
+    print(f'{time.strftime("%H:%M:%S")} SCORED {problem} (credited {credited.get(problem, 0)}/4) …', flush=True)
+    case = scored_call(http, problem)
+    if case.get("status") in ("passed", "failed") and case.get("attribution") not in ("harness_issue", "mixed"):
+        passes, calls = evidence.get(problem, (0, 0))
+        evidence[problem] = (passes + (case["status"] == "passed"), calls + 1)
+    print(f'{time.strftime("%H:%M:%S")}   → {str(case.get("status")).upper()}  attribution={case.get("attribution")}  '
+          f'signals={case.get("signal_codes")}  call_id={case.get("call_id")}', flush=True)
+    return 1
 
 
 def main() -> None:
