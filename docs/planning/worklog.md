@@ -6,7 +6,7 @@ Newest first. One entry per change, written when the change lands.
 By: Mark Skrypka
 Why: the reschedule path had never run live (all four change_and_cancel scored calls were cancels) and "The Real Call" (weight 5, not open yet) leans on it in 2 of 3 published cases: the move guard did not recognise "cannot make his appointment"/"no va a poder ir" and answered "book instead", and doctor and site were left to the model. Separately, the one no_slot_free scored miss: asked for "the next one" after 09:00 Sáez at Sur, we offered 09:15 Ortiz at Centro; twice the model also passed a slot ref as `after_appointment_id` and got an error.
 How: `tools.find_slots`: `after_appointment_id` takes an appointment (keeps its doctor and site unless the caller named others, only later times, and marks the call as a move so `reschedule` is not questioned) or the slot just offered (keeps the site, any doctor). `_offer` lists later times at the first offer's site before other sites'. Move words for a relative's appointment. Prompt: offer the next in the list; a later move passes nothing about doctor or site; no goodbye while something asked for is still open. My first rule ("next keeps the doctor too") was refuted by a targeted text eval against today's accepted answer (another doctor's 09:30 at the same site) and corrected before deploy. Verified: 90 tests (6 new); text evals on exactly the touched cases — the_real_call 3/3 (6/6 on the first cut), the published later move 1/1, no_slot_free 4/4 against today's answers; deployed 20:20 with the line idle. Not yet run through the harness.
-Ref: pending
+Ref: 94a6817
 
 ## 2026-09-19 · fix · the line's own number always counts; a sound id forgives a mangled name
 By: Mark Skrypka
