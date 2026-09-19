@@ -2,6 +2,12 @@
 
 Newest first. One entry per change, written when the change lands.
 
+## 2026-09-19 · feat · the last two problems of the evening: the nearest clinic with directions, clinic facts turned round
+By: Mark Skrypka
+Why: at 21:00 the organizers opened "The Nearest Site" and "The Questions" (12 points each) and announced that the first team to reach the maximum wins the evening's prize. Their fresh docs showed two things ours could not do: a caller who asks how to get to the clinic hangs up on "I do not know", and a caller who asks about the clinic hangs up on one wrong fact. Our geocoder also failed on two of the three published addresses.
+How: `geo.py` places the caller from a town outside the city, else the street through OpenStreetMap (asked as "street, Madrid" or street + city, which it answers; the old free-text query it did not), else a list of Madrid districts and landmarks — the published origins all resolve, mangled or not — and writes directions from the two coordinates. `tools.nearest_site(address, specialty)` works before identification and names the nearest clinic that has the doctor they need; `find_slots` then walks the clinics nearest first whatever site the model passes. `prompt._by_clinic` generates BY CLINIC and HOW MANY from the catalogue, negatives spelled out. Organizers' docs and cases refreshed. Verified: 95 tests; text evals 7 of 9 (both misses are cases whose published Saturday slot no longer exists); on the harness the scored calls used the tool, named Centro for gynaecology from Alcobendas and Sur for physiotherapy, and gave directions: "The Nearest Site" 4/4.
+Ref: 713a073
+
 ## 2026-09-19 · fix · a later move keeps its doctor and clinic; "the next one" keeps the clinic
 By: Mark Skrypka
 Why: the reschedule path had never run live (all four change_and_cancel scored calls were cancels) and "The Real Call" (weight 5, not open yet) leans on it in 2 of 3 published cases: the move guard did not recognise "cannot make his appointment"/"no va a poder ir" and answered "book instead", and doctor and site were left to the model. Separately, the one no_slot_free scored miss: asked for "the next one" after 09:00 Sáez at Sur, we offered 09:15 Ortiz at Centro; twice the model also passed a slot ref as `after_appointment_id` and got an error.
