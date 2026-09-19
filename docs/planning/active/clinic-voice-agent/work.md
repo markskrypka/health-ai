@@ -1,5 +1,10 @@
 # Work — Clinic voice agent
 
+**State (2026-09-19, ~12:55 Madrid) — second Run All had 3 failures; submissions now retry; first commit made.**
+- Run All 2 (12:09–12:32), from our logs: 22 calls, none lost to a tool call written as text (the guard recovered one live), but 8 submissions got `ReadTimeout` from the platform and two calls ran 185 s and 211 s: the platform's API was answering in 4–6 s per request. Mark reports 3 failed cases. Fix deployed 12:45: `finalize` retries inside the 30 s window (see worklog).
+- Committed as `f69cb71` on branch `clinic-voice-agent` (main is the default branch and still has no commit; `git branch -m main` puts it there).
+**Next action:** Mark's third Run All is the test of the retry fix; read its failures from `logs/calls/`. Then languages (parked) and problems as they open.
+
 **State (2026-09-19, ~12:00 Madrid) — first Run All 36/40, tied for first; the cause of both misses fixed and deployed.**
 - Run All #39 (11:20): 18 passed, 2 failed, both `wall_clock` + `record_mismatch`, one 1-point and one 3-point case. Cause, from our own logs (`logs/calls/72a78c2a…`, `8530e780…`): Gemini wrote its tool calls as text, the agent spoke them, nothing ran, the pattern repeated to the wall. Fixed in `speech.py` (`GuardedGoogleLLM`): such text is never spoken, the written call is parsed and run as a real call, and it never enters the context. Deployed 11:50; smoke call through the harness passed (90 s).
 - Same build also carries: replayed replies dropped, half-sentences waited out, nudge at 10 s, wrap-up keeps the offer on the table, chart notes hidden, a booking stays a booking. "When Exactly" #5 and "The Rules" #5, the two practice failures, now pass (115 s and 87 s).
