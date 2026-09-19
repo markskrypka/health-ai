@@ -31,7 +31,7 @@ and enough visibility to explain why the agent said what it said.
    published practice cases, answers included.
 3. **Run for score** when you think you are ready. You pick a problem, we call
    your agent with a case of it you have never seen, check what it did, and
-   your points go on the leaderboard. One scored call at a time, twelve
+   your points go on the leaderboard. One scored call at a time, five
    minutes apart, and they add up.
 4. **Checkpoints.** Twice over the weekend the board freezes and prizes go to
    whoever is leading. Being early pays.
@@ -60,7 +60,7 @@ the same ordinary booking:
 - A terrible line, a caller who interrupts and corrects and changes their mind,
   and someone trying to talk your agent into something it should not do.
 
-→ [The 18 problems](problems.md)
+→ [The 19 problems](problems.md)
 
 ## How you are scored
 

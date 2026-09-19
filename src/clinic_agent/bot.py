@@ -134,7 +134,7 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
         # Two lookups in a row mean ~6 s of model rounds. The harness cuts a line that goes quiet,
         # so say one short holding phrase per caller turn — never before a submission's confirmation.
         names = {getattr(fc, "function_name", "") for fc in function_calls}
-        if not holding["said"] and names & {"find_patient", "find_slots", "list_appointments"}:
+        if not holding["said"] and names & {"find_patient", "find_slots", "list_appointments", "nearest_site"}:
             holding["said"] = True
             # Kept out of the context: a model that reads its own holding phrases starts writing them too.
             await worker.queue_frames([TTSSpeakFrame(languages.HOLDING[session.language], append_to_context=False)])

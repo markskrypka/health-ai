@@ -152,16 +152,17 @@ lane refuses it rather than spend a cooldown on a call that cannot pay.
 
 **One queued or active run at a time**, in either lane; both buttons are
 disabled while that slot is occupied. Two clocks on top of that: 30 seconds
-between practice calls, and **12 minutes after your last scored run
+between practice calls, and **5 minutes after your last scored run
 finished** before the next may start. From finished, not from requested, so
 the queue wait a busy harness adds is not quietly subtracted from the
 cooldown. The page counts it down for you.
 
 The scored cooldown is **global**: it is one clock for the whole team, not one
 per problem. A scored run at any problem blocks a scored run at every problem
-until it has completed and the twelve minutes have elapsed. Budget accordingly
-— a scored call plus its cooldown is roughly a quarter of an hour, so plan
-which problem each one is spent on rather than working down the list.
+until it has completed and the five minutes have elapsed. Budget accordingly
+— a scored call plus its cooldown is roughly ten minutes at best, longer
+whenever the harness queue is running behind — so plan which problem each one
+is spent on rather than working down the list.
 
 Practice is where the feedback is. A **scored** case tells you only whether it
 passed, whose failure it was and a failure signal until the reveal on Monday,
@@ -194,5 +195,5 @@ is what the jury looks at instead. In rough order of points per hour:
 | The wire, and the JSON you POST | [The call contract](contract.md) |
 | The clinic, its rules, and how to schedule well | [The clinic](clinic-api.md) |
 | What passes a case | [Scoring](rules.md) |
-| What the callers ask for | [The 18 problems](problems.md) |
+| What the callers ask for | [The 19 problems](problems.md) |
 | Every field of every endpoint | [API reference](api.md) |

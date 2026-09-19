@@ -481,3 +481,36 @@ def test_console_puts_a_decision_in_words_and_times_the_lookups():
     assert _in_words({"action": "no-action", "reason": "no_availability"}) == "NO_ACTION no_availability"
     events = [{"kind": "tool_call", "name": "find_slots", "t": 10.0}, {"kind": "tool_result", "name": "find_slots", "t": 10.4}]
     assert [round(s, 1) for s in _lookup_times(events)] == [0.4]
+
+
+# --- the nearest site: the published origins, as said and as speech-to-text might mangle them ---
+@pytest.mark.parametrize("said, site", [
+    ("I'm in Getafe, at Calle de Madrid 54", "sur"),
+    ("Calle de Preciado tres by Puerta del Sol", "centro"),          # the street is mangled; the landmark carries it
+    ("Pase de la Castellana one eight nine at Plaza de Castilla", "norte"),
+])
+async def test_a_town_or_a_landmark_places_the_caller_without_the_network(said, site, monkeypatch):
+    from clinic_agent import geo
+
+    async def offline(*_args, **_kwargs):
+        return None
+    monkeypatch.setattr(geo, "_search", offline)
+    assert geo.sites_by_distance(*(await geo.geocode(said)), SITES)[0]["id"] == site
+
+
+def test_directions_are_always_an_answer():
+    from clinic_agent import geo
+    sur = {"name": "Arenal Sur", "address": "Avenida de las Ciudades 8, 28903 Getafe", "latitude": 40.305, "longitude": -3.7327}
+    far = geo.directions(40.4169, -3.7035, sur)
+    assert "Avenida de las Ciudades 8" in far and "kilometres south" in far and "minutes" in far
+
+
+def test_the_facts_are_turned_round_for_questions_about_a_clinic():
+    import json
+    from clinic_agent import config, prompt
+    facts = "\n".join(prompt._by_clinic(json.loads((config.ORGANIZERS_DIR / "clinic.json").read_text())))
+    assert "Open on Saturday: Arenal Centro and no other." in facts
+    assert "Arenal Sur, in Getafe" in facts
+    assert "General Practice: Dr. Martín Sáez (Monday, Tuesday, Wednesday, Thursday). So at Arenal Sur there is one on Monday, Tuesday, Wednesday, Thursday and none on Friday." in facts
+    assert "Orthopaedics: 2 — Dr. Emilio Iglesia at Arenal Centro only; Dra. Nuria Peral at Arenal Norte and Arenal Sur only." in facts
+    assert "Dermatology: Dra. Elena Iglesias (Monday, Wednesday)." in facts

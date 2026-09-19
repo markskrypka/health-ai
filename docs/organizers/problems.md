@@ -1,9 +1,9 @@
 # The problem set
 
-Eighteen problems, seventeen of them scored, opening in order. Each isolates
+Nineteen problems, eighteen of them scored, opening in order. Each isolates
 **one** thing that makes a real scheduling call hard, sitting on the same simple
 booking. That is deliberate: if you fail *Noise* and pass everything else, you
-have an audio problem, not a reasoning problem. Two entries break the rule and
+have an audio problem, not a reasoning problem. Three entries break the rule and
 say so.
 
 Every problem has 3–6 **public cases** — published, fixed, answers printed on
@@ -17,7 +17,7 @@ problem 1.
 score is the *sum* of each problem's passed cases times its weight — no
 percentage, no denominator — and a problem credits **your first four passed
 cases**, so *The Real Call* puts up to 20 on the board where *The Simple
-Booking* puts up to 4, and the full roster is worth 196. The Switchboard
+Booking* puts up to 4, and the full roster is worth 208. The Switchboard
 carries none: the scored lane never dials it, and it earns nothing.
 
 **Open** is whether you can dial it yet. Problems are released as each is
@@ -37,14 +37,15 @@ problem list and cannot be picked for a scored run. This table is the roadmap
 | 8 | [Change and Cancel](#8-change-and-cancel) | `change_and_cancel` | 4 | 2 | yes |
 | 9 | [The Third Party](#9-the-third-party) | `third_party` | 4 | 3 | yes |
 | 10 | [Triage](#10-triage) | `triage` | 5 | 3 | yes |
-| 11 | [Languages](#11-languages) | `languages` | 4 | 3 | not yet |
-| 12 | [Noise](#12-noise) | `noise` | 4 | 3 | not yet |
-| 13 | [The Difficult Caller](#13-the-difficult-caller) | `difficult_caller` | 5 | 4 | not yet |
-| 14 | [Adversarial and Privacy](#14-adversarial-and-privacy) | `adversarial` | 4 | 4 | not yet |
-| 15 | [The Nearest Site](#15-the-nearest-site) | `nearest_site` | 4 | 3 | not yet |
-| 16 | [The Questions](#16-the-questions) | `the_questions` | 5 | 3 | not yet |
-| 17 | [The Second Policy](#17-the-second-policy) | `second_policy` | 4 | 4 | not yet |
-| 18 | [The Real Call](#18-the-real-call) | `the_real_call` | 3 | 5 | not yet |
+| 11 | [Languages](#11-languages) | `languages` | 4 | 3 | yes |
+| 12 | [Noise](#12-noise) | `noise` | 4 | 3 | yes |
+| 13 | [The Difficult Caller](#13-the-difficult-caller) | `difficult_caller` | 5 | 4 | yes |
+| 14 | [Adversarial and Privacy](#14-adversarial-and-privacy) | `adversarial` | 4 | 4 | yes |
+| 15 | [The Wild Card](#15-the-wild-card) | `wild_card` | 4 | 3 | yes |
+| 16 | [The Nearest Site](#16-the-nearest-site) | `nearest_site` | 4 | 3 | yes |
+| 17 | [The Questions](#17-the-questions) | `the_questions` | 5 | 3 | yes |
+| 18 | [The Second Policy](#18-the-second-policy) | `second_policy` | 4 | 4 | not yet |
+| 19 | [The Real Call](#19-the-real-call) | `the_real_call` | 3 | 5 | not yet |
 
 ## Public and private cases
 
@@ -321,7 +322,29 @@ it while you decline is the right thing to do.
 
 **Answer** `NO_ACTION(out_of_scope)`, and a clean transcript.
 
-## 15. The Nearest Site
+## 15. The Wild Card
+
+One of the other open problems, drawn at random, and you are not told which
+until the caller speaks. Every case here *is* a case of some other problem's
+private pool — the same caller, the same noise, the same expected answer —
+posed under `wild_card` instead.
+
+This is the only problem you cannot point a specialist at. Everywhere else you
+name the problem when you ask to be called, so an agent built for exactly that
+axis is a fair strategy; here the draw is uniform over every open scored
+problem, so the agent that answers has to be one agent.
+
+The four public cases are named rather than drawn, and span what the pool can
+pose: a plain booking, a refusal (transcript checked, as *Adversarial and
+Privacy* would), a caller not speaking English, and one through street noise.
+The scored pool is every open scored problem, drawn per call — knowing the
+published four tells you nothing about which one a scored call lands on.
+
+**Answer** whatever the drawn problem's answer is. It is scored exactly as
+that problem would score it, including the transcript check when the draw is
+*Adversarial and Privacy*.
+
+## 16. The Nearest Site
 
 The caller does not name a site. They say where they are — a real street
 address in Madrid or its suburbs, "I'm at Calle de Madrid 54, in Getafe" — and
@@ -336,21 +359,40 @@ and the answer is the smallest straight-line distance. Use whatever you like
 to get there; the answer you have to land on is the published one. Origins are
 chosen so the winner wins by a clear margin.
 
+Once told which clinic, and before agreeing to a slot, the caller asks how to
+get there from where they are. An agent that says it does not know, or cannot
+help with that, loses the caller: they hang up without booking and the case
+fails. Any directions at all keep them on the line — what is checked is that
+the agent answers, not the route.
+
 **Answer** `BOOK` at the correct site.
 
-## 16. The Questions
+## 17. The Questions
 
 The caller interrogates the clinic before committing — how many sites, which
-doctors, what hours — and what they book depends on the answers they get.
+doctors, what hours. **They already know every answer. They are checking
+whether you do.**
 
-Scored through the booking, never the transcript. The caller genuinely acts on
-whatever you tell them: say Norte opens on Saturday and they will ask for
-Norte on a Saturday, which is unbookable, and the case fails. Say Centro and
-the booking lands. A wrong fact fails the booking.
+Get one right and the call goes on to the booking the case is really about.
+Get one wrong and they tell you what is actually true, hang up, and never ask
+for an appointment at all. No record is submitted, so the case fails — and
+you will see it as the signal `missing_record`, not as a mismatch. There is
+no second chance inside a call.
+
+Two things that are explicitly not wrong. **Taking a moment to look it up is
+fine** — the caller waits, and an agent that checks before it answers is the
+agent this problem rewards. **Wording is free**: "the central one" for Arenal
+Centro, a surname without its title, "nine" for 09:00. Each public case
+carries the exact fact and the exact latitude in its persona, in
+[public-cases.json](public-cases.json).
+
+Refusing to answer ends the call too. The caller asks once whether you can
+find out, and leaves if you still will not. Deflection is not a safe move
+here; saying you will check, and then checking, is.
 
 **Answer** `BOOK`.
 
-## 17. The Second Policy
+## 18. The Second Policy
 
 The plan on file will not cover what the caller wants. They hold a second one,
 it is not in the record, and they will not volunteer it — because in real life
@@ -363,7 +405,7 @@ invent a second plan, or to bill the wrong one.
 **Answer** `BOOK` naming the `policy_id` it is billed against. The right slot
 against the wrong plan fails.
 
-## 18. The Real Call
+## 19. The Real Call
 
 Three axes stacked and two intents in one call — a grandmother calling from a
 noisy kitchen about her grandson's appointment, wanting to move it and book

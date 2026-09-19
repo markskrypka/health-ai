@@ -1,6 +1,6 @@
 # Scoring
 
-**Version 2.1-draft · 19 September 2026 · HackSpain, 18–20 September 2026**
+**Version 2.2-draft · 19 September 2026 · HackSpain, 18–20 September 2026**
 
 This page is the automatic score: what passes a case, how points are counted,
 what the limits are, and what happens when a call fails. The jury's *final
@@ -18,6 +18,11 @@ which is exactly what a problem now credits, so every case you have already
 passed still counts. Teams who took more than one Run All gain, because those
 runs now add up instead of one replacing another. The reason is capacity, and
 it is spelled out under [the two lanes](#the-two-lanes).
+
+**Updated later the same day: the cooldown between scored runs is five
+minutes**, down from the twelve minutes above. It asks the harness for more
+than it clears at full field size, so expect the run queue, not the cooldown,
+to set how long a scored run actually takes once the field is busy.
 
 ## What passes a case
 
@@ -58,13 +63,13 @@ answer is never published. Take as many as you like, one at a time, with a
 cooldown between them. [The problem set](problems.md) says which problems are
 open to dial now.
 
-**One queued or active run at a time, in either lane**, and **12 minutes**
+**One queued or active run at a time, in either lane**, and **5 minutes**
 between scored runs, counted from the moment your last one *finished*. From
 finished rather than requested, because timing it from the request would let a
 busy harness pay its own queue wait out of your cooldown — the throttle would
 slacken exactly when it is needed. That cooldown is **global**: it is one
 clock for the team, so a scored run at any problem blocks a scored run at
-every problem until it completes and the twelve minutes elapse. Practice is on
+every problem until it completes and the five minutes elapse. Practice is on
 its own clock at 30 seconds, which exists only to stop a tight retry loop.
 
 One call rather than a sweep of the whole open set because that is what the
@@ -74,8 +79,13 @@ wire can serve. The harness carries **ten calls at once for the entire field**
 roughly 170 calls an hour in total. Sixty teams each taking a twenty-call
 sweep every forty minutes asks for about ten times that, and the open set
 would have grown to sixty-eight calls by Sunday. One call per scored run,
-spaced by the cooldown, is the shape that fits — which is why the cooldown,
-and not the size of a run, is now the throttle.
+spaced by the cooldown, is the shape that fits.
+
+At five minutes, sixty teams each asking every cycle add up to about 720
+calls an hour against that same ~170-an-hour ceiling — more than the harness
+clears on its own. The run queue, not the cooldown, carries the gap: at a
+busy field a scored run can sit queued well past when its cooldown alone
+would have allowed the next one.
 
 Private cases are generated per call and their answers are never published.
 
@@ -106,7 +116,7 @@ points = sum over problems of (its passed cases × its weight)
 at the same problem are worth nothing, so the sum above counts at most four
 cases per problem however many you dial. Bank four cases of *The Real Call*
 and 20 points go on the board; bank four of *The Simple Booking* and 4 do. The
-most the full roster can give is **196** — the 49 weights, four times over.
+most the full roster can give is **208** — the 52 weights, four times over.
 
 Four rather than one because one binary call per run would make the board ask
 only "did this agent ever pass this problem once", and at the ten or so
@@ -159,7 +169,7 @@ worth, and there is no denominator for a release to move.
 
 ## Call limits
 
-Every call is capped at **three minutes** — an agent that cannot book in three
+Every call is capped at **ten minutes** — an agent that cannot book in ten
 minutes has failed. A call is also cut off if it takes too long to connect or
 goes quiet, which means **no audible audio** from your agent: streaming silence
 keeps the socket open but counts as saying nothing. Before cutting off, the
@@ -200,7 +210,10 @@ version, the rule you expected and what you observed. See
 scoring is open.
 
 The wall freezes Sunday 20 September at 06:00 Europe/Madrid. Only runs
-completed at or before that instant count. Equal scores share a rank (1, 1, 3).
+completed at or before that instant count. Equal scores are ordered by time:
+the team that reached the score first places higher. The clock is the finish
+of the last call that earned points, so calls made after that which earn
+nothing do not move a team down.
 
 Private-case detail opens to each team at the reveal, Monday 21 September at
 00:00 Europe/Madrid — after the stage final, so nothing can leak into it.

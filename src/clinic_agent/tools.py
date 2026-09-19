@@ -151,6 +151,36 @@ async def find_patient(s: CallSession, api: ClinicClient, name: str = "", nation
     return result
 
 
+# ---------------------------------------------------------------- nearest site
+
+def _serves(cat: dict, location_id: str, specialty_id: str) -> bool:
+    return any(p["specialty_id"] == specialty_id and any(sch["location_id"] == location_id for sch in p["schedules"])
+               for p in cat["providers"])
+
+
+async def nearest_site(s: CallSession, api: ClinicClient, caller_address: str, specialty_id: str = "") -> dict:
+    """Which clinic is closest to where the caller is — before we know who they are. The rule is the nearest
+    clinic that can serve the request: Getafe plus gynaecology is Arenal Centro, because Sur has no gynaecologist."""
+    where = await geo.geocode(caller_address)
+    if where is None:
+        return {"status": "address_not_found", "say": "Ask which town or neighbourhood they are in, then call nearest_site again."}
+    s.caller_position = where
+    cat = await api.catalogue()
+    ranked = geo.sites_by_distance(*where, cat["locations"])
+    serving = [loc for loc in ranked if not specialty_id or _serves(cat, loc["id"], specialty_id)] or ranked
+    best = serving[0]
+    result = {"status": "ok", "nearest": best["name"], "location_id": best["id"], "distance_km": best["distance_km"],
+              "directions": geo.directions(*where, best),
+              "say": "Name this clinic to the caller. If they ask how to get there, give these directions in one or two "
+                     "sentences — always answer, never say you do not know. Then identify the patient and call find_slots."}
+    if best is not ranked[0]:
+        result["note"] = f'{ranked[0]["name"]} is closer ({ranked[0]["distance_km"]} km) but has nobody for {specialty_id}; say so in one sentence.'
+    if not specialty_id:
+        result["say"] += " If they have not said which kind of doctor they need, ask, and call nearest_site again with specialty_id."
+    s.log("nearest_site", address=caller_address, position=where, ranked=[(loc["id"], loc["distance_km"]) for loc in ranked], named=best["id"])
+    return result
+
+
 # ---------------------------------------------------------------- slot search
 
 # The model passes whatever the caller called their language; the catalogue lists ISO codes.
@@ -256,13 +286,16 @@ async def find_slots(s: CallSession, api: ClinicClient, patient_id: str, special
 
     # where
     sites: list[str | None] = [location_id or None]
-    if caller_address and not location_id:
-        where = await geo.geocode(caller_address)
-        if where is None:
+    if caller_address and not s.caller_position:
+        s.caller_position = await geo.geocode(caller_address)
+        if s.caller_position is None:
             return {"status": "address_not_found", "say": "Ask which town or neighbourhood they are in, then search again."}
-        ranked = geo.sites_by_distance(*where, cat["locations"])
+    if s.caller_position and not anchor:
+        # The caller asked for the closest clinic: nearest first among those that have this kind of doctor,
+        # whatever site the model passed. In the evals the model named a clinic from its own idea of Madrid.
+        ranked = [loc for loc in geo.sites_by_distance(*s.caller_position, cat["locations"]) if _serves(cat, loc["id"], specialty_id)]
         sites = [loc["id"] for loc in ranked]
-        notes.append("Sites nearest first: " + ", ".join(f'{l["name"]} ({l["distance_km"]} km)' for l in ranked))
+        notes.append("Clinics with this kind of doctor, nearest first: " + ", ".join(f'{l["name"]} ({l["distance_km"]} km)' for l in ranked))
 
     if provider and _on_leave(provider, start):
         notes.append(f'{provider["name"]} is on leave until {provider["leave"]["end"]}. '
@@ -687,6 +720,11 @@ TOOLS: dict[str, tuple[Tool, str, dict, list[str]]] = {
         {"name": _S, "national_id": {"type": "string", "description": "DNI or NIE as digits and letters, e.g. 48064716Y"},
          "phone": _S, "date_of_birth": {"type": "string", "description": "YYYY-MM-DD"},
          "use_caller_id": {"type": "boolean", "description": "true to search by the number they are ringing from"}}, []),
+    "nearest_site": (nearest_site,
+        "Which clinic is closest to where the caller is. Call it as soon as they say where they are and ask for the "
+        "closest clinic — before identifying anyone. Never choose a clinic from your own knowledge of Madrid.",
+        {"caller_address": {"type": "string", "description": "where they said they are, in their words: street, number, town, landmark"},
+         "specialty_id": _E(SPECIALTIES)}, ["caller_address"]),
     "find_slots": (find_slots,
         "Find real availability for an identified patient. Code applies the clinic's rules and resolves the day; "
         "you only classify what the caller said.",
@@ -697,7 +735,7 @@ TOOLS: dict[str, tuple[Tool, str, dict, list[str]]] = {
          "part_of_day": _E(dates.PARTS_OF_DAY),
          "language": {"type": "string", "description": "ISO code, only if the caller needs a doctor who speaks it, e.g. ca"},
          "insurer": {**_E(INSURERS), "description": "only a SECOND plan the caller named on this call"},
-         "caller_address": {"type": "string", "description": "only when they ask for the nearest site"},
+         "caller_address": {"type": "string", "description": "only when they ask for the nearest clinic and nearest_site has not been called"},
          "after_appointment_id": {"type": "string", "description": "only later times come back. Moving an appointment to 'the next time after the one I have': that appointment_id — same doctor and same site unless you also pass others. The caller turns down the time you offered and asks for the next one: the slot_ref you offered — same site, any doctor."}}, ["patient_id"]),
     "list_appointments": (list_appointments, "The patient's upcoming appointments — the only source of an appointment_id.",
         {"patient_id": _S}, ["patient_id"]),

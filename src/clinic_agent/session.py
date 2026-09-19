@@ -30,6 +30,9 @@ class CallSession:
     last_refusal_reason: str | None = None
     # Who and what the latest search was for: (patient_id, specialty_id). A refusal is about that request.
     last_search: tuple[str, str] | None = None
+    # Where the caller said they are, once placed: (lat, lon). Set by nearest_site; the searches that follow
+    # walk the clinics nearest first, whatever site the model passes.
+    caller_position: tuple[float, float] | None = None
     # Whose chart the caller id opened, when that is not the patient being booked for.
     caller_record: dict | None = None
 

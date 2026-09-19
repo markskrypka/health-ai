@@ -40,7 +40,7 @@ and their chart, checking real availability, and creating, moving or cancelling
 the appointment. Some calls should not end in a booking at all, and recognising
 those is part of the job.
 
-The challenge is posed as **18 problems**, each with its own **persona** who
+The challenge is posed as **19 problems**, each with its own **persona** who
 calls your agent. They cover the range a real front desk sees: a
 straightforward booking, an ambiguous patient match, a caller who changes their
 mind mid-call, someone asking for something the clinic cannot give them, a bad

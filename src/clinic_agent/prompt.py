@@ -34,6 +34,8 @@ THE USUAL CALL
 5. When they say yes to a specific slot, call book at once, then confirm in one short sentence and say goodbye — unless something else they asked for on this call is still open: then go straight on to it, and say goodbye only when everything is done. Do not ask whether they need anything else. What you record is sent when the call ends, so the LAST thing the caller asked for is what counts: if they change their mind after you booked, search again and book the new slot — it replaces the earlier one. If they take everything back, call discard_recorded.
 
 OTHER CALLS
+- They say where they are and ask which clinic is closest: call nearest_site at once with the address in their words (and the specialty if they have named it) — before identifying anyone, and never from your own knowledge of Madrid. Name the clinic it gives you. If they ask how to get there, give the tool's directions in one or two sentences: ALWAYS answer, never say you do not know or cannot help. Then identify the patient and call find_slots without location_id — code keeps to the nearest clinic that has the doctor they need.
+- Questions about the clinic (how many clinics, which one is in a town, who works where, which days, opening hours, who sees children): answer from CLINIC FACTS, exactly and completely — every clinic, doctor or day that applies and no other; a wrong or partial answer ends the call. BY CLINIC and HOW MANY below are written for these questions. Never refuse and never guess: the answer is there.
 - A doctor's name that fits two doctors: ask which kind of doctor they mean.
 - Not on file and wants to register: you need eight things the CALLER says — given name, both surnames, DNI or NIE, date of birth, phone, email, insurer. A registration must finish inside two minutes, so ask exactly three questions: (1) full name with both surnames; (2) DNI or NIE and date of birth — then call check_national_id, and only if it is not valid ask about the id again; (3) phone number, email address and insurer, all in one question. Then call register_patient at once. Do NOT read the email back and never ask whether the email is correct: a spoken email cannot be confirmed over this line, and code repairs its spelling from the name. Read digits back only when a tool tells you something is wrong (an id that fails its check, a phone that is not nine digits), and then ask ONLY "Is that correct?" — never add another question to a read-back. If the caller corrects something, take the correction and move on; never go round the same item more than twice. Never fill in an item yourself — not even the insurer. Do not book anything for a new patient on this call, even if asked to look for a slot; if they are not on file and do not want to register, end_without_booking with patient_not_found.
 - Change or cancel: identify the patient, call list_appointments, agree which appointment they mean, then reschedule (find_slots first; if they want the next time after the appointment they have, pass after_appointment_id and nothing about the doctor or the site — it keeps both and returns only later times; name a doctor or a site only if the caller asks for a different one) or cancel. "Cannot make it" about an appointment they hold is a request to move it, never a new booking. Two cancellations are two cancel calls. One call can need several actions; do each one.
@@ -83,10 +85,51 @@ def _facts(cat: dict) -> str:
                      + (f" Not covered by: {no}." if no else ""))
     lines.append("Insurance plans accepted: " + ", ".join(f'{pl["name"]} ({pl["id"]})' for pl in cat["plans"])
                  + ". Privado means self-pay and is a plan a patient holds, not a fallback.")
+    lines += _by_clinic(cat)
     closures = ", ".join(cat["calendar"]["closure_days"])
     lines.append(f'Bookable calendar: {cat["calendar"]["starts"]} to {cat["calendar"]["ends"]}, {cat["calendar"]["slot_minutes"]}-minute slots. '
                  f"The whole clinic is closed on {closures} (Fiesta Nacional) and every Sunday. Nothing is ever booked for the same day.")
     return "\n".join(lines)
+
+
+_WEEK = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
+
+def _days(days: set[str]) -> str:
+    return ", ".join(d.capitalize() for d in _WEEK if d in days)
+
+
+def _by_clinic(cat: dict) -> list[str]:
+    """The same facts turned round for the caller who asks about a clinic or a specialty: who is where on which
+    days, how many of each kind of doctor there are, and the negatives spelled out. A wrong answer ends the call,
+    and inverting twelve doctors' timetables in its head is where the model slips."""
+    towns = {loc["id"]: loc["address"].rsplit(" ", 1)[-1] for loc in cat["locations"]}
+    lines = ["BY CLINIC (who is there, on which days):"]
+    for loc in cat["locations"]:
+        open_days = {d["weekday"] for d in loc["hours"]}
+        lines.append(f'- {loc["name"]}, in {towns[loc["id"]]}: open {_days(open_days)}; closed {_days(set(_WEEK) - open_days)}.')
+        for sp in cat["specialties"]:
+            there = [(p, {d["weekday"] for sch in p["schedules"] if sch["location_id"] == loc["id"] for d in sch["days"]})
+                     for p in cat["providers"] if p["specialty_id"] == sp["id"]]
+            there = [(p, days) for p, days in there if days]
+            if not there:
+                lines.append(f'  · {sp["name"]}: nobody at {loc["name"]}.')
+                continue
+            covered = set().union(*(days for _, days in there))
+            who = "; ".join(f'{p["name"]} ({_days(days)})' for p, days in there)
+            gaps = _days(open_days - covered)
+            lines.append(f'  · {sp["name"]}: {who}. So at {loc["name"]} there is one on {_days(covered)}'
+                         + (f" and none on {gaps}." if gaps else " — every day the clinic opens."))
+    lines.append("HOW MANY (every doctor of each kind, and every clinic each one works at):")
+    for sp in cat["specialties"]:
+        doctors = [p for p in cat["providers"] if p["specialty_id"] == sp["id"]]
+        where = "; ".join(f'{p["name"]} at ' + " and ".join(sch["location_name"] for sch in p["schedules"]) + " only" for p in doctors)
+        sites = [loc["name"] for loc in cat["locations"] if any(sch["location_id"] == loc["id"] for p in doctors for sch in p["schedules"])]
+        lines.append(f'- {sp["name"]}: {len(doctors)} — {where}. Clinics with {sp["name"]}: {", ".join(sites)}.')
+    saturday = [loc["name"] for loc in cat["locations"] if any(d["weekday"] == "saturday" for d in loc["hours"])]
+    lines.append(f'Clinics: {len(cat["locations"])}. Open on Saturday: {", ".join(saturday) or "none"} and no other. Open on Sunday: none. '
+                 "Children are seen wherever Paediatrics is listed above.")
+    return lines
 
 
 def build(cat: dict, now: datetime, has_caller_id: bool) -> str:
