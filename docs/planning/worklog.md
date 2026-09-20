@@ -6,7 +6,7 @@ Newest first. One entry per change, written when the change lands.
 By: Mark Skrypka
 Why: the jury demo adds a web app (`apps/web`), and Mark chose a full monorepo now rather than after the demo — the voice-agent changes are finished and merged to `main`, so the move collides with nothing.
 How: `git mv` of `src/ tests/ evals/ scripts/ pyproject.toml` into `apps/agent/`. `config.ROOT` and `practice.ROOT` still mean the repo root, so `.env`, `.venv/`, `logs/` and `docs/` stay where they were; the three shell scripts `cd` to the repo root and `night.sh` calls the scripts by their new paths; `pip install --no-deps -e apps/agent` re-pointed the editable install and touched no other package. Done under the running phone server and scored loop without disturbing them: both hold their modules and absolute paths in memory, and the package imports nothing lazily. Verified: 111 tests pass and 4 skip from `apps/agent`; a dry-run server started on 7861 from the new layout (root, keys, log folder and catalogue all resolve); the shell scripts parse; the phone line's `/health` answered before and after; the loop still runs. `restart.sh` was not run. The unstarted initiative "Admin web interface" is folded into "The jury demo" (`active/demo-web/`), its brief kept under `research/`.
-Ref: pending
+Ref: 67f0434
 
 ## 2026-09-20 · feat · the agent speaks with ElevenLabs
 By: Mark Skrypka
