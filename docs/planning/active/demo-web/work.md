@@ -1,17 +1,17 @@
 # Work — The jury demo: the caller's screen and the front desk screen
 
-**State (2026-09-20, 04:30 Madrid) — every piece is built; what is left needs Mark.** Both screens work and are
-verified in a browser with a recorded caller; mood per turn, the reading of finished calls, cost, the pipeline
-comparison, eight portraits, `apps/agent/scripts/demo.sh` and `docs/demo.md` are in. 127 agent tests, 126 web tests.
-Running now, started by the assistant (they die with its session — `demo.sh` in Mark's own terminal replaces them):
-events service 7870, dry-run call server 7861, web app 3100. **The phone line (:7860) was never restarted and still runs
-the 03:14 build**: phone calls show on the desk with turns, lookups, identification, offers, rules, decisions and
-delivery, but without live words, answer times, the pipeline badge, the slot list and the masked card.
-**Next action:** Mark's spoken call from `http://localhost:3100/call` (Chrome, headset) — the one path a recorded
-caller cannot prove (microphone, echo); fix what it shows. Then a rehearsal against `docs/demo.md`.
-**Waiting on Mark:** (1) that spoken call; (2) after the 06:00 freeze, yes or no to restarting the phone line on this
-build (`apps/agent/scripts/restart.sh`, then one practice call through the harness; back to `a7c0062` if anything
-differs) — see "Decisions still to come".
+**State (2026-09-20, 04:55 Madrid) — built, verified, reviewed; two things are Mark's.** Both screens work
+(`apps/agent/scripts/demo.sh`, script in `docs/demo.md`). Mark made a first spoken call from the browser at 04:46
+(277 s, a registration): the microphone path works with a human voice. An independent read-only review of every change
+that could touch a phone call says: safe to restart the phone line on this build, no blocker; its one open point —
+phone mode never run on the new build — is closed by one phone-mode call and three at once on the dry-run server, all
+with the accepted booking; its four small guards are in. 130 agent tests, 127 web tests. Running now: `demo.sh` in the
+assistant's session (7861, 7870, 3100) — it dies with that session; run it in your own terminal before the demo.
+**The phone line (:7860) was never restarted and still runs the 03:14 build.**
+**Next action:** Mark's verdict on his spoken call (what felt wrong); a rehearsal against `docs/demo.md`.
+**Waiting on Mark:** after the 06:00 freeze, yes or no to restarting the phone line on this build — the steps and
+the way back are under "Decisions still to come". If no: the desk shows phone calls with everything the old build
+logs, and nothing else changes.
 
 ## How it fits together
 
@@ -117,11 +117,20 @@ stay). Behind at checkpoint B: piece 5 shrinks to the mood marks and the pipelin
 
 ## Decisions still to come
 
-- **After the 06:00 freeze — does the phone line move to the demo's build?** Gain: the jury's own phone call shows word
-  by word, with the calendar list and the pipeline badge. Risk: the jury judges that call. If yes:
-  `apps/agent/scripts/restart.sh`, one practice call through the harness, and straight back to the previous commit if
-  anything looks different. If no: the desk still shows that call with everything today's events carry. Mark decides,
-  not before piece 4 is verified.
+- **After the 06:00 freeze — does the phone line move to the demo's build?** Mark decides.
+  - *Gain:* the jury's own phone call shows on the desk word by word, with answer times, cost, the pipeline badge, the
+    slot list behind each offer and the masked patient card. Without it the desk still shows that call's turns,
+    lookups, identification, offers, rules, decisions, delivery and mood.
+  - *Risk:* the jury judges that call. What stands against the risk: the review (no blocker; prompt, tools, greeting,
+    voice, tool results and `finalize` unchanged for a phone call), a phone-mode call and three at once on this build
+    with the accepted booking, 130 tests. What a restart always costs: the first call on a cold process reaches its
+    greeting about half a second later.
+  - *If yes:* `apps/agent/scripts/restart.sh` (waits for an idle line) → one practice call through the harness
+    (`apps/agent/scripts/practice.py`) → check it passed and that the first `call_started` in the newest log names
+    this build and `source: phone`.
+  - *The way back, tested:* `apps/agent/scripts/old-build.sh` unpacks commit `a7c0062` beside the repo's keys, logs and
+    docs and restarts the phone line on it (`--check` only proves it starts: done at 05:00, it does). Forward again:
+    `restart.sh`.
 
 ## Follow-ups
 

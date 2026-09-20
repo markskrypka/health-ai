@@ -87,9 +87,15 @@ def call_setup(catalogue: dict, session: CallSession, web: screen.Screen | None,
     return system, screen.greeting(GREETING, known) if web else GREETING, schemas
 
 
+def web_call(body: dict) -> screen.Screen | None:
+    """The web page's part of a call — on a dry-run server only. The phone line ignores `screen=1` whoever sends it,
+    so nothing in screen.py can ever reach a call whose decisions are submitted."""
+    return screen.from_start(body) if config.DRY_RUN_SUBMIT else None
+
+
 async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, active: dict[str, CallSession]) -> None:
     body = call_data.get("body") or {}
-    web = screen.from_start(body)  # None: a phone call
+    web = web_call(body)  # None: a phone call
     pipeline_id = pipelines.pick(body.get("pipeline") if web else None)
     session = CallSession(call_id=call_data["call_id"], from_number=body.get("from_number") or None,
                           dry_run=config.DRY_RUN_SUBMIT, voice=pipelines.voice(pipeline_id), screen=bool(web))

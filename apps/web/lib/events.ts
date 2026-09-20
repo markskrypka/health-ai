@@ -190,6 +190,8 @@ export function reduce(view: CallView, e: CallEvent, seq: number): CallView {
 
     case "caller": {
       const settled = settleSpoken(base, seq, e.t);
+      // A cough or a click can close a turn with no words in it: nothing was said, so nothing is shown.
+      if (!str(e.text).trim()) return { ...settled, hearing: "" };
       return { ...push(settled, { type: "turn", id, seq, t: e.t, who: "caller", text: str(e.text), because: [] }), hearing: "" };
     }
 

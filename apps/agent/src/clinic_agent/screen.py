@@ -13,6 +13,8 @@ choose the rest with their eyes.
 import json
 from dataclasses import dataclass, field
 
+from loguru import logger
+
 from . import tools
 from .clinic import ClinicClient
 from .session import CallSession
@@ -50,7 +52,11 @@ async def identify(session: CallSession, api: ClinicClient, screen: Screen) -> d
     if not args:
         return None
     session.log("tool_call", name="find_patient", args=args, by="form")
-    result = await tools.find_patient(session, api, **args)
+    try:
+        result = await tools.find_patient(session, api, **args)
+    except Exception as err:  # a directory that does not answer costs the greeting its name, never the call
+        logger.warning(f"[{session.call_id}] the form's lookup failed: {type(err).__name__}: {err}")
+        result = {"status": "error", "detail": type(err).__name__}
     session.log("tool_result", name="find_patient", result=result, by="form")
     return result
 

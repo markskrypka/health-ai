@@ -17,6 +17,8 @@ from datetime import date, datetime, timedelta
 from difflib import SequenceMatcher
 from typing import Any, Awaitable, Callable
 
+from loguru import logger
+
 from . import config, dates, geo, ids
 from .clinic import ClinicClient, ClinicError
 from .config import MADRID
@@ -418,7 +420,10 @@ def _already_recorded(s: CallSession, slot: dict, patient_id: str) -> bool:
 def _offer(s: CallSession, cat: dict, picked: list[dict], wanted_day: date | None, site: str | None,
            part_of_day: str, notes: list[str], provider: dict | None, patient_id: str, at_time: str = "") -> dict:
     picked.sort(key=lambda sl: sl["start_time"])
-    _log_availability(s, cat, picked, provider, site)
+    try:
+        _log_availability(s, cat, picked, provider, site)
+    except Exception:  # the screens' calendar is never worth an offer
+        logger.exception(f"[{s.call_id}] availability log")
     if wanted := re.fullmatch(r"(\d{1,2})[:.h]?(\d{2})", at_time.strip()):
         # A caller on the web page names a time they can see on its calendar: that slot leads the offer.
         hhmm = f"{int(wanted[1]):02d}:{wanted[2]}"

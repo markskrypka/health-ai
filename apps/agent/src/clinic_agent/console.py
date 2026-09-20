@@ -93,7 +93,7 @@ async def _follow() -> None:
             hub.publish({"type": "event", "call_id": call_id, "seq": seq, "event": event})
             if call_id not in touched:
                 touched.append(call_id)
-            if event["kind"] == "caller":
+            if event["kind"] == "caller" and str(event.get("text") or "").strip():  # a turn with no words has no mood
                 asyncio.create_task(_read_mood(call_id, seq))
             elif event["kind"] == "call_ended":
                 asyncio.create_task(_read_call(call_id))

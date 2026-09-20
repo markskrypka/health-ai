@@ -2,6 +2,12 @@
 
 Newest first. One entry per change, written when the change lands.
 
+## 2026-09-20 · fix · the demo build checked for the phone line: an independent review, four small guards, phone-mode calls on it
+By: Mark Skrypka
+Why: after the freeze Mark decides whether the phone line moves to the demo's build, and the jury judges that call. The question had to be answered with evidence: can anything added tonight change or endanger a phone call?
+How: a read-only reviewer went through every change to `bot.py`, `tools.py`, `speech.py`, `session.py`, the new `screen.py`, `observe.py`, `pipelines.py` and Pipecat's observer code. Verdict: safe to restart, no blocker; for a phone call the prompt, tools, greeting, voice, tool results and `finalize` are the same, and what is added is log output and two passive observers (measured: ten calls at once go from 15.6% to about 19% of one core, loop lag unchanged). Its one material point — phone mode had never run on the new build — is closed: one phone-mode call on the dry-run server (source phone, pipeline A, the usual greeting, the accepted booking, no `at_time`, no word of a screen, 85 s) and three at once (all three booked the accepted slot, no server errors). Its four small guards are in: only a dry-run server takes `screen=1` (`bot.web_call`), the form's lookup cannot kill a call when the directory does not answer, a failing calendar log still leaves the offer, `restart.sh` unsets a stray `PIPELINE`. Found while Mark made his first spoken call from the browser (277 s, 26 turns, a registration — the microphone path works with a human voice): a turn with no words in it is no longer shown or read for mood, and in development a saved file no longer hangs up a live call (Fast Refresh runs every cleanup). 130 agent tests, 127 web tests.
+Ref: pending
+
 ## 2026-09-20 · feat · what we learn from a call; portraits; one command to start the demo; the runbook
 By: Mark Skrypka
 Why: pieces 5–7 of "The jury demo": the jury asks what we can learn from a call afterwards and how we know the agent works; Mark asked for mood, the pipeline that took the call so agents can be A/B tested, a photo on identification, and live mood per turn.

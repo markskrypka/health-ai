@@ -123,3 +123,35 @@ async def test_a_web_caller_who_hangs_up_on_an_offer_has_not_booked_it_and_a_pho
         await tools.find_slots(s, api, "P00902", specialty_id="general_practice")
         await tools.finalize(s, api)
         assert [r["action"] for r in s.submissions] == expected
+
+
+# ---------------------------------------------------------------- what must never cost a call
+
+def test_the_phone_line_ignores_a_start_message_that_claims_a_screen(monkeypatch):
+    claims_a_screen = {"screen": "1", "prefill": json.dumps({"name": "Alice Collins Davies"})}
+    monkeypatch.setattr(config, "DRY_RUN_SUBMIT", False)
+    assert bot.web_call(claims_a_screen) is None
+    monkeypatch.setattr(config, "DRY_RUN_SUBMIT", True)
+    assert bot.web_call(claims_a_screen).typed == {"name": "Alice Collins Davies"}
+
+
+async def test_a_directory_that_does_not_answer_costs_the_greeting_its_name_never_the_call():
+    class _Down:
+        async def directory(self, **query):
+            raise TimeoutError("the directory did not answer")
+
+    s, web = _call(), screen.Screen(typed={"name": "Alice Collins Davies"})
+    known = await screen.identify(s, _Down(), web)
+    assert known["status"] == "error"
+    system, greeting, _ = bot.call_setup(_catalogue(), s, web, known)
+    assert greeting == bot.GREETING and "full name: Alice Collins Davies" in system
+
+
+async def test_a_calendar_log_that_fails_still_leaves_the_offer(monkeypatch):
+    def broken(*_args, **_kwargs):
+        raise KeyError("provider_name")
+
+    monkeypatch.setattr(tools, "_log_availability", broken)
+    s, api = _saturday_evening_call(), _Diary()
+    found = await tools.find_slots(s, api, "P00902", specialty_id="general_practice")
+    assert found["status"] == "slots_found" and len(found["offers"]) == 3

@@ -127,6 +127,13 @@ describe("words as they arrive", () => {
   });
 });
 
+describe("a turn with no words in it", () => {
+  it("is not shown", () => {
+    const view = build([{ t: 0, kind: "call_started" }, { t: 3, kind: "hearing", text: "" }, { t: 4, kind: "caller", text: "" }]);
+    expect(view.items.filter((i) => i.type === "turn")).toHaveLength(0);
+  });
+});
+
 describe("small words", () => {
   it("reads a slot off its text, in Madrid time whatever the browser's zone", () => {
     expect(slotWords("2026-09-25T10:45:00+02:00")).toBe("Fri 25 Sep · 10:45");

@@ -60,8 +60,16 @@ export default function CallPage() {
   useEffect(() => {
     store.start();
     fetch(`${EVENTS_URL}/api/catalogue`).then((r) => r.json()).then(setNames).catch(() => {});
-    return () => { store.stop(); phone.current?.hangUp(); };
+    return () => store.stop();
   }, [store]);
+
+  // Leaving the page ends the call. In development a saved file runs every cleanup and setup back to back (Fast
+  // Refresh): that is not a goodbye, so the hang-up waits a moment and is called off when the page is still there.
+  const leaving = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => {
+    clearTimeout(leaving.current);
+    return () => { leaving.current = setTimeout(() => phone.current?.hangUp(), 400); };
+  }, []);
 
   const events = (callId && state.events[callId]) || NOTHING;
   const view = useMemo(() => (events.length ? build(events) : empty()), [events]);

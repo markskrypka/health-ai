@@ -16,6 +16,7 @@ pid=$(lsof -nP -tiTCP:7860 -sTCP:LISTEN | head -1 || true)
 [ -n "${pid:-}" ] && kill "$pid" && echo "stopped server pid $pid"
 for i in $(seq 1 10); do lsof -nP -tiTCP:7860 -sTCP:LISTEN >/dev/null 2>&1 || break; sleep 1; done
 unset DRY_RUN_SUBMIT
+unset PIPELINE  # the phone line speaks with the default voice, whatever this shell was trying out
 mkdir -p logs
 nohup caffeinate -dims .venv/bin/python -m uvicorn clinic_agent.server:app --host 127.0.0.1 --port 7860 >> logs/server.log 2>&1 &
 for i in $(seq 1 20); do [ "$(curl -s -m 2 -o /dev/null -w '%{http_code}' http://127.0.0.1:7860/health)" = "200" ] && echo "server up on the new code" && exit 0; sleep 1; done
