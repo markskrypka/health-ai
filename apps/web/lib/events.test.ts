@@ -101,6 +101,25 @@ describe("words as they arrive", () => {
     expect(view.hearing).toBe("");
   });
 
+  it("keeps the greeting, which is spoken by code and never becomes a turn of the model", () => {
+    let view = empty();
+    ["Clínica", "Arenal,", "good", "morning."].forEach((w, i) => { view = reduce(view, { t: 1 + i / 10, kind: "speaking", text: w }, i); });
+    expect(view.speaking).toBe("Clínica Arenal, good morning.");
+    view = reduce(view, { t: 3, kind: "hearing", text: "Hi" }, 4);
+    expect(view.speaking).toBe("");
+    expect(view.items.at(-1)).toMatchObject({ who: "agent", text: "Clínica Arenal, good morning.", spokenOnly: true });
+  });
+
+  it("does not say a talked-over reply twice: the finished turn replaces its first words", () => {
+    let view = empty();
+    ["One", "moment,", "please.", "The", "earliest", "appointment", "is", "with"].forEach((w, i) => { view = reduce(view, { t: 1, kind: "speaking", text: w }, i); });
+    view = reduce(view, { t: 2, kind: "hearing", text: "Yes" }, 8);
+    view = reduce(view, { t: 2.5, kind: "agent", text: "The earliest appointment is with", cut_off: true }, 9);
+    const turns = view.items.filter((i) => i.type === "turn");
+    expect(turns).toHaveLength(1);
+    expect(turns[0]).toMatchObject({ text: "The earliest appointment is with", cutOff: true });
+  });
+
   it("hangs the seconds to answer on the agent's next turn", () => {
     let view = reduce(empty(), { t: 1, kind: "latency", secs: 1.3 }, 0);
     view = reduce(view, { t: 2, kind: "agent", text: "Good morning." }, 1);

@@ -83,6 +83,18 @@ def _identifies(said: str, id_is_sound: bool, match: dict) -> bool:
     return id_is_sound and "national_id" in match.get("matched_fields", []) and _name_is_recognisable(said, match)
 
 
+def _card(m: dict) -> dict:
+    """What a screen may show of a record. It goes to the call's log, never to the model; the national id and the
+    phone number are there by their last characters only."""
+    def tail(value, keep: int) -> str:
+        value = str(value or "")
+        return "•" * max(len(value) - keep, 0) + value[-keep:] if value else ""
+
+    return {**{k: m.get(k) for k in ("given_name", "first_surname", "second_surname", "date_of_birth", "sex", "insurer",
+                                     "has_visited_before", "referrals", "note")},
+            "national_id_masked": tail(m.get("national_id"), 4), "phone_masked": tail(m.get("phone"), 3)}
+
+
 async def find_patient(s: CallSession, api: ClinicClient, name: str = "", national_id: str = "",
                        phone: str = "", date_of_birth: str = "", use_caller_id: bool = False) -> dict:
     query: dict[str, str] = {}
@@ -159,7 +171,7 @@ async def find_patient(s: CallSession, api: ClinicClient, name: str = "", nation
         result["caller"] = (f'The number they are ringing from is on another patient\'s record, '
                             f'{s.caller_record["given_name"]} {s.caller_record["first_surname"]} — the caller or a relative. '
                             "Book for the patient named above, not for that record.")
-    s.log("patient", patient_id=m["patient_id"], matched_on=list(query), status=result["status"])
+    s.log("patient", patient_id=m["patient_id"], matched_on=list(query), status=result["status"], card=_card(m))
     return result
 
 
@@ -240,7 +252,7 @@ def _sits(provider: dict, site: str | None, day: date) -> bool:
 async def find_slots(s: CallSession, api: ClinicClient, patient_id: str, specialty_id: str = "",
                      provider_name: str = "", location_id: str = "", day_kind: str = "earliest",
                      weekday: str = "", date_iso: str = "", part_of_day: str = "any", language: str = "",
-                     insurer: str = "", caller_address: str = "", after_appointment_id: str = "") -> dict:
+                     insurer: str = "", caller_address: str = "", after_appointment_id: str = "", at_time: str = "") -> dict:
     if patient_id not in s.patients:
         return {"status": "error", "say": "Identify the patient with find_patient first."}
     if s.search_locked and s.last_offered_slot:
@@ -370,7 +382,7 @@ async def find_slots(s: CallSession, api: ClinicClient, patient_id: str, special
                     break  # a standing rule, not a full diary: later windows will say the same
                 cursor = window_end + timedelta(days=1)
             if picked:
-                return _offer(s, cat, picked, wanted_day, site, part_of_day, notes, doctor, patient_id)
+                return _offer(s, cat, picked, wanted_day, site, part_of_day, notes, doctor, patient_id, at_time=at_time)
         if not (doctor and blocked):
             break
         notes.append(f'{doctor["name"]} cannot take this patient ({blocked[0]["restriction"]}). Looking at the same specialty.')
@@ -404,8 +416,18 @@ def _already_recorded(s: CallSession, slot: dict, patient_id: str) -> bool:
 
 
 def _offer(s: CallSession, cat: dict, picked: list[dict], wanted_day: date | None, site: str | None,
-           part_of_day: str, notes: list[str], provider: dict | None, patient_id: str) -> dict:
+           part_of_day: str, notes: list[str], provider: dict | None, patient_id: str, at_time: str = "") -> dict:
     picked.sort(key=lambda sl: sl["start_time"])
+    _log_availability(s, cat, picked, provider, site)
+    if wanted := re.fullmatch(r"(\d{1,2})[:.h]?(\d{2})", at_time.strip()):
+        # A caller on the web page names a time they can see on its calendar: that slot leads the offer.
+        hhmm = f"{int(wanted[1]):02d}:{wanted[2]}"
+        local = lambda sl: datetime.fromisoformat(sl["start_time"]).astimezone(MADRID)  # noqa: E731
+        exact = [sl for sl in picked if local(sl).strftime("%H:%M") == hhmm and (not wanted_day or local(sl).date() == wanted_day)]
+        if exact:
+            picked = exact + [sl for sl in picked if sl not in exact]
+        else:
+            notes.append(f"Nothing is free at {hhmm} on the day they named. These are the nearest free times: say so, and offer the first.")
     first_day = datetime.fromisoformat(picked[0]["start_time"]).astimezone(MADRID).date()
     if wanted_day and first_day != wanted_day:
         pool = [provider] if provider else [p for p in cat["providers"] if p["id"] in {sl["provider_id"] for sl in picked}]
@@ -441,9 +463,23 @@ def _offer(s: CallSession, cat: dict, picked: list[dict], wanted_day: date | Non
                      "and the time again, slowly, and change nothing unless they now ask for a different time.")
     s.last_offered_slot, s.last_offered_patient, s.last_refusal_reason = offers[0]["slot_ref"], patient_id, None
     s.log("offer", offers=offers, notes=notes)
-    return {"status": "slots_found", "offers": offers, "notes": notes,
-            "say": "Offer the FIRST one only. Read back day, date, time, doctor and site; book(slot_ref) once the caller says yes. "
-                   "If they only turn down the time and ask for the next one, offer the next in this list — do not search again."}
+    say = ("Offer the FIRST one only. Read back day, date, time, doctor and site; book(slot_ref) once the caller says yes. "
+           "If they only turn down the time and ask for the next one, offer the next in this list — do not search again.")
+    if s.screen:  # a caller on the web page sees every free time of this search on a calendar
+        say += (" Then add, in a few words, that the other free times are on their screen and they can tell you the day and "
+                "time that suits them better.")
+    return {"status": "slots_found", "offers": offers, "notes": notes, "say": say}
+
+
+def _log_availability(s: CallSession, cat: dict, by_time: list[dict], provider: dict | None, site: str | None) -> None:
+    """Every free slot behind an offer, for the screens: the caller's calendar shows them, the model sees three."""
+    site_names = {l["id"]: l["name"] for l in cat["locations"]}
+    kinds = {p["id"]: p["specialty_name"] for p in cat["providers"]}
+    label = " · ".join(filter(None, (kinds.get(by_time[0]["provider_id"]), provider["name"] if provider else "any doctor",
+                                     site_names.get(site) if site else "any clinic")))
+    s.log("availability", label=label, slots=[
+        {"start": sl["start_time"], "provider_id": sl["provider_id"], "provider": sl["provider_name"],
+         "location_id": sl["location_id"], "site": site_names.get(sl["location_id"], sl["location_id"])} for sl in by_time[:300]])
 
 
 async def list_appointments(s: CallSession, api: ClinicClient, patient_id: str) -> dict:
@@ -789,7 +825,11 @@ async def finalize(s: CallSession, api: ClinicClient) -> None:
     last tool call, send the likeliest answer — the slot just offered, or the reason the last search gave."""
     if not s.submissions:
         await recover_leaked_calls(s, api)
-    if not s.submissions:
+    if not s.submissions and s.screen:
+        # A person on the clinic's web page who hangs up on an offer has not taken it, and sees so on their screen.
+        # The guess below is for the harness, where silence always fails; a web call is a dry run and sends nothing.
+        s.log("hung_up_undecided", offer=s.last_offered_slot)
+    elif not s.submissions:
         s.unheard = None  # the caller has gone: nothing can be said again
         if s.last_offered_slot and s.last_offered_patient in s.patients:
             await book(s, api, s.last_offered_patient, s.last_offered_slot)

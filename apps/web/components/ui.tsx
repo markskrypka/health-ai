@@ -14,6 +14,24 @@ export function useNow(everyMs = 1000): number {
   return now;
 }
 
+/** The agent's words reach the log a sentence at a time, a moment before they are heard. They are shown at the
+ *  speed the voice says them (about sixteen characters a second, measured over the logged calls), word by word. */
+export function useRevealed(text: string, charsPerSec = 16): string {
+  const [shown, setShown] = useState(0);
+  const target = text.length;
+  const behind = shown < target;
+  useEffect(() => {
+    if (target === 0) setShown(0);
+  }, [target]);
+  useEffect(() => {
+    if (!behind) return;
+    const timer = setInterval(() => setShown((n) => n + 1), 1000 / charsPerSec);
+    return () => clearInterval(timer);
+  }, [behind, charsPerSec]);
+  if (shown >= target) return text;
+  return text.slice(0, Math.max(text.lastIndexOf(" ", shown), 0));
+}
+
 const TINTS = ["bg-[#dbeafe] text-[#1e3a8a]", "bg-[#dcfce7] text-[#14532d]", "bg-[#fde68a] text-[#713f12]", "bg-[#fbcfe8] text-[#831843]",
   "bg-[#e9d5ff] text-[#581c87]", "bg-[#fed7aa] text-[#7c2d12]", "bg-[#cffafe] text-[#164e63]"];
 

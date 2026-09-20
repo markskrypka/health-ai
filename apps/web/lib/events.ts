@@ -85,7 +85,11 @@ export type Action =
   | { kind: "ended"; seconds: number };
 
 export type ChatItem =
-  | { type: "turn"; id: string; seq: number; t: number; who: "caller" | "agent"; text: string; latency?: number; because: string[] }
+  | {
+      type: "turn"; id: string; seq: number; t: number; who: "caller" | "agent"; text: string; latency?: number; because: string[];
+      spokenOnly?: boolean; // words that left the line but were never a turn in the model's context: the greeting, "one moment", a nudge
+      cutOff?: boolean; // the caller talked over this reply and did not hear it
+    }
   | { type: "action"; id: string; seq: number; t: number; action: Action };
 
 export type FieldName = "name" | "national_id" | "date_of_birth" | "phone" | "email" | "insurer";
@@ -143,6 +147,15 @@ function patch(view: CallView, id: string | undefined, change: (a: Action) => Ac
   return { ...view, items: view.items.map((it) => (it.type === "action" && it.id === id ? { ...it, action: change(it.action) } : it)) };
 }
 
+const plain = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N} ]/gu, "").replace(/\s+/g, " ").trim();
+
+/** Words the agent has spoken that no finished turn accounts for yet become a turn of their own when the caller starts. */
+function settleSpoken(view: CallView, seq: number, t: number): CallView {
+  const text = view.speaking.trim();
+  if (!text) return view;
+  return { ...push(view, { type: "turn", id: `s${seq}`, seq, t, who: "agent", text, because: [], spokenOnly: true }), speaking: "" };
+}
+
 function heard(view: CallView, fields: Partial<Record<FieldName, unknown>>): CallView["form"] {
   const form = { ...view.form };
   for (const [name, raw] of Object.entries(fields) as [FieldName, unknown][]) {
@@ -170,10 +183,12 @@ export function reduce(view: CallView, e: CallEvent, seq: number): CallView {
       };
 
     case "hearing":
-      return { ...base, hearing: str(e.text) };
+      return { ...settleSpoken(base, seq, e.t), hearing: str(e.text) };
 
-    case "caller":
-      return { ...push(base, { type: "turn", id, seq, t: e.t, who: "caller", text: str(e.text), because: [] }), hearing: "" };
+    case "caller": {
+      const settled = settleSpoken(base, seq, e.t);
+      return { ...push(settled, { type: "turn", id, seq, t: e.t, who: "caller", text: str(e.text), because: [] }), hearing: "" };
+    }
 
     case "speaking":
       return { ...base, speaking: `${base.speaking} ${str(e.text)}`.trim() };
@@ -184,8 +199,12 @@ export function reduce(view: CallView, e: CallEvent, seq: number): CallView {
     case "agent": {
       const text = str(e.text).trim();
       if (!text) return { ...base, speaking: "" }; // the turn was only a lookup
-      const turn: ChatItem = { type: "turn", id, seq, t: e.t, who: "agent", text, latency: base.pendingLatency, because: base.since };
-      return { ...push(base, turn), speaking: "", since: [], pendingLatency: undefined };
+      // The finished turn is the whole reply. Its first words may already stand as a spoken-only turn — the caller
+      // began to talk over it — and then this replaces them rather than saying them twice.
+      const last = base.items.at(-1);
+      const items = last?.type === "turn" && last.spokenOnly && plain(last.text).includes(plain(text).slice(0, 24)) ? base.items.slice(0, -1) : base.items;
+      const turn: ChatItem = { type: "turn", id, seq, t: e.t, who: "agent", text, latency: base.pendingLatency, because: base.since, cutOff: Boolean(e.cut_off) || undefined };
+      return { ...base, items: [...items, turn], speaking: "", since: [], pendingLatency: undefined };
     }
 
     case "tool_call": {
@@ -333,6 +352,7 @@ export function reduce(view: CallView, e: CallEvent, seq: number): CallView {
       return { ...action({ kind: "note", what: "voice", detail: str(e.language) }, false), language: str(e.language) || base.language };
     case "listening_model":
       return { ...action({ kind: "note", what: "listening_model", detail: str(e.language) }, false), language: "ca" };
+    case "hung_up_undecided":
     case "quiet_line":
     case "wrap_up_clock":
     case "inferred_at_hangup":

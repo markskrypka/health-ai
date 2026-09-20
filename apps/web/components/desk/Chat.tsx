@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { Globe, HelpCircle, Phone, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { clock, type CallView, type ChatItem, type Summary } from "@/lib/events";
-import { Chip, LiveDot, Mood, useNow } from "@/components/ui";
+import { Chip, LiveDot, Mood, useNow, useRevealed } from "@/components/ui";
 import { ActionCard, type Names } from "./ActionCard";
 
 const SOURCE = { phone: { icon: Phone, word: "phone line" }, web: { icon: Globe, word: "web call" }, replay: { icon: RotateCcw, word: "replay" } } as const;
@@ -69,13 +69,14 @@ export function Chat({ view, names, moods, live }: { view: CallView; names: Name
   const [asked, setAsked] = useState<string>();
   const scroller = useRef<HTMLDivElement>(null);
   const pinned = useRef(true);
+  const speaking = useRevealed(view.speaking);
   const because = asked ? (view.items.find((i) => i.id === asked) as Extract<ChatItem, { type: "turn" }> | undefined)?.because ?? [] : [];
 
   // Stay with the newest line unless the reader scrolled up to read something.
   useEffect(() => {
     const el = scroller.current;
     if (el && pinned.current) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [view.items.length, view.hearing, view.speaking]);
+  }, [view.items.length, view.hearing, speaking]);
 
   return (
     <div ref={scroller} className="pane flex-1 overflow-y-auto px-5 py-5"
@@ -88,7 +89,8 @@ export function Chat({ view, names, moods, live }: { view: CallView; names: Name
               <div className={clsx("flex max-w-[78%] items-end gap-2", item.who === "agent" && "flex-row-reverse")}>
                 <button type="button" disabled={item.who !== "agent"} onClick={() => setAsked(asked === item.id ? undefined : item.id)}
                         className={clsx("group rounded-2xl px-3.5 py-2 text-left text-[14px] leading-snug",
-                                        item.who === "agent" ? "rounded-br-md bg-clinic text-white hover:bg-clinic/90" : "rounded-bl-md border border-line bg-card")}>
+                                        item.who === "agent" ? "rounded-br-md bg-clinic text-white hover:bg-clinic/90" : "rounded-bl-md border border-line bg-card",
+                                        item.spokenOnly && "bg-clinic/75", item.cutOff && "line-through decoration-white/50")}>
                   {item.text}
                   {item.who === "agent" && <HelpCircle className={clsx("ml-1.5 inline size-3.5 -translate-y-px opacity-0 transition group-hover:opacity-70", asked === item.id && "opacity-90")} />}
                 </button>
@@ -96,6 +98,7 @@ export function Chat({ view, names, moods, live }: { view: CallView; names: Name
               </div>
               <span className="mt-1 px-1 font-mono text-[10px] tabular-nums text-faint">
                 {item.who} · {clock(item.t)}{item.latency != null ? ` · answered in ${item.latency.toFixed(1)} s` : ""}
+                {item.spokenOnly ? " · said by code, not by the model" : ""}{item.cutOff ? " · the caller talked over this and did not hear it" : ""}
               </span>
               {asked === item.id && <div className="w-full max-w-[78%]"><Why item={item} items={view.items} /></div>}
             </div>
@@ -108,7 +111,7 @@ export function Chat({ view, names, moods, live }: { view: CallView; names: Name
         )}
         {view.speaking && (
           <div className="flex flex-col items-end">
-            <div className="max-w-[78%] rounded-2xl rounded-br-md bg-clinic/70 px-3.5 py-2 text-[14px] leading-snug text-white">{view.speaking}<span className="ml-0.5 animate-pulse">▍</span></div>
+            <div className="max-w-[78%] rounded-2xl rounded-br-md bg-clinic/70 px-3.5 py-2 text-[14px] leading-snug text-white">{speaking}<span className="ml-0.5 animate-pulse">▍</span></div>
           </div>
         )}
         {live && !view.ended && !view.hearing && !view.speaking && <div className="py-1 text-center text-xs text-faint">listening…</div>}

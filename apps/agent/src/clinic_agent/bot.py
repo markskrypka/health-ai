@@ -26,7 +26,7 @@ from pipecat.services.llm_service import FunctionCallParams
 from pipecat.transports.websocket.fastapi import FastAPIWebsocketParams, FastAPIWebsocketTransport
 from pipecat.turns.user_turn_strategies import UserTurnStrategies
 
-from . import config, languages, prompt, tools
+from . import config, languages, observe, pipelines, prompt, screen, tools
 from .clinic import ClinicClient
 from .session import CallSession
 from .speech import GuardedGoogleLLM, LookupMute, PatientTurnStop, SpokenClock, VoiceRouter, voice_service
@@ -76,13 +76,31 @@ def _tool_handler(name: str, session: CallSession, api: ClinicClient):
     return handler
 
 
+def call_setup(catalogue: dict, session: CallSession, web: screen.Screen | None, known: dict | None) -> tuple[str, str, list[FunctionSchema]]:
+    """What the model is told, the greeting, and the tools — for a phone call exactly what they always were; a call
+    from the clinic's web page (screen.py) adds its block, a greeting by name and an exact time for find_slots."""
+    system = prompt.build(catalogue, session.now, bool(session.from_number))
+    if web:
+        system += "\n" + screen.prompt_block(web, known)
+    schemas = [FunctionSchema(name=n, description=desc, properties=screen.properties(n, props) if web else props, required=req)
+               for n, (_, desc, props, req) in tools.TOOLS.items()]
+    return system, screen.greeting(GREETING, known) if web else GREETING, schemas
+
+
 async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, active: dict[str, CallSession]) -> None:
     body = call_data.get("body") or {}
+    web = screen.from_start(body)  # None: a phone call
+    pipeline_id = pipelines.pick(body.get("pipeline") if web else None)
     session = CallSession(call_id=call_data["call_id"], from_number=body.get("from_number") or None,
-                          dry_run=config.DRY_RUN_SUBMIT)
+                          dry_run=config.DRY_RUN_SUBMIT, voice=pipelines.voice(pipeline_id), screen=bool(web))
     active[session.call_id] = session
-    session.log("call_started", has_caller_id=bool(session.from_number))
     catalogue = await api.catalogue()
+    session.log("call_started", has_caller_id=bool(session.from_number), source="web" if web else "phone",
+                pipeline=pipelines.describe(pipeline_id, prompt.build(catalogue, session.now, bool(session.from_number))),
+                **({"screen": True, "prefilled": sorted(web.typed)} if web else {}))
+    # A caller who filled the page's form in is looked up before the greeting, so the greeting can know them.
+    known = await screen.identify(session, api, web) if web else None
+    system, greeting, schemas = call_setup(catalogue, session, web, known)
 
     serializer = TwilioFrameSerializer(
         stream_sid=call_data["stream_id"], call_sid=session.call_id,
@@ -95,17 +113,15 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
         keyterm=_KEYTERMS + [p["name"].split()[-1] for p in catalogue["providers"]]))
     llm = GuardedGoogleLLM(api_key=config.GOOGLE_API_KEY, settings=GoogleLLMSettings(
         model=config.LLM_MODEL,
-        system_instruction=prompt.build(catalogue, session.now, bool(session.from_number)),
+        system_instruction=system,
         thinking=GoogleThinkingConfig(thinking_level="minimal")))
-    tts = voice_service(session.language)
+    tts = voice_service(session.language, session.voice)
 
-    schemas = [FunctionSchema(name=n, description=desc, properties=props, required=req)
-               for n, (_, desc, props, req) in tools.TOOLS.items()]
     for name in tools.TOOLS:
         llm.register_function(name, _tool_handler(name, session, api))
 
     # The greeting is spoken by code, so the model has to be told it already happened.
-    context = LLMContext(messages=[{"role": "assistant", "content": GREETING}], tools=ToolsSchema(standard_tools=schemas))
+    context = LLMContext(messages=[{"role": "assistant", "content": greeting}], tools=ToolsSchema(standard_tools=schemas))
     user_agg, assistant_agg = LLMContextAggregatorPair(context, user_params=LLMUserAggregatorParams(
         vad_analyzer=SileroVADAnalyzer(), user_idle_timeout=QUIET_LINE_SECS, user_mute_strategies=[LookupMute()],
         user_turn_strategies=UserTurnStrategies(
@@ -114,14 +130,16 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
 
     spoken = SpokenClock()
     pipeline = Pipeline([transport.input(), stt, user_agg, llm, VoiceRouter(session), tts, transport.output(), spoken, assistant_agg])
-    worker = PipelineWorker(pipeline, enable_rtvi=False, params=PipelineParams(
+    # Beside the pipeline, never in it: the screens' live words, answer times and what the call used (observe.py).
+    watcher = observe.CallObserver(session, spoken_after=transport.output())
+    worker = PipelineWorker(pipeline, enable_rtvi=False, observers=[watcher, observe.latency_observer(session)], params=PipelineParams(
         audio_in_sample_rate=LINE_RATE, audio_out_sample_rate=LINE_RATE, enable_metrics=True, enable_usage_metrics=True))
 
     @transport.event_handler("on_client_connected")
     async def on_connected(_transport, _client):
         # Already in the context above; appended again it sat there twice, and a model that reads a doubled
         # first line starts doubling its own.
-        await worker.queue_frames([TTSSpeakFrame(GREETING, append_to_context=False)])
+        await worker.queue_frames([TTSSpeakFrame(greeting, append_to_context=False)])
 
     @transport.event_handler("on_client_disconnected")
     async def on_disconnected(_transport, _client):
@@ -146,6 +164,7 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
         text = getattr(message, "content", str(message))
         session.heard.append(text)
         session.log("caller", text=text)
+        watcher.turn_ended()
         if not session.catalan and languages.sounds_catalan(session.heard):
             # Deepgram's multilingual model has no Catalan and mangles its dates; the Catalan model (Nova-2,
             # which takes no keyterms) hears it word for word. The service reconnects with the new settings.
@@ -191,6 +210,7 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
         # Decisions are POSTed now: the window stays open 30 s after the socket closes. Shielded, because
         # the pipeline's own cancellation must not interrupt the one thing the leaderboard reads.
         await asyncio.shield(tools.finalize(session, api))
+        session.log("usage", seconds=round(session.elapsed(), 1), **watcher.usage)
         session.log("call_ended", submissions=session.submissions, posted=session.posted)
         active.pop(session.call_id, None)
         logger.info(f"[{session.call_id}] ended with {session.submissions} → {session.posted}")

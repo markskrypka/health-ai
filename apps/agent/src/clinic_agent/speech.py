@@ -178,11 +178,16 @@ class GuardedGoogleLLM(GoogleLLMService):
         await super().run_function_calls(function_calls)
 
 
-def voice_service(language: str) -> ElevenLabsTTSService | DeepgramTTSService:
+def speaks_with_elevenlabs(voice: str = "") -> bool:
+    """A call may name its voice (pipelines.py); one that does not gets ElevenLabs whenever its key is there."""
+    return (voice or ("elevenlabs" if config.ELEVENLABS_API_KEY else "deepgram")) == "elevenlabs"
+
+
+def voice_service(language: str, voice: str = "") -> ElevenLabsTTSService | DeepgramTTSService:
     """The agent's voice. ElevenLabs' one voice reads English and Spanish alike and hears the language from the text.
     It is not told the language: that is part of its connection, and at a change of language ElevenLabs took two
     seconds to close the old one — measured on a Spanish call, right before the first Spanish sentence."""
-    if config.ELEVENLABS_API_KEY:
+    if speaks_with_elevenlabs(voice):
         return ElevenLabsTTSService(api_key=config.ELEVENLABS_API_KEY, settings=ElevenLabsTTSSettings(
             voice=config.ELEVENLABS_VOICE_ID, model=config.ELEVENLABS_MODEL))
     return DeepgramTTSService(api_key=config.DEEPGRAM_API_KEY, settings=DeepgramTTSSettings(voice=languages.VOICES[language]))
@@ -205,7 +210,7 @@ class VoiceRouter(FrameProcessor):
             if language != self._session.language:
                 self._session.language = language
                 self._session.log("voice", language=language)
-                if not config.ELEVENLABS_API_KEY:
+                if not speaks_with_elevenlabs(self._session.voice):
                     await self.push_frame(TTSUpdateSettingsFrame(delta=DeepgramTTSSettings(voice=languages.VOICES[language])))
         await self.push_frame(frame, direction)
 

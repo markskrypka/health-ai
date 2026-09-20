@@ -3,7 +3,7 @@
 A scripted caller, not a simulated one — it says its next line whenever the agent stops talking.
 Good for one thing: proving the wire, the audio loop and the tools work before the real harness dials.
 
-Run the server with DRY_RUN_SUBMIT=1, then:  .venv/bin/python apps/agent/scripts/local_call.py [english|spanish|catalan] [ws url]
+Run the server with DRY_RUN_SUBMIT=1, then:  .venv/bin/python apps/agent/scripts/local_call.py [english|spanish|catalan|web] [ws url]
 """
 
 import asyncio
@@ -35,6 +35,11 @@ SCENARIOS = {
         "Me llamo Josefa Domínguez Navarro.",
         "Sí, me viene bien. Resérvela, por favor.",
         "Muchas gracias. Adiós."]),
+    # A call from the clinic's web page: no caller id, the form filled in — so nobody asks her who she is.
+    "web": ("", "aura-2-luna-en", [
+        "Hi, I'd like to book a general practice appointment, the earliest one you have please.",
+        "Yes, that works for me. Please book it.",
+        "Thank you very much. Goodbye."]),
     "catalan": ("+34669394942", "gemini", [
         "Bon dia. Voldria demanar la primera hora lliure de traumatologia. Necessito que m'atengui algú amb qui pugui parlar en català.",
         "Em dic Teresa López García.",
@@ -44,6 +49,8 @@ SCENARIOS = {
 SCENARIO = sys.argv[1] if len(sys.argv) > 1 else "english"
 URL = sys.argv[2] if len(sys.argv) > 2 else "ws://localhost:7860/ws"
 FROM_NUMBER, VOICE, LINES = SCENARIOS[SCENARIO]
+# What the web page adds to the `start` message (clinic_agent/screen.py): that it is a screen, and the form.
+WEB = {"screen": "1", "prefill": json.dumps({"name": "Josefa Domínguez Navarro", "national_id": "48064716Y"})} if SCENARIO == "web" else {}
 DG = {"Authorization": f"Token {config.DEEPGRAM_API_KEY}"}
 
 
@@ -99,7 +106,7 @@ async def main() -> None:
         await ws.send(json.dumps({"event": "start", "sequenceNumber": "1", "streamSid": stream_sid, "start": {
             "accountSid": "AC-local", "streamSid": stream_sid, "callSid": call_sid, "tracks": ["inbound"],
             "mediaFormat": {"encoding": "audio/x-mulaw", "sampleRate": 8000, "channels": 1},
-            "customParameters": {"call_id": call_sid, "from_number": FROM_NUMBER}}}))
+            "customParameters": {"call_id": call_sid, **({"from_number": FROM_NUMBER} if FROM_NUMBER else {}), **WEB}}}))
 
         async def listen() -> None:
             async for raw in ws:

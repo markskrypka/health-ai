@@ -1,15 +1,17 @@
 # Work — The jury demo: the caller's screen and the front desk screen
 
-**State (2026-09-20, 03:55 Madrid) — pieces 0, 1 and 2 done: the front desk works on today's events.** The repo is a
-monorepo (`67f0434`); the events service streams the call logs and replays recorded calls (`01afe19`); `/desk` shows
-calls in progress and past calls, the chat with the agent's actions as cards, "why did it say that?", and the patient's
-card — verified in a browser with one replay, ten replays at once and a past call; 15 reducer tests (one builds all 206
-real logs), 5 follower tests. Running now, started by the assistant: events service on 7870 (`logs/events-service.log`),
-web app on 3100 (`logs/web-dev.log`). The phone line (:7860) and the scored loop were never restarted. The browser's
-phone module (`apps/web/lib/phone`) is being built by a helper agent alongside.
-**Next action:** piece 3 "A phone in the browser" — the demo call server on 7861, the `start` message's `screen`,
-`prefill` and `pipeline`, and `/call` with the call button.
-**Waiting on Mark:** one spoken test call from his browser when piece 3 lands.
+**State (2026-09-20, 04:15 Madrid) — pieces 0–4 done: both screens work; checkpoint B reached five hours early.**
+The front desk (`/desk`) runs on today's events; the caller's screen (`/call`) dials the dry-run call server on 7861
+from the browser, a filled form is known before the greeting, an empty one fills itself, the calendar shows every free
+slot of the agent's search. Verified from a real browser with a recorded caller (`/call?clip=/phone/test-caller.wav`)
+and with a scripted web call; 127 agent tests, 126 web tests. Running now, started by the assistant: events service
+7870, demo call server 7861, web app 3100 (logs in `logs/`). **The phone line (:7860) was never restarted and still
+runs the 03:14 build — the new events (live words, answer times, pipeline badge, slot list, masked card) reach the desk
+from web calls only until Mark decides to restart it after the freeze.**
+**Next action:** piece 5 "What we learn, during and after" — `analysis.py` (mood per turn, the call's analysis), the
+past-call header, the pipeline comparison table. Then photos, `demo.sh`, `docs/demo.md`.
+**Waiting on Mark:** one spoken call from his own browser at `http://localhost:3100/call` (microphone, headset) — the
+one thing a recorded caller cannot prove; and after 06:00 the decision about restarting the phone line on this build.
 
 ## How it fits together
 

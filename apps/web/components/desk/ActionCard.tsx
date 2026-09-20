@@ -84,6 +84,7 @@ const NOTE: Record<string, { icon: React.ComponentType<{ className?: string }>; 
   recovered_leaked_call: { icon: Undo2, text: "The model wrote a tool call as text — the code ran it instead of saying it" },
   refusal_not_recorded: { icon: ShieldAlert, text: "A refusal was dropped: another decision stands" },
   discarded: { icon: Undo2, text: "The caller took the decision back" },
+  hung_up_undecided: { icon: PhoneOff, text: "The caller hung up before deciding — nothing was booked" },
 };
 
 export function ActionCard({ action, names, highlighted }: { action: Action; names: Names; highlighted?: boolean }) {

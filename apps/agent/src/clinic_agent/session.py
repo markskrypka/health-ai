@@ -50,6 +50,10 @@ class CallSession:
     # The language the agent is speaking right now ("en" or "es") — it picks the voice and the stock phrases —
     # and whether the caller turned out to speak Catalan, which needs its own listening model.
     language: str = "en"
+    # Which voice speaks on this call, "elevenlabs" or "deepgram" (pipelines.py). Empty: whichever the keys allow.
+    voice: str = ""
+    # The caller is on the clinic's web page and sees a calendar of the free times a search finds (screen.py).
+    screen: bool = False
     catalan: bool = False
     move_challenged: bool = False
     discard_challenged: bool = False
