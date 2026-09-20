@@ -491,6 +491,9 @@ async def _record(s: CallSession, api: ClinicClient, action: str, payload: dict)
     """Record a decision. Nothing is POSTed until finalize(): an accepted action can never be withdrawn,
     and problem 13 scores the caller's FINAL request — so a later decision replaces the one it contradicts."""
     record = {"action": action, **payload}
+    if action != "escalate" and any(old["action"] == "escalate" for old in s.submissions):
+        return {"status": "emergency_recorded",
+                "say": "An emergency was recorded on this call, so nothing else is booked or changed. Tell them again to call 112 now."}
     specialty_of = {p["id"]: p["specialty_id"] for p in (await api.catalogue())["providers"]} if action == "no-action" else {}
 
     def contradicted(old: dict) -> bool:
@@ -501,9 +504,12 @@ async def _record(s: CallSession, api: ClinicClient, action: str, payload: dict)
         if action == "no-action":
             # Seen live: "Okay" → booked → "oh no, I can't make mornings" → nothing else free → refusal. The
             # booking the caller walked away from — same patient, same kind of doctor — goes with it.
-            walked_away = old["action"] == "book" and s.last_search == (old["patient_id"], specialty_of.get(old["provider_id"]))
-            return walked_away or old["action"] in ("no-action", "escalate")
-        if old["action"] in ("no-action", "escalate"):
+            # A refusal about anything else — advice asked for after booking, a second request a rule blocks — leaves
+            # the booking alone: it must carry the very reason the last search gave for that patient and doctor.
+            walked_away = (old["action"] == "book" and payload["reason"] == s.last_refusal_reason
+                           and s.last_search == (old["patient_id"], specialty_of.get(old["provider_id"])))
+            return walked_away or old["action"] == "no-action"
+        if old["action"] == "no-action":
             return True  # something is being written after all
         if action == "book":
             return old["action"] == "book" and old["patient_id"] == payload["patient_id"]
@@ -629,13 +635,20 @@ async def end_without_booking(s: CallSession, api: ClinicClient, reason: str) ->
 async def escalate(s: CallSession, api: ClinicClient, reason: str = "medical_emergency") -> dict:
     if reason not in REASONS:
         return {"status": "error", "say": f"reason must be one of {REASONS}."}
-    return await _record(s, api, "escalate", {"reason": reason})
+    await _record(s, api, "escalate", {"reason": reason})
+    return {"status": "recorded", "say": "Tell them to hang up and call 112 now, in one short sentence, and stay calm and kind. "
+                                          "You cannot alert anyone yourself: never say you have called or are calling the emergency services."}
 
 
 async def discard_recorded(s: CallSession, api: ClinicClient) -> dict:
-    dropped, s.submissions = s.submissions, []
-    s.log("discarded", dropped=dropped)
-    return {"status": "discarded", "say": "Nothing is recorded now. Carry on with what the caller wants."}
+    """The caller took the last decision back. Only the last one: a call can hold two (a move for a relative, a
+    booking for the caller). The offer goes too, or the hang-up fallback would book what was just withdrawn."""
+    if not s.submissions or s.submissions[-1]["action"] == "escalate":
+        return {"status": "nothing_to_discard", "say": "There is nothing the caller can take back."}
+    dropped = s.submissions.pop()
+    s.withdraw_offer()
+    s.log("discarded", dropped=[dropped])
+    return {"status": "discarded", "say": "That decision is no longer recorded. Carry on with what the caller wants."}
 
 
 # Gemini occasionally writes a call out as text — "default_api:register_patient{given_name: Ana ,…}" — instead of
@@ -742,7 +755,7 @@ TOOLS: dict[str, tuple[Tool, str, dict, list[str]]] = {
     "find_patient": (find_patient,
         "Look a patient up in the clinic's records. Pass everything the caller has given so far. "
         "An exact field that is wrong returns nothing, so read identifiers back before relying on them.",
-        {"name": _S, "national_id": {"type": "string", "description": "DNI or NIE as digits and letters, e.g. 48064716Y"},
+        {"name": _S, "national_id": {"type": "string", "description": "DNI or NIE exactly as the caller dictated it: digits and the letter, no spaces"},
          "phone": _S, "date_of_birth": {"type": "string", "description": "YYYY-MM-DD"},
          "use_caller_id": {"type": "boolean", "description": "true to search by the number they are ringing from"}}, []),
     "nearest_site": (nearest_site,
@@ -780,7 +793,7 @@ TOOLS: dict[str, tuple[Tool, str, dict, list[str]]] = {
     "end_without_booking": (end_without_booking, "The call ends with nothing written. The reason is the answer.",
         {"reason": _E(REASONS)}, ["reason"]),
     "discard_recorded": (discard_recorded,
-        "The caller took back everything recorded so far on this call (nothing has been sent yet). Clears it.", {}, []),
+        "The caller took back the decision recorded last on this call (nothing has been sent yet). Removes that one.", {}, []),
     "escalate": (escalate, "Hand the call to a human: a medical emergency. Book nothing.",
         {"reason": _E(["medical_emergency"])}, ["reason"]),
 }

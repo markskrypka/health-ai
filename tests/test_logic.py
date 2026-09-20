@@ -309,7 +309,7 @@ async def test_okay_then_no_mornings_then_nothing_free_ends_as_a_single_refusal(
     from clinic_agent import tools
     s, api = _session_with_a_booking(), _Catalogue()
     await tools.book(s, api, "P3", "S1")                      # the caller said "Okay"
-    s.last_search = ("P3", "orthopaedics")                    # "I can't make mornings" → afternoon search → nothing
+    s.last_search, s.last_refusal_reason = ("P3", "orthopaedics"), "no_availability"   # "not mornings" → afternoon search → nothing
     await tools.end_without_booking(s, api, "no_availability")
     assert s.submissions == [{"action": "no-action", "reason": "no_availability"}]
 
@@ -536,3 +536,42 @@ async def test_a_slot_found_for_one_patient_cannot_be_recorded_for_another():
     assert (await tools.book(s, api, "P9", "S1"))["status"] == "slot_of_another_patient"
     assert (await tools.reschedule(s, api, "A9", "S1"))["status"] == "slot_of_another_patient"
     assert (await tools.book(s, api, "P3", "S1"))["status"] == "recorded"
+
+
+# --- what a refusal, an emergency and a withdrawal may and may not undo ---
+async def test_an_off_topic_refusal_after_a_booking_leaves_the_booking():
+    from clinic_agent import tools
+    s, api = _session_with_a_booking(), _Catalogue()
+    s.last_search = ("P3", "orthopaedics")
+    await tools.book(s, api, "P3", "S1")
+    await tools.end_without_booking(s, api, "out_of_scope")   # "and what should I take for the pain?"
+    assert [a["action"] for a in s.submissions] == ["book"]
+
+
+async def test_nothing_is_recorded_after_an_emergency_and_it_cannot_be_discarded():
+    from clinic_agent import tools
+    s, api = _session_with_a_booking(), _Catalogue()
+    said = await tools.escalate(s, api)
+    assert "112" in said["say"] and "never say you have called" in said["say"]
+    assert (await tools.book(s, api, "P3", "S1"))["status"] == "emergency_recorded"
+    assert (await tools.discard_recorded(s, api))["status"] == "nothing_to_discard"
+    assert [a["action"] for a in s.submissions] == ["escalate"]
+
+
+async def test_a_withdrawn_booking_is_not_sent_at_hang_up():
+    from clinic_agent import tools
+    s, api = _session_with_a_booking(), _Catalogue()
+    s.last_offered_slot, s.last_offered_patient = "S1", "P3"
+    await tools.book(s, api, "P3", "S1")
+    await tools.discard_recorded(s, api)                      # "actually, forget it"
+    await tools.finalize(s, api)
+    assert [a["action"] for a in s.submissions] == ["no-action"]
+
+
+def test_no_patient_id_sits_in_anything_the_model_reads():
+    import json, re
+    from clinic_agent import config, prompt, tools
+    cat = json.loads((config.ORGANIZERS_DIR / "clinic.json").read_text())
+    from datetime import datetime
+    text = prompt.build(cat, datetime.now(config.MADRID), True) + json.dumps([(d, p) for _, d, p, _ in tools.TOOLS.values()])
+    assert not re.search(r"\b\d{8}[A-Za-z]\b|\b[XYZxyz]\d{7}[A-Za-z]\b", text)
