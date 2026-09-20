@@ -125,8 +125,7 @@ PYTHONPATH=apps/agent/src .venv/bin/python scripts/measure_latency.py
 │       ├── app/desk/          # Front desk live inspection screen
 │       ├── app/call/          # Caller browser phone with live form & calendar
 │       └── components/        # Action cards, visual waveforms, patient cards
-├── docs/                      # Presentation scripts, jury runbook & research notes
-│   ├── DEMO_SCRIPT.md         # 10-minute presentation guide
+├── docs/                      # Benchmarks, architecture & research notes
 │   ├── LATENCY_BENCHMARK.json # Empirical latency metrics
 │   └── architecture_diagram.jpg
 └── scripts/
@@ -139,6 +138,5 @@ PYTHONPATH=apps/agent/src .venv/bin/python scripts/measure_latency.py
 
 Built with passion by **Javier**, **Samer**, and **Mark** (**Team GING**) for the **Prosper Track** at **HackSpain 2026**.
 
-* 🎤 **10-minute Live Presentation Script:** [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
 * 📊 **Empirical Latency Benchmark Results:** [docs/LATENCY_BENCHMARK.json](docs/LATENCY_BENCHMARK.json)
 * 🏛️ **Architecture Diagram (High-res):** [docs/architecture_diagram.jpg](docs/architecture_diagram.jpg)
