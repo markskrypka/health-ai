@@ -97,6 +97,24 @@ def _card(m: dict) -> dict:
             "national_id_masked": tail(m.get("national_id"), 4), "phone_masked": tail(m.get("phone"), 3)}
 
 
+# The clinic's directory never changes during a call: a registration is a record that is sent when the call ends, so
+# the person just registered has no patient_id and nothing can be booked for them on this call — the organizers' rule
+# ("register: nothing is booked"). Seen live with a human caller: "You are now registered. How can I help you today?",
+# then a search with an invented patient id, a lookup that found nobody, and the model explaining it to the caller with
+# reasons it made up — "your registration was not completed", "I need a valid Spanish phone number" — and registering
+# them a second time. Twelve minutes. So every tool that can be reached after a registration says what is true.
+_AFTER_REGISTERING = (
+    "They ARE registered: it is done and nothing is missing. Tell them so in one warm sentence, and that a new patient's first "
+    "appointment is booked on their NEXT call, once the clinic has opened their record — this call cannot book it, for anyone "
+    "new. Do not look them up, do not search for slots, do not register them again, and NEVER say the registration failed, is "
+    "incomplete or needs another detail. If they ask why: the clinic has to open a new patient's record before anything can be "
+    "booked on it, and that happens after the call — say only that, add no other reason. If they need nothing else, say goodbye.")
+
+
+def _registered_on_this_call(s: CallSession) -> dict | None:
+    return next((r for r in s.submissions if r["action"] == "register"), None)
+
+
 async def find_patient(s: CallSession, api: ClinicClient, name: str = "", national_id: str = "",
                        phone: str = "", date_of_birth: str = "", use_caller_id: bool = False) -> dict:
     query: dict[str, str] = {}
@@ -143,6 +161,10 @@ async def find_patient(s: CallSession, api: ClinicClient, name: str = "", nation
         return {"status": "error", "detail": str(err.detail)[:200]}
 
     exact = [k for k in ("national_id", "phone", "date_of_birth") if k in query]
+    if not strong and _registered_on_this_call(s):
+        return {"status": "not_found",
+                "say": "No record matches — and for the person you registered on this call that is how it should be: the "
+                       "directory only shows a new patient after the call. " + _AFTER_REGISTERING}
     if not strong:
         return {"status": "not_found",
                 "say": "No record matches. Re-check the identifier once (read it back). If it still fails, the caller may be new: offer to register them."}
@@ -255,6 +277,8 @@ async def find_slots(s: CallSession, api: ClinicClient, patient_id: str, special
                      provider_name: str = "", location_id: str = "", day_kind: str = "earliest",
                      weekday: str = "", date_iso: str = "", part_of_day: str = "any", language: str = "",
                      insurer: str = "", caller_address: str = "", after_appointment_id: str = "", at_time: str = "") -> dict:
+    if patient_id not in s.patients and _registered_on_this_call(s):
+        return {"status": "new_patient_books_next_call", "say": "There is no patient_id for someone registered on this call. " + _AFTER_REGISTERING}
     if patient_id not in s.patients:
         return {"status": "error", "say": "Identify the patient with find_patient first."}
     if s.search_locked and s.last_offered_slot:
@@ -602,6 +626,10 @@ async def _record(s: CallSession, api: ClinicClient, action: str, payload: dict)
         # No accepted answer ever pairs NO_ACTION with another action: a refused second request leaves the first as it is.
         s.submissions = standing
         s.log("refusal_not_recorded", payload=payload, standing=standing)
+        if any(old["action"] == "register" for old in standing):
+            # Seen live: registered, asked to book, "patient_not_found" — and then "clinic rules require registration
+            # first before booking. Goodbye." to the person it had just registered.
+            return {"status": "recorded", "say": "The registration stands and this changes nothing about it. " + _AFTER_REGISTERING}
     else:
         s.submissions = standing + [record]
         s.log("recorded", action=action, payload=payload, replaced=replaced)
@@ -713,11 +741,12 @@ async def register_patient(s: CallSession, api: ClinicClient, given_name: str, f
         s.insurer_challenged = True
         return {"status": "insurer_not_heard",
                 "say": "The caller has not said which insurer they are with. Ask them now, then call register_patient again. Never assume privado."}
-    return await _record(s, api, "register", {
+    result = await _record(s, api, "register", {
         "given_name": given_name.strip(), "first_surname": first_surname.strip(),
         "second_surname": second_surname.strip(), "national_id": nid.normalized,
         "date_of_birth": date_of_birth, "phone": digits or phone,
         "email": repair_email(email, given_name, first_surname, second_surname), "insurer": insurer})
+    return {**result, "say": _AFTER_REGISTERING} if result.get("status") == "recorded" else result
 
 
 async def end_without_booking(s: CallSession, api: ClinicClient, reason: str) -> dict:

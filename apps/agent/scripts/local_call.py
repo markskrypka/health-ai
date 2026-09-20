@@ -3,7 +3,7 @@
 A scripted caller, not a simulated one — it says its next line whenever the agent stops talking.
 Good for one thing: proving the wire, the audio loop and the tools work before the real harness dials.
 
-Run the server with DRY_RUN_SUBMIT=1, then:  .venv/bin/python apps/agent/scripts/local_call.py [english|spanish|catalan|web|calendar] [ws url]
+Run the server with DRY_RUN_SUBMIT=1, then:  .venv/bin/python apps/agent/scripts/local_call.py [english|spanish|catalan|web|calendar|newpatient] [ws url]
 """
 
 import asyncio
@@ -47,6 +47,16 @@ SCENARIOS = {
         "Could I have Tuesday the twenty-second at half past ten instead?",
         "Yes, please book that one.",
         "Thank you very much. Goodbye."]),
+    # Someone new registers from the web page and then, as a person would, asks to book — which no call can do for
+    # a new patient. The agent has to say so plainly and must not invent a reason (seen live: it did, for 12 minutes).
+    "newpatient": ("", "aura-2-luna-en", [
+        "Hi, I'm not a patient of yours yet. I'd like to register, please.",
+        "My name is Marcos Prueba Demo.",
+        "My D N I is 1 2 3 4 5 6 7 8 Z, and I was born on the ninth of November, two thousand and one.",
+        "My phone number is 6 0 5, 6 5 6, 7 6 9. My email is marcos dot prueba at gmail dot com. And I'm with Sanitas.",
+        "Great. Now I'd like to book an appointment with a general practitioner, please.",
+        "But I just registered. Why can't you book it now?",
+        "Okay, thank you. Goodbye."]),
     "catalan": ("+34669394942", "gemini", [
         "Bon dia. Voldria demanar la primera hora lliure de traumatologia. Necessito que m'atengui algú amb qui pugui parlar en català.",
         "Em dic Teresa López García.",
@@ -57,8 +67,9 @@ SCENARIO = sys.argv[1] if len(sys.argv) > 1 else "english"
 URL = sys.argv[2] if len(sys.argv) > 2 else "ws://localhost:7860/ws"
 FROM_NUMBER, VOICE, LINES = SCENARIOS[SCENARIO]
 # What the web page adds to the `start` message (clinic_agent/screen.py): that it is a screen, and the form.
-WEB = {"screen": "1", "prefill": json.dumps({"name": "Josefa Domínguez Navarro", "national_id": "48064716Y"}),
-       **({"pipeline": os.environ["PIPELINE"]} if os.getenv("PIPELINE") else {})} if SCENARIO in ("web", "calendar") else {}
+WEB = {"screen": "1", **({"pipeline": os.environ["PIPELINE"]} if os.getenv("PIPELINE") else {}),
+       **({"prefill": json.dumps({"name": "Josefa Domínguez Navarro", "national_id": "48064716Y"})} if SCENARIO != "newpatient" else {}),
+       } if SCENARIO in ("web", "calendar", "newpatient") else {}
 DG = {"Authorization": f"Token {config.DEEPGRAM_API_KEY}"}
 
 
