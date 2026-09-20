@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Frame 05 — Real-Time Sentiment & Lessons</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: 'Geist';
+        src: local('Geist'), local('Inter'), local('system-ui');
+      }
+
+      :root {
+        --primary: #0f6b5c;
+        --primary-soft: #e3f1ed;
+        --primary-line: #bfded6;
+        --bg: #f6f4ef;
+        --card-bg: #ffffff;
+        --text: #1c1a17;
+        --muted: #6f6a61;
+        --faint: #a39d92;
+        --line: #e6e1d6;
+        --good: #1f7a4d;
+        --good-soft: #e4f3ea;
+        --live: #e5484d;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #ecefe9;
+        font-family: "Geist", system-ui, -apple-system, sans-serif;
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: radial-gradient(circle at 50% 30%, #f4f6f2 0%, #e3e8e2 100%);
+      }
+
+      /* Full uncropped browser window */
+      .browser-window {
+        position: absolute;
+        top: 36px;
+        left: 60px;
+        width: 1800px;
+        height: 970px;
+        background: #f6f4ef;
+        border-radius: 16px;
+        box-shadow: 0 30px 80px rgba(15, 107, 92, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .browser-bar {
+        height: 44px;
+        background: #ebe7df;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        padding: 0 18px;
+        gap: 16px;
+      }
+      .window-dots {
+        display: flex;
+        gap: 8px;
+      }
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .dot.red { background: #ff5f56; }
+      .dot.yellow { background: #ffbd2e; }
+      .dot.green { background: #27c93f; }
+
+      .address-pill {
+        flex: 1;
+        max-width: 560px;
+        margin: 0 auto;
+        height: 28px;
+        background: #ffffff;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .address-text {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .status-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--primary);
+        background: var(--primary-soft);
+        padding: 4px 10px;
+        border-radius: 100px;
+      }
+
+      .desk-nav {
+        height: 48px;
+        background: #ffffff;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        gap: 16px;
+      }
+      .brand-title {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .brand-accent {
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      .floating-hud-strip {
+        margin-left: auto;
+        background: #f4f8f6;
+        border: 1px solid var(--primary-line);
+        border-radius: 8px;
+        padding: 4px 14px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .hud-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .hud-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--faint);
+        letter-spacing: 0.05em;
+      }
+      .hud-val {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+      .hud-divider {
+        width: 1px;
+        height: 24px;
+        background: var(--line);
+      }
+
+      /* 3-Column Desk Layout */
+      .desk-body {
+        height: 878px;
+        display: flex;
+        min-height: 0;
+      }
+
+      /* Left Pane */
+      .queue-pane {
+        width: 320px;
+        height: 100%;
+        border-right: 1px solid var(--line);
+        background: #ffffff;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        padding: 14px;
+        gap: 8px;
+      }
+      .call-card-past {
+        border: 1.5px solid var(--primary);
+        background: #f4f9f7;
+        border-radius: 10px;
+        padding: 12px;
+      }
+
+      /* Center Chat Pane with Native Post-Call Summary Banner */
+      .chat-pane {
+        flex: 1;
+        background: #f6f4ef;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--line);
+        padding: 20px 32px;
+        gap: 16px;
+        overflow-y: auto;
+        position: relative;
+      }
+
+      /* Post-Call Clinical Intelligence Banner */
+      .post-call-banner {
+        background: #ffffff;
+        border: 1.5px solid var(--primary-line);
+        border-radius: 14px;
+        padding: 16px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        box-shadow: 0 4px 16px rgba(15, 107, 92, 0.05);
+        transition: all 0.3s ease;
+      }
+      .banner-top-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .badge-booking-pill {
+        background: var(--good-soft);
+        color: var(--good);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 100px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .badge-meta {
+        font-size: 12px;
+        color: var(--muted);
+        display: flex;
+        gap: 12px;
+      }
+      .banner-lesson-box {
+        background: #f4f8f6;
+        border-left: 3px solid var(--primary);
+        padding: 10px 14px;
+        border-radius: 0 8px 8px 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .lesson-text {
+        font-size: 13px;
+        color: var(--text);
+        line-height: 1.45;
+      }
+
+      .turn-bubble {
+        max-width: 780px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        font-size: 13.5px;
+        line-height: 1.5;
+        position: relative;
+      }
+      .turn-bubble.user {
+        background: #ffffff;
+        border: 1px solid var(--line);
+        align-self: flex-start;
+      }
+      .turn-bubble.agent {
+        background: var(--primary);
+        color: #ffffff;
+        align-self: flex-end;
+      }
+
+      /* Animated Sentiment Trajectory Overlay */
+      .sentiment-arc-svg {
+        position: absolute;
+        top: 200px;
+        left: 30px;
+        width: 700px;
+        height: 400px;
+        pointer-events: none;
+        z-index: 25;
+      }
+
+      /* Right Pane */
+      .patient-pane {
+        width: 380px;
+        background: #ffffff;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .floating-feature-chip {
+        position: absolute;
+        bottom: 24px;
+        right: 28px;
+        background: rgba(15, 107, 92, 0.95);
+        backdrop-filter: blur(8px);
+        color: #ffffff;
+        padding: 8px 16px;
+        border-radius: 100px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        z-index: 50;
+        opacity: 0;
+      }
+      .feature-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #34d399;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="05-insights" data-width="1920" data-height="1080" data-duration="19.0">
+      
+      <!-- Full uncropped browser window -->
+      <div class="browser-window" id="browserWindow">
+        <div class="browser-bar">
+          <div class="window-dots">
+            <div class="dot red"></div>
+            <div class="dot yellow"></div>
+            <div class="dot green"></div>
+          </div>
+          <div class="address-pill">
+            <span class="address-lock" style="color: var(--primary);">🔒</span>
+            <span>https://</span><span class="address-text">clinica-arenal.com/desk/analysis</span>
+          </div>
+          <div class="status-pill">
+            <span>●</span> Post-Call Clinical Intelligence
+          </div>
+        </div>
+
+        <div class="desk-nav">
+          <span class="brand-title"><span class="brand-accent">Clínica Arenal</span> · front desk</span>
+          <span style="font-size: 12px; color: var(--muted);">Post-Call Companion Model Analysis</span>
+
+          <!-- Integrated HUD strip inside nav bar -->
+          <div class="floating-hud-strip" id="hudStrip">
+            <div class="hud-item">
+              <span class="hud-label">Caller Sentiment</span>
+              <span class="hud-val">+1.4 → +2.0</span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-item">
+              <span class="hud-label">Patient Effort</span>
+              <span class="hud-val">Low</span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-item">
+              <span class="hud-label">Total Cost</span>
+              <span class="hud-val">$0.038</span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-item">
+              <span class="hud-label">Retention</span>
+              <span class="hud-val">100% Retained</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="desk-body">
+          <!-- Queue Pane -->
+          <div class="queue-pane">
+            <div style="font-size: 11px; font-weight: 700; color: var(--faint); text-transform: uppercase;">Analyzed Session</div>
+            <div class="call-card-past">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 13.5px; font-weight: 700;">Teresa López García</span>
+                <span style="font-size: 15px;">😊</span>
+              </div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">48s · Pipeline B (Aura-2) · $0.017</div>
+              <div style="margin-top: 6px; font-size: 11px; color: var(--good); font-weight: 600;">✓ Confirmed Booking</div>
+            </div>
+          </div>
+
+          <!-- Center Chat Pane with Native Post-Call Summary Banner -->
+          <div class="chat-pane" id="chatPane">
+            <!-- Native Post-Call Summary Banner -->
+            <div class="post-call-banner" id="callBanner">
+              <div class="banner-top-row">
+                <span class="badge-booking-pill">✓ BOOK P00003 · PR1 · centro · 2026-09-26 12:30 delivered to clinic</span>
+                <span class="badge-meta">⏱ 48s · decided at 21s</span>
+                <span class="badge-meta">answers in 1.3s · lookups 600ms</span>
+                <span class="badge-meta" style="color: var(--primary); font-weight: 600;">call cost: $0.017</span>
+              </div>
+              <div style="font-size: 11.5px; color: var(--muted);">
+                pipeline <strong>B</strong> · Deepgram Nova-3 · Gemini 3.8 Flash · Deepgram Aura-2
+              </div>
+              <div class="banner-lesson-box" id="lessonBox">
+                <span style="font-size: 18px;">😊</span>
+                <div class="lesson-text">
+                  <strong>effort Low</strong> — The caller identified themselves, accepted the earliest suitable appointment, and completed the booking.<br/>
+                  <span style="color: var(--primary); font-weight: 600;">Operational Takeaway:</span> Showing the full calendar while speaking one recommendation helps the caller decide quickly.
+                </div>
+              </div>
+            </div>
+
+            <!-- Turns -->
+            <div class="turn-bubble agent" id="turn1">
+              <div>Thank you, Teresa. One moment while I check the diary.</div>
+              <div style="font-size: 10px; opacity: 0.7; text-align: right;">agent · 00:12</div>
+            </div>
+
+            <div class="turn-bubble agent" id="turn2">
+              <div>The earliest appointment is with Dr. Ortiz at Arenal Centro, at 12:30. The other free times are visible on your screen.</div>
+              <div style="font-size: 10px; opacity: 0.7; text-align: right;">agent · 00:16 · answered in 1.3s</div>
+            </div>
+
+            <div class="turn-bubble user" id="turn3">
+              <div>Yes, that works for me. Please book it.</div>
+              <div style="font-size: 10px; opacity: 0.7;">caller · 00:21</div>
+            </div>
+
+            <div class="turn-bubble agent" id="turn4">
+              <div>You're booked for Saturday, 26 September at 12:30 with Dr. Ortiz. We've sent the confirmation to your phone. Have a wonderful day!</div>
+              <div style="font-size: 10px; opacity: 0.7; text-align: right;">agent · 00:25 · resolved</div>
+            </div>
+          </div>
+
+          <!-- Right Pane: Patient Snapshot -->
+          <div class="patient-pane">
+            <div style="font-size: 15px; font-weight: 700;">Teresa López García</div>
+            <div style="font-size: 12px; color: var(--muted); margin-top: -14px;">61 years · female · P00003</div>
+            <div style="font-size: 11px; color: var(--good); font-weight: 600;">✓ identified on name + phone</div>
+
+            <div style="border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
+              <div><strong>Born:</strong> 1963-04-12</div>
+              <div><strong>DNI / NIE:</strong> •••••716Y</div>
+              <div><strong>Phone:</strong> ••••••0529</div>
+              <div><strong>Plan:</strong> Sanitas Más Salud</div>
+            </div>
+
+            <div style="background: var(--good-soft); padding: 12px; border-radius: 8px; font-size: 11.5px; color: var(--good); margin-top: 10px;">
+              <strong>Outcome: Booked</strong><br/>
+              Sat 26 Sep · 12:30 · Dr. Ortiz
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Chip -->
+      <div class="floating-feature-chip" id="featureChip">
+        <div class="feature-dot"></div>
+        <span>Companion Analytics · Friction & Cost Telemetry</span>
+      </div>
+
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["05-insights"] = tl;
+
+      tl.from("#browserWindow", { opacity: 0, y: 25, duration: 0.8, ease: "power2.out" })
+        .from("#hudStrip", { opacity: 0, x: 20, duration: 0.6, ease: "power2.out" }, "-=0.3")
+        .to("#featureChip", { opacity: 1, duration: 0.6 }, "-=0.3");
+
+      // Highlight post-call intelligence banner
+      tl.to("#callBanner", {
+        borderColor: "#0f6b5c",
+        boxShadow: "0 8px 30px rgba(15, 107, 92, 0.12)",
+        duration: 0.8,
+        ease: "power2.out"
+      }, "+=0.3");
+
+      // Highlight operational takeaway
+      tl.to("#lessonBox", {
+        backgroundColor: "#e3f1ed",
+        duration: 0.6
+      }, "+=0.5");
+
+      // Soft breathing highlight on HUD
+      tl.to("#hudStrip", {
+        borderColor: "#0f6b5c",
+        duration: 0.6,
+        repeat: 20,
+        yoyo: true,
+        ease: "sine.inOut"
+      }, "+=0.5");
+
+      tl.to({}, { duration: 4.0 });
+    </script>
+  </body>
+</html>

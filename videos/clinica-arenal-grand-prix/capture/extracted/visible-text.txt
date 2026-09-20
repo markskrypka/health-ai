@@ -1,0 +1,7 @@
+Clínica Arenal · front desk
+Book by talking to us.
+The patient can call from the browser, identify themselves by speaking, see their form fill from the conversation, and choose from the same appointment availability the agent is discussing.
+The front desk sees every live and past call, the transcript, patient identification, availability searches, offers, clinic rules, decisions, replacements, delivery state, response time, cost estimate, pipeline, caller mood, and one post-call lesson.
+The interface can replay ten recorded calls at once and compare voice pipelines.
+The system supports English, Spanish, and Catalan callers, deterministic emergency and privacy gates, booking, cancellation, rescheduling, nearest-site directions, family calls, and insurer constraints.
+Repository evidence: 127 agent tests at the time of the jury runbook; 73 published evaluation cases with repeated text evaluations; more than 200 real call logs handled by the reducer; ten concurrent calls previously completed and submitted.

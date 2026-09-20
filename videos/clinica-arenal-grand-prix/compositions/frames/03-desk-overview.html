@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Frame 03 — Front-Desk Mission Control</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: 'Geist';
+        src: local('Geist'), local('Inter'), local('system-ui');
+      }
+
+      :root {
+        --primary: #0f6b5c;
+        --primary-soft: #e3f1ed;
+        --primary-line: #bfded6;
+        --bg: #f6f4ef;
+        --card-bg: #ffffff;
+        --text: #1c1a17;
+        --muted: #6f6a61;
+        --faint: #a39d92;
+        --line: #e6e1d6;
+        --live: #e5484d;
+        --good: #1f7a4d;
+        --good-soft: #e4f3ea;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #ecefe9;
+        font-family: "Geist", system-ui, -apple-system, sans-serif;
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: radial-gradient(circle at 50% 30%, #f4f6f2 0%, #e3e8e2 100%);
+      }
+
+      .browser-window {
+        position: absolute;
+        top: 36px;
+        left: 60px;
+        width: 1800px;
+        height: 970px;
+        background: #f6f4ef;
+        border-radius: 16px;
+        box-shadow: 0 30px 80px rgba(15, 107, 92, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .browser-bar {
+        height: 44px;
+        background: #ebe7df;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        padding: 0 18px;
+        gap: 16px;
+      }
+      .window-dots {
+        display: flex;
+        gap: 8px;
+      }
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .dot.red { background: #ff5f56; }
+      .dot.yellow { background: #ffbd2e; }
+      .dot.green { background: #27c93f; }
+
+      .address-pill {
+        flex: 1;
+        max-width: 560px;
+        margin: 0 auto;
+        height: 28px;
+        background: #ffffff;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .address-text {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .status-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--good);
+        background: var(--good-soft);
+        padding: 4px 10px;
+        border-radius: 100px;
+      }
+
+      /* Desk Top Nav */
+      .desk-nav {
+        height: 48px;
+        background: #ffffff;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        gap: 16px;
+      }
+      .brand-title {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .brand-accent {
+        color: var(--primary);
+        font-weight: 700;
+      }
+      .connection-badge {
+        font-size: 12px;
+        color: var(--good);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+      }
+      .nav-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .btn-nav {
+        height: 32px;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: #ffffff;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn-nav-primary {
+        background: var(--primary);
+        color: #ffffff;
+        border: none;
+        font-weight: 600;
+      }
+
+      /* 3-Column Desk Layout */
+      .desk-body {
+        height: 878px;
+        display: flex;
+        min-height: 0;
+      }
+
+      /* Left Pane: Call Queue */
+      .queue-pane {
+        width: 320px;
+        height: 100%;
+        border-right: 1px solid var(--line);
+        background: #ffffff;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+      }
+      .queue-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--line);
+        padding: 10px 14px 0;
+        gap: 12px;
+      }
+      .tab-item {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--muted);
+        padding-bottom: 8px;
+        cursor: pointer;
+      }
+      .tab-item.active {
+        color: var(--text);
+        border-bottom: 2px solid var(--primary);
+      }
+      .call-list {
+        flex: 1;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        overflow: hidden;
+      }
+      .call-item {
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        padding: 12px;
+        background: #ffffff;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        transition: all 0.2s ease;
+      }
+      .call-item.selected {
+        border-color: var(--primary);
+        background: #f4f9f7;
+        box-shadow: 0 2px 8px rgba(15, 107, 92, 0.08);
+      }
+      .call-item-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .caller-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .live-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--live);
+        box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.2);
+      }
+      .call-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--faint);
+      }
+      .pill-tag {
+        background: #f0eee8;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      /* Center Pane: Chat & Turn Timeline */
+      .chat-pane {
+        flex: 1;
+        background: #f6f4ef;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--line);
+      }
+      .chat-header {
+        height: 54px;
+        background: #ffffff;
+        border-bottom: 1px solid var(--line);
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .chat-title-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .chat-caller-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .tag-live-badge {
+        background: rgba(229, 72, 77, 0.1);
+        color: var(--live);
+        border: 1px solid rgba(229, 72, 77, 0.2);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 100px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        overflow: hidden;
+      }
+      .turn-bubble {
+        max-width: 680px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        font-size: 13.5px;
+        line-height: 1.5;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      }
+      .turn-bubble.user {
+        align-self: flex-start;
+        background: #ffffff;
+        border: 1px solid var(--line);
+        color: var(--text);
+      }
+      .turn-bubble.agent {
+        align-self: flex-end;
+        background: var(--primary);
+        color: #ffffff;
+      }
+      .turn-time {
+        font-size: 10.5px;
+        margin-top: 4px;
+        opacity: 0.7;
+        text-align: right;
+      }
+
+      /* Action Card */
+      .action-card {
+        align-self: center;
+        width: 680px;
+        background: #ffffff;
+        border: 1px solid var(--primary-line);
+        border-radius: 12px;
+        padding: 14px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        box-shadow: 0 4px 14px rgba(15, 107, 92, 0.06);
+      }
+      .action-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .action-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--primary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .action-latency {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--muted);
+        background: #f0f4f2;
+        padding: 2px 8px;
+        border-radius: 100px;
+      }
+      .action-body {
+        font-size: 13px;
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      /* Right Pane: Patient Panel with HIPAA Masking */
+      .patient-pane {
+        width: 380px;
+        background: #ffffff;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .patient-avatar-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--line);
+      }
+      .avatar-circle {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: var(--primary-soft);
+        border: 2px solid var(--primary-line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: var(--primary);
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .patient-full-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .patient-sub {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .verified-badge {
+        margin-top: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--good);
+        background: var(--good-soft);
+        padding: 3px 10px;
+        border-radius: 100px;
+      }
+
+      .patient-details-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .detail-row {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .detail-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--faint);
+      }
+      .detail-val {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      /* HIPAA Masking Highlight */
+      .masked-pill {
+        font-family: monospace;
+        letter-spacing: 0.1em;
+        background: #f6f4ef;
+        padding: 3px 8px;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        font-size: 13px;
+        color: var(--text);
+        transition: all 0.3s ease;
+      }
+      .masked-pill.highlight {
+        border-color: var(--primary);
+        background: var(--primary-soft);
+        color: var(--primary);
+        box-shadow: 0 0 12px rgba(15, 107, 92, 0.2);
+      }
+
+      /* Security Callout Badge */
+      .hipaa-security-badge {
+        background: rgba(15, 107, 92, 0.06);
+        border: 1px solid var(--primary-line);
+        border-radius: 10px;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--primary);
+        font-weight: 500;
+        margin-top: 10px;
+      }
+
+      .sim-cursor {
+        position: absolute;
+        width: 22px;
+        height: 22px;
+        pointer-events: none;
+        z-index: 100;
+        top: 600px;
+        left: 500px;
+        opacity: 0;
+      }
+
+      .floating-feature-chip {
+        position: absolute;
+        bottom: 24px;
+        right: 28px;
+        background: rgba(15, 107, 92, 0.95);
+        backdrop-filter: blur(8px);
+        color: #ffffff;
+        padding: 8px 16px;
+        border-radius: 100px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        z-index: 50;
+        opacity: 0;
+      }
+      .feature-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #34d399;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="03-desk-overview" data-width="1920" data-height="1080" data-duration="21.0">
+      
+      <!-- Full-width authentic browser window -->
+      <div class="browser-window" id="browserWindow">
+        <div class="browser-bar">
+          <div class="window-dots">
+            <div class="dot red"></div>
+            <div class="dot yellow"></div>
+            <div class="dot green"></div>
+          </div>
+          <div class="address-pill">
+            <span class="address-lock" style="color: var(--primary);">🔒</span>
+            <span>https://</span><span class="address-text">clinica-arenal.com/desk</span>
+          </div>
+          <div class="status-pill">
+            <span>●</span> Connected to Live Logs
+          </div>
+        </div>
+
+        <!-- Desk Top Nav -->
+        <div class="desk-nav">
+          <span class="brand-title"><span class="brand-accent">Clínica Arenal</span> · front desk</span>
+          <span class="connection-badge">● connected to the call logs (port 7870)</span>
+          <div class="nav-actions">
+            <button class="btn-nav">⇄ Compare pipelines</button>
+            <button class="btn-nav">☷ Replay ten at once</button>
+            <button class="btn-nav btn-nav-primary">Open caller's screen</button>
+          </div>
+        </div>
+
+        <!-- Desk 3-Column Body (UNCROPPED) -->
+        <div class="desk-body">
+          <!-- Left: Call Queue -->
+          <div class="queue-pane">
+            <div class="queue-tabs">
+              <span class="tab-item active">Live (1)</span>
+              <span class="tab-item">Past (12)</span>
+            </div>
+            <div class="call-list">
+              <!-- Selected Live Call -->
+              <div class="call-item selected" id="callItemLive">
+                <div class="call-item-top">
+                  <span class="caller-name">Josefa Domínguez Navarro</span>
+                  <span class="live-dot"></span>
+                </div>
+                <div class="call-meta">
+                  <span class="pill-tag" style="background: var(--good-soft); color: var(--good);">web phone</span>
+                  <span class="pill-tag">pipeline A</span>
+                  <span>00:18</span>
+                </div>
+              </div>
+
+              <!-- Other calls -->
+              <div class="call-item" style="opacity: 0.65;">
+                <div class="call-item-top">
+                  <span class="caller-name">Lucía Ortega Ruiz</span>
+                  <span style="font-size: 11px; color: var(--faint);">00:48</span>
+                </div>
+                <div class="call-meta">
+                  <span class="pill-tag">phone line</span>
+                  <span class="pill-tag">booked</span>
+                </div>
+              </div>
+
+              <div class="call-item" style="opacity: 0.65;">
+                <div class="call-item-top">
+                  <span class="caller-name">Álvaro Martín Santos</span>
+                  <span style="font-size: 11px; color: var(--faint);">00:48</span>
+                </div>
+                <div class="call-meta">
+                  <span class="pill-tag">phone line</span>
+                  <span class="pill-tag">booked</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Center: Chat Conversation Pane -->
+          <div class="chat-pane">
+            <div class="chat-header">
+              <div class="chat-title-group">
+                <span class="chat-caller-title">Josefa Domínguez Navarro</span>
+                <span class="tag-live-badge">● LIVE SESSION</span>
+                <span style="font-size: 12px; color: var(--muted);">web phone · pipeline A (ElevenLabs)</span>
+              </div>
+              <span style="font-size: 12px; color: var(--muted); font-weight: 500;">Operator Supervisory Mode</span>
+            </div>
+
+            <div class="chat-messages">
+              <div class="turn-bubble user">
+                <div>Good morning. I'd like to book an appointment with Dr. Ortiz next week.</div>
+                <div class="turn-time">caller · 00:04</div>
+              </div>
+
+              <div class="turn-bubble agent">
+                <div>Good morning, Josefa. One moment while I check the diary for Dr. Ortiz at Arenal Centro.</div>
+                <div class="turn-time">agent · 00:08 · answered in 1.1s</div>
+              </div>
+
+              <!-- Real-time Action Card -->
+              <div class="action-card" id="deskActionCard">
+                <div class="action-header">
+                  <span class="action-title">📅 Free slots found</span>
+                  <span class="action-latency">lookups 600ms</span>
+                </div>
+                <div class="action-body">
+                  <strong>Tuesday at 12:30</strong> · Dr. Rafael Ortiz · Arenal Centro
+                </div>
+                <div style="font-size: 11px; color: var(--muted);">18 free slots behind this offer — rendered to caller's screen.</div>
+              </div>
+
+              <div class="turn-bubble agent" style="margin-top: 4px;">
+                <div>The earliest appointment is with Dr. Ortiz at Arenal Centro, at 12:30. The other free times are visible on your screen.</div>
+                <div class="turn-time">agent · 00:14 · answered in 1.3s</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Patient Profile with HIPAA Protection -->
+          <div class="patient-pane">
+            <div class="patient-avatar-box">
+              <div class="avatar-circle">JD</div>
+              <div class="patient-full-name">Josefa Domínguez Navarro</div>
+              <div class="patient-sub">61 years · female · P00003</div>
+              <div class="verified-badge">✓ verified on name + phone</div>
+            </div>
+
+            <div class="patient-details-list">
+              <div class="detail-row">
+                <span class="detail-label">Date of Birth</span>
+                <span class="detail-val">12 Apr 1963</span>
+              </div>
+
+              <div class="detail-row">
+                <span class="detail-label">National ID (DNI / NIE)</span>
+                <span class="detail-val">
+                  <span class="masked-pill" id="pillDni">•••••716Y</span>
+                </span>
+              </div>
+
+              <div class="detail-row">
+                <span class="detail-label">Phone Number</span>
+                <span class="detail-val">
+                  <span class="masked-pill" id="pillPhone">••••••0529</span>
+                </span>
+              </div>
+
+              <div class="detail-row">
+                <span class="detail-label">Insurance Provider</span>
+                <span class="detail-val" style="color: var(--primary);">Sanitas Más Salud</span>
+              </div>
+
+              <div class="detail-row">
+                <span class="detail-label">Referral Status</span>
+                <span class="detail-val">GP Direct Access (No Referral Required)</span>
+              </div>
+            </div>
+
+            <div class="hipaa-security-badge" id="hipaaBadge">
+              <span style="font-size: 16px;">🛡️</span>
+              <div>
+                <strong style="display: block; font-size: 12px; color: var(--primary);">HIPAA & GDPR Safeguarded</strong>
+                <span style="font-size: 11px; color: var(--muted);">Direct PII masking enforced at wire boundary.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulated Cursor -->
+      <svg class="sim-cursor" id="simCursor" viewBox="0 0 24 24" fill="none" stroke="#1c1a17" stroke-width="1.5">
+        <polygon points="3 3 3 21 8.5 16 13.5 21 16 19 11 14 18 14 3 3" fill="#ffffff"/>
+      </svg>
+
+      <!-- Non-intrusive floating feature chip -->
+      <div class="floating-feature-chip" id="featureChip">
+        <div class="feature-dot"></div>
+        <span>Front-Desk Mission Control · Live Supervision & Masking</span>
+      </div>
+
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["03-desk-overview"] = tl;
+
+      // Window entrance
+      tl.from("#browserWindow", { opacity: 0, y: 25, duration: 0.8, ease: "power2.out" })
+        .to("#featureChip", { opacity: 1, duration: 0.6 }, "-=0.3");
+
+      // Animate active live call in queue
+      tl.to("#callItemLive", {
+        boxShadow: "0 4px 16px rgba(15, 107, 92, 0.2)",
+        duration: 0.8,
+        repeat: 30,
+        yoyo: true,
+        ease: "sine.inOut"
+      }, "+=0.2");
+
+      // Cursor enters and moves across to inspect HIPAA masked pills
+      tl.to("#simCursor", { opacity: 1, duration: 0.3 }, "+=0.3")
+        .to("#simCursor", { x: 740, y: -260, duration: 1.2, ease: "power2.inOut" });
+
+      // Highlight DNI masking
+      tl.to("#pillDni", { className: "masked-pill highlight", duration: 0.3 })
+        .to("#simCursor", { y: -200, duration: 0.8, ease: "power1.inOut" })
+        .to("#pillPhone", { className: "masked-pill highlight", duration: 0.3 })
+        .to("#hipaaBadge", { scale: 1.03, borderColor: "#0f6b5c", duration: 0.4, ease: "power2.out" });
+
+      // Cursor moves to action card in center chat
+      tl.to("#simCursor", { x: 80, y: -120, duration: 1.4, ease: "power2.inOut" })
+        .to("#deskActionCard", { borderColor: "#0f6b5c", boxShadow: "0 6px 20px rgba(15, 107, 92, 0.15)", duration: 0.5 });
+
+      tl.to({}, { duration: 4.0 });
+    </script>
+  </body>
+</html>

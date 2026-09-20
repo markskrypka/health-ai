@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Frame 01 — The Healthcare Bottleneck</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: 'Geist';
+        src: local('Geist'), local('Inter'), local('system-ui');
+      }
+
+      :root {
+        --primary: #0f6b5c;
+        --primary-light: #e3f1ed;
+        --text: #1c1a17;
+        --muted: #6f6a61;
+        --bg: #0d1312;
+        --card-bg: rgba(255, 255, 255, 0.05);
+        --border: rgba(15, 107, 92, 0.3);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #0d1312;
+        font-family: "Geist", system-ui, -apple-system, sans-serif;
+        color: #ffffff;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      .bg-layer {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 40%, #162422 0%, #080c0b 100%);
+      }
+      .grid-pattern {
+        position: absolute;
+        inset: 0;
+        background-size: 60px 60px;
+        background-image: 
+          linear-gradient(to right, rgba(15, 107, 92, 0.08) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(15, 107, 92, 0.08) 1px, transparent 1px);
+        opacity: 0.7;
+      }
+      .container {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 120px;
+        text-align: center;
+      }
+      .badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(15, 107, 92, 0.2);
+        border: 1px solid var(--border);
+        padding: 10px 24px;
+        border-radius: 100px;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #34d399;
+        margin-bottom: 32px;
+      }
+      .badge-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #34d399;
+        box-shadow: 0 0 12px #34d399;
+      }
+      .hero-title {
+        font-size: 72px;
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        max-width: 1400px;
+        margin-bottom: 28px;
+        background: linear-gradient(180deg, #ffffff 0%, #d1d5db 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .hero-subtitle {
+        font-size: 26px;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #9ca3af;
+        max-width: 1080px;
+        margin-bottom: 50px;
+      }
+      .waveform-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        height: 90px;
+        margin-bottom: 44px;
+      }
+      .waveform-bar {
+        width: 6px;
+        height: 20px;
+        background: #0f6b5c;
+        border-radius: 4px;
+        transition: height 0.1s ease;
+      }
+      .pillars {
+        display: flex;
+        gap: 32px;
+        max-width: 1200px;
+      }
+      .pillar-card {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 24px 30px;
+        text-align: left;
+        backdrop-filter: blur(10px);
+      }
+      .pillar-label {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #34d399;
+        margin-bottom: 8px;
+      }
+      .pillar-val {
+        font-size: 22px;
+        font-weight: 600;
+        color: #f3f4f6;
+      }
+      .sf-watermark {
+        position: absolute;
+        bottom: 36px;
+        right: 48px;
+        font-size: 14px;
+        letter-spacing: 0.05em;
+        color: #6b7280;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="01-hook" data-width="1920" data-height="1080" data-duration="23">
+      <div class="clip bg-layer"></div>
+      <div class="clip grid-pattern"></div>
+      
+      <div class="container">
+        <div class="badge-pill" id="badge">
+          <span class="badge-dot"></span>
+          San Francisco Grand Prix 2026 · Healthcare AI
+        </div>
+
+        <h1 class="hero-title" id="title">
+          One healthcare call becomes a safe care operating system.
+        </h1>
+
+        <p class="hero-subtitle" id="subtitle">
+          Every morning, clinics face rushed conversations, endless hold times, or missed patient care.
+          Clínica Arenal turns live patient phone calls into explainable clinical precision.
+        </p>
+
+        <div class="waveform-container" id="waveform">
+          <!-- 32 audio waveform bars -->
+        </div>
+
+        <div class="pillars" id="pillars">
+          <div class="pillar-card">
+            <div class="pillar-label">Dual Surface</div>
+            <div class="pillar-val">Phone & Browser Telephony</div>
+          </div>
+          <div class="pillar-card">
+            <div class="pillar-label">Explainability</div>
+            <div class="pillar-val">Deterministic Clinic Rules</div>
+          </div>
+          <div class="pillar-card">
+            <div class="pillar-label">Performance</div>
+            <div class="pillar-val">Sub-1.2s Multimodal Pipeline</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sf-watermark">Clínica Arenal · Grand Prix Edition</div>
+    </div>
+
+    <script>
+      // Generate waveform bars
+      const wf = document.getElementById("waveform");
+      const barCount = 36;
+      const bars = [];
+      for (let i = 0; i < barCount; i++) {
+        const bar = document.createElement("div");
+        bar.className = "waveform-bar";
+        wf.appendChild(bar);
+        bars.push(bar);
+      }
+
+      // GSAP timeline
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["01-hook"] = tl;
+      tl.from("#badge", { opacity: 0, y: -20, duration: 1.0, ease: "power2.out" })
+        .from("#title", { opacity: 0, y: 30, duration: 1.4, ease: "power3.out" }, "-=0.5")
+        .from("#subtitle", { opacity: 0, y: 20, duration: 1.2, ease: "power2.out" }, "-=0.8")
+        .from(".pillar-card", { opacity: 0, y: 30, stagger: 0.2, duration: 1.0, ease: "power2.out" }, "-=0.6");
+
+      // Dynamic waveform pulse
+      gsap.to(bars, {
+        height: (i) => 15 + ((Math.sin(i * 12.3) * 0.5 + 0.5) * 65),
+        backgroundColor: (i) => ((i % 3 === 0) ? "#0f6b5c" : "#34d399"),
+        repeat: 60,
+        yoyo: true,
+        stagger: {
+          each: 0.05,
+          from: "center",
+        },
+        duration: 0.35,
+        ease: "sine.inOut"
+      });
+    </script>
+  </body>
+</html>

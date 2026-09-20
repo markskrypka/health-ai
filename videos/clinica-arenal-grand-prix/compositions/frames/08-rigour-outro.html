@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Frame 08 — Engineering Rigour & Grand Prix</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: 'Geist';
+        src: local('Geist'), local('Inter'), local('system-ui');
+      }
+
+      :root {
+        --primary: #0f6b5c;
+        --accent: #34d399;
+        --bg: #090e0d;
+        --card-bg: rgba(255, 255, 255, 0.04);
+        --border: rgba(15, 107, 92, 0.35);
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #090e0d;
+        font-family: "Geist", system-ui, -apple-system, sans-serif;
+        color: #ffffff;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      .bg-layer {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 50%, #132220 0%, #060a09 100%);
+      }
+      .grid-pattern {
+        position: absolute;
+        inset: 0;
+        background-size: 80px 80px;
+        background-image: 
+          linear-gradient(to right, rgba(15, 107, 92, 0.1) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(15, 107, 92, 0.1) 1px, transparent 1px);
+      }
+      .container {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 140px;
+        text-align: center;
+      }
+      .eyebrow {
+        font-size: 15px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #34d399;
+        margin-bottom: 24px;
+        background: rgba(15, 107, 92, 0.2);
+        border: 1px solid var(--border);
+        padding: 8px 24px;
+        border-radius: 100px;
+      }
+      .closing-title {
+        font-size: 68px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        max-width: 1400px;
+        margin-bottom: 50px;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 28px;
+        width: 100%;
+        max-width: 1360px;
+        margin-bottom: 60px;
+      }
+      .stat-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1.5px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 32px 24px;
+        backdrop-filter: blur(12px);
+        text-align: center;
+      }
+      .stat-number {
+        font-size: 58px;
+        font-weight: 700;
+        color: #34d399;
+        line-height: 1.0;
+        margin-bottom: 12px;
+        font-feature-settings: "tnum";
+      }
+      .stat-label {
+        font-size: 18px;
+        font-weight: 600;
+        color: #f3f4f6;
+        margin-bottom: 6px;
+      }
+      .stat-desc {
+        font-size: 13px;
+        color: #9ca3af;
+        line-height: 1.4;
+      }
+      .grand-prix-banner {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 36px;
+        width: 100%;
+        max-width: 1100px;
+        justify-content: center;
+      }
+      .brand-emblem {
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #ffffff;
+      }
+      .brand-emblem span { color: #34d399; }
+      .banner-divider {
+        width: 1px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.2);
+      }
+      .gp-text {
+        font-size: 17px;
+        color: #9ca3af;
+        text-align: left;
+      }
+      .gp-text strong {
+        color: #ffffff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="08-rigour-outro" data-width="1920" data-height="1080">
+      <div class="clip bg-layer"></div>
+      <div class="clip grid-pattern"></div>
+
+      <div class="container">
+        <div class="eyebrow" id="eyebrow">Production-Grade Engineering</div>
+        
+        <h1 class="closing-title" id="title">
+          Crafted for clinicians. Built for patients.<br />
+          Engineered for the Grand Prix.
+        </h1>
+
+        <div class="stats-grid">
+          <div class="stat-card" id="sc1">
+            <div class="stat-number" id="num1">127</div>
+            <div class="stat-label">Agent Tests</div>
+            <div class="stat-desc">Full end-to-end integration & unit coverage</div>
+          </div>
+
+          <div class="stat-card" id="sc2">
+            <div class="stat-number" id="num2">73</div>
+            <div class="stat-label">Benchmark Evals</div>
+            <div class="stat-desc">Published cases evaluated with repeated trials</div>
+          </div>
+
+          <div class="stat-card" id="sc3">
+            <div class="stat-number" id="num3">100%</div>
+            <div class="stat-label">Safety Gates</div>
+            <div class="stat-desc">Code-enforced emergency triage routing</div>
+          </div>
+
+          <div class="stat-card" id="sc4">
+            <div class="stat-number" id="num4">3</div>
+            <div class="stat-label">Languages</div>
+            <div class="stat-desc">Native English, Spanish & Catalan voice support</div>
+          </div>
+        </div>
+
+        <div class="grand-prix-banner" id="banner">
+          <div class="brand-emblem">Clínica <span>Arenal</span></div>
+          <div class="banner-divider"></div>
+          <div class="gp-text">
+            San Francisco Grand Prix Delivery · <strong>Sunday 20 September 2026</strong><br />
+            Creativity · Problem Solving · Craftsmanship
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["08-rigour-outro"] = tl;
+      tl.from("#eyebrow", { opacity: 0, y: -20, duration: 0.8, ease: "power2.out" })
+        .from("#title", { opacity: 0, y: 30, duration: 1.2, ease: "power3.out" }, "-=0.4")
+        .from(".stat-card", { opacity: 0, y: 30, stagger: 0.15, duration: 0.9, ease: "power2.out" }, "-=0.6")
+        .from("#banner", { opacity: 0, y: 20, duration: 1.0, ease: "power2.out" }, "-=0.3");
+
+      // Number counter rolls
+      const c1 = { val: 0 };
+      gsap.to(c1, { val: 127, duration: 2.0, ease: "power2.out", onUpdate: () => {
+        document.getElementById("num1").textContent = Math.round(c1.val);
+      }});
+
+      const c2 = { val: 0 };
+      gsap.to(c2, { val: 73, duration: 1.8, ease: "power2.out", onUpdate: () => {
+        document.getElementById("num2").textContent = Math.round(c2.val);
+      }});
+    </script>
+  </body>
+</html>

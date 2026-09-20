@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Frame 06 — Multi-Pipeline Architecture & Fallback</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: 'Geist';
+        src: local('Geist'), local('Inter'), local('system-ui');
+      }
+
+      :root {
+        --primary: #0f6b5c;
+        --primary-soft: #e3f1ed;
+        --primary-line: #bfded6;
+        --bg: #f6f4ef;
+        --card-bg: #ffffff;
+        --text: #1c1a17;
+        --muted: #6f6a61;
+        --faint: #a39d92;
+        --line: #e6e1d6;
+        --good: #1f7a4d;
+        --good-soft: #e4f3ea;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #ecefe9;
+        font-family: "Geist", system-ui, -apple-system, sans-serif;
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: radial-gradient(circle at 50% 30%, #f4f6f2 0%, #e3e8e2 100%);
+      }
+
+      .browser-window {
+        position: absolute;
+        top: 36px;
+        left: 60px;
+        width: 1800px;
+        height: 970px;
+        background: #f6f4ef;
+        border-radius: 16px;
+        box-shadow: 0 30px 80px rgba(15, 107, 92, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .browser-bar {
+        height: 44px;
+        background: #ebe7df;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        padding: 0 18px;
+        gap: 16px;
+      }
+      .window-dots {
+        display: flex;
+        gap: 8px;
+      }
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .dot.red { background: #ff5f56; }
+      .dot.yellow { background: #ffbd2e; }
+      .dot.green { background: #27c93f; }
+
+      .address-pill {
+        flex: 1;
+        max-width: 560px;
+        margin: 0 auto;
+        height: 28px;
+        background: #ffffff;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .address-text {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .status-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--good);
+        background: var(--good-soft);
+        padding: 4px 10px;
+        border-radius: 100px;
+      }
+
+      .desk-nav {
+        height: 48px;
+        background: #ffffff;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        gap: 16px;
+      }
+      .brand-title {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .brand-accent {
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      /* Compare Pipelines Modal (Full Stage Centered) */
+      .modal-backdrop {
+        position: absolute;
+        inset: 44px 0 0 0;
+        background: rgba(15, 23, 21, 0.45);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 40;
+      }
+      .pipeline-modal {
+        width: 1100px;
+        background: #ffffff;
+        border: 1.5px solid var(--line);
+        border-radius: 18px;
+        box-shadow: 0 35px 80px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .modal-header {
+        height: 56px;
+        background: #f8faf9;
+        border-bottom: 1px solid var(--line);
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .modal-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .modal-sub {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .pipelines-grid {
+        padding: 32px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+      }
+      .pipe-card {
+        border-radius: 14px;
+        border: 2px solid var(--line);
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        background: #ffffff;
+        transition: all 0.3s ease;
+      }
+      .pipe-card.primary {
+        border-color: var(--primary);
+        background: #fdfefe;
+        box-shadow: 0 10px 30px rgba(15, 107, 92, 0.08);
+      }
+      .pipe-card.fallback {
+        border-color: #0284c7;
+        background: #f0f9ff;
+        box-shadow: 0 10px 30px rgba(2, 132, 199, 0.08);
+      }
+
+      .pipe-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .pipe-badge {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 4px 12px;
+        border-radius: 100px;
+      }
+      .badge-pipe-a {
+        background: var(--primary-soft);
+        color: var(--primary);
+      }
+      .badge-pipe-b {
+        background: #e0f2fe;
+        color: #0369a1;
+      }
+      .pipe-status {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--good);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .pipe-stack-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .stack-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 13px;
+        padding: 6px 10px;
+        background: #fbfaf8;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+      }
+      .stack-key {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+      .stack-val {
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      /* Latency Comparison Progress Bar */
+      .latency-box {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .latency-top {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .latency-bar-track {
+        height: 10px;
+        background: #e2e8f0;
+        border-radius: 100px;
+        overflow: hidden;
+      }
+      .latency-bar-fill {
+        height: 100%;
+        border-radius: 100px;
+        width: 0%;
+      }
+
+      .modal-footer {
+        background: #f8faf9;
+        border-top: 1px solid var(--line);
+        padding: 14px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .switchover-tag {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--primary);
+        background: var(--primary-soft);
+        padding: 3px 10px;
+        border-radius: 100px;
+      }
+
+      .sim-cursor {
+        position: absolute;
+        width: 22px;
+        height: 22px;
+        pointer-events: none;
+        z-index: 100;
+        top: 600px;
+        left: 500px;
+        opacity: 0;
+      }
+
+      .floating-feature-chip {
+        position: absolute;
+        bottom: 24px;
+        right: 28px;
+        background: rgba(15, 107, 92, 0.95);
+        backdrop-filter: blur(8px);
+        color: #ffffff;
+        padding: 8px 16px;
+        border-radius: 100px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        z-index: 50;
+        opacity: 0;
+      }
+      .feature-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #34d399;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="06-pipelines" data-width="1920" data-height="1080" data-duration="21.0">
+      
+      <!-- Full uncropped browser window -->
+      <div class="browser-window" id="browserWindow">
+        <div class="browser-bar">
+          <div class="window-dots">
+            <div class="dot red"></div>
+            <div class="dot yellow"></div>
+            <div class="dot green"></div>
+          </div>
+          <div class="address-pill">
+            <span class="address-lock" style="color: var(--primary);">🔒</span>
+            <span>https://</span><span class="address-text">clinica-arenal.com/desk</span>
+          </div>
+          <div class="status-pill">
+            <span>●</span> Twin Voice Pipelines Active
+          </div>
+        </div>
+
+        <div class="desk-nav">
+          <span class="brand-title"><span class="brand-accent">Clínica Arenal</span> · front desk</span>
+          <div style="margin-left: auto; display: flex; gap: 10px;">
+            <button class="btn-nav" id="btnCompare" style="height: 32px; padding: 0 12px; border-radius: 8px; border: 1.5px solid var(--primary); background: var(--primary-soft); color: var(--primary); font-weight: 600; font-size: 12px;">⇄ Compare pipelines</button>
+          </div>
+        </div>
+
+        <!-- Centered Compare Pipelines Modal (No squishing sidebars!) -->
+        <div class="modal-backdrop" id="modalBackdrop">
+          <div class="pipeline-modal" id="pipeModal">
+            <div class="modal-header">
+              <span class="modal-title">⇄ Live Twin Pipeline Comparison</span>
+              <span class="modal-sub">Deterministic Zero-Downtime Fallback Architecture</span>
+            </div>
+
+            <div class="pipelines-grid">
+              <!-- Pipeline A -->
+              <div class="pipe-card primary" id="pipeA">
+                <div class="pipe-header">
+                  <span class="pipe-badge badge-pipe-a">Pipeline A · Primary</span>
+                  <span class="pipe-status">● Live Active</span>
+                </div>
+
+                <div class="pipe-stack-list">
+                  <div class="stack-item">
+                    <span class="stack-key">Speech-to-Text</span>
+                    <span class="stack-val">Deepgram Nova-3</span>
+                  </div>
+                  <div class="stack-item">
+                    <span class="stack-key">Clinical Reasoning</span>
+                    <span class="stack-val">Gemini 3.8 Flash</span>
+                  </div>
+                  <div class="stack-item">
+                    <span class="stack-key">Text-to-Speech</span>
+                    <span class="stack-val">ElevenLabs Flash (Turbo)</span>
+                  </div>
+                  <div class="stack-item">
+                    <span class="stack-key">Inflection Quality</span>
+                    <span class="stack-val" style="color: var(--primary);">Natural Human Conversational</span>
+                  </div>
+                </div>
+
+                <div class="latency-box">
+                  <div class="latency-top">
+                    <span>Roundtrip P95 Latency</span>
+                    <span style="color: var(--primary); font-weight: 700;">820 ms</span>
+                  </div>
+                  <div class="latency-bar-track">
+                    <div class="latency-bar-fill" id="fillA" style="background: var(--primary);"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pipeline B -->
+              <div class="pipe-card fallback" id="pipeB">
+                <div class="pipe-header">
+                  <span class="pipe-badge badge-pipe-b">Pipeline B · Instant Fallback</span>
+                  <span class="pipe-status" style="color: #0284c7;">● Hot Standby</span>
+                </div>
+
+                <div class="pipe-stack-list">
+                  <div class="stack-item">
+                    <span class="stack-key">Speech-to-Text</span>
+                    <span class="stack-val">Deepgram Nova-3</span>
+                  </div>
+                  <div class="stack-item">
+                    <span class="stack-key">Clinical Reasoning</span>
+                    <span class="stack-val">Gemini 3.8 Flash</span>
+                  </div>
+                  <div class="stack-item">
+                    <span class="stack-key">Text-to-Speech</span>
+                    <span class="stack-val">Deepgram Aura-2</span>
+                  </div>
+                  <div class="stack-item">
+                    <span class="stack-key">Cost Telemetry</span>
+                    <span class="stack-val" style="color: #0284c7;">Ultra-Low Cost ($0.011/min)</span>
+                  </div>
+                </div>
+
+                <div class="latency-box">
+                  <div class="latency-top">
+                    <span>Roundtrip P95 Latency</span>
+                    <span style="color: #0284c7; font-weight: 700;">680 ms</span>
+                  </div>
+                  <div class="latency-bar-track">
+                    <div class="latency-bar-fill" id="fillB" style="background: #0284c7;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <span>Automatic switchover triggers upon any socket or audio chunk jitter exceeding 1200ms.</span>
+              <span class="switchover-tag">Seamless Failover: &lt; 14ms</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cursor -->
+      <svg class="sim-cursor" id="simCursor" viewBox="0 0 24 24" fill="none" stroke="#1c1a17" stroke-width="1.5">
+        <polygon points="3 3 3 21 8.5 16 13.5 21 16 19 11 14 18 14 3 3" fill="#ffffff"/>
+      </svg>
+
+      <!-- Feature Chip -->
+      <div class="floating-feature-chip" id="featureChip">
+        <div class="feature-dot"></div>
+        <span>Twin Architecture · ElevenLabs Flash &amp; Deepgram Aura-2</span>
+      </div>
+
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["06-pipelines"] = tl;
+
+      tl.from("#browserWindow", { opacity: 0, y: 25, duration: 0.8, ease: "power2.out" })
+        .to("#featureChip", { opacity: 1, duration: 0.6 }, "-=0.3");
+
+      // Modal animates open in center
+      tl.from("#pipeModal", {
+        opacity: 0,
+        scale: 0.92,
+        duration: 0.7,
+        ease: "power3.out"
+      }, "+=0.2");
+
+      // Animate latency comparison bars
+      tl.to("#fillA", { width: "82%", duration: 1.2, ease: "power2.out" }, "+=0.2")
+        .to("#fillB", { width: "68%", duration: 1.2, ease: "power2.out" }, "-=1.0");
+
+      // Cursor glides across to inspect fallback
+      tl.to("#simCursor", { opacity: 1, duration: 0.3 }, "+=0.2")
+        .to("#simCursor", { x: 320, y: -200, duration: 1.4, ease: "power2.inOut" });
+
+      tl.to("#pipeB", {
+        borderColor: "#0284c7",
+        boxShadow: "0 12px 36px rgba(2, 132, 199, 0.2)",
+        duration: 0.5
+      });
+
+      tl.to({}, { duration: 4.0 });
+    </script>
+  </body>
+</html>

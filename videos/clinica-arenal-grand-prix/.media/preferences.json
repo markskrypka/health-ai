@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "preferences": {
+    "destination": {
+      "value": "judge-screen",
+      "confirmed_in": [
+        "clinica-arenal-grand-prix"
+      ],
+      "updated_at": "2026-09-20T06:31:18.755Z"
+    },
+    "aspect": {
+      "value": "1920x1080",
+      "confirmed_in": [
+        "clinica-arenal-grand-prix"
+      ],
+      "updated_at": "2026-09-20T06:31:18.789Z"
+    },
+    "language": {
+      "value": "en",
+      "confirmed_in": [
+        "clinica-arenal-grand-prix"
+      ],
+      "updated_at": "2026-09-20T06:31:18.823Z"
+    },
+    "flow": {
+      "value": "automation",
+      "confirmed_in": [
+        "clinica-arenal-grand-prix"
+      ],
+      "updated_at": "2026-09-20T06:31:18.856Z"
+    },
+    "storyboard": {
+      "value": "no",
+      "confirmed_in": [
+        "clinica-arenal-grand-prix"
+      ],
+      "updated_at": "2026-09-20T06:31:18.889Z"
+    },
+    "style_preset.product-launch-video": {
+      "value": "blue-professional",
+      "confirmed_in": [
+        "clinica-arenal-grand-prix"
+      ],
+      "updated_at": "2026-09-20T06:32:39.721Z"
+    }
+  },
+  "sightings": {}
+}

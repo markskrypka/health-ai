@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Frame 07 — Simulated Concurrency Stress</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: 'Geist';
+        src: local('Geist'), local('Inter'), local('system-ui');
+      }
+
+      :root {
+        --primary: #0f6b5c;
+        --primary-soft: #e3f1ed;
+        --primary-line: #bfded6;
+        --bg: #f6f4ef;
+        --card-bg: #ffffff;
+        --text: #1c1a17;
+        --muted: #6f6a61;
+        --faint: #a39d92;
+        --line: #e6e1d6;
+        --live: #e5484d;
+        --good: #1f7a4d;
+        --good-soft: #e4f3ea;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #ecefe9;
+        font-family: "Geist", system-ui, -apple-system, sans-serif;
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: radial-gradient(circle at 50% 30%, #f4f6f2 0%, #e3e8e2 100%);
+      }
+
+      /* Full uncropped browser window */
+      .browser-window {
+        position: absolute;
+        top: 36px;
+        left: 60px;
+        width: 1800px;
+        height: 970px;
+        background: #f6f4ef;
+        border-radius: 16px;
+        box-shadow: 0 30px 80px rgba(15, 107, 92, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .browser-bar {
+        height: 44px;
+        background: #ebe7df;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        padding: 0 18px;
+        gap: 16px;
+      }
+      .window-dots {
+        display: flex;
+        gap: 8px;
+      }
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .dot.red { background: #ff5f56; }
+      .dot.yellow { background: #ffbd2e; }
+      .dot.green { background: #27c93f; }
+
+      .address-pill {
+        flex: 1;
+        max-width: 560px;
+        margin: 0 auto;
+        height: 28px;
+        background: #ffffff;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .address-text {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .status-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--live);
+        background: rgba(229, 72, 77, 0.1);
+        padding: 4px 10px;
+        border-radius: 100px;
+      }
+
+      .desk-nav {
+        height: 48px;
+        background: #ffffff;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        gap: 16px;
+      }
+      .brand-title {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .brand-accent {
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      .desk-body {
+        height: 878px;
+        display: flex;
+        min-height: 0;
+      }
+
+      /* Left Pane: 10 Concurrent Calls List */
+      .queue-pane {
+        width: 440px;
+        height: 100%;
+        border-right: 1px solid var(--line);
+        background: #ffffff;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+      }
+      .queue-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #faf9f6;
+        flex-shrink: 0;
+      }
+      .queue-title {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: var(--live);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .concurrency-badge {
+        font-size: 11px;
+        font-weight: 700;
+        background: rgba(229, 72, 77, 0.1);
+        color: var(--live);
+        padding: 2px 8px;
+        border-radius: 100px;
+      }
+
+      .call-list-scroll {
+        flex: 1;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-height: 0;
+        overflow-y: auto;
+      }
+      .concur-item {
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        padding: 8px 12px;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s ease;
+      }
+      .concur-item.active-stream {
+        border-color: rgba(229, 72, 77, 0.3);
+        background: #fff8f8;
+      }
+      .item-left {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .item-name {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .item-meta {
+        font-size: 10.5px;
+        color: var(--muted);
+        display: flex;
+        gap: 6px;
+      }
+
+      .item-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .wave-bars-mini {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        height: 14px;
+      }
+      .bar-mini {
+        width: 2.5px;
+        background: var(--live);
+        border-radius: 2px;
+        height: 4px;
+      }
+      .timer-num {
+        font-size: 11.5px;
+        font-family: monospace;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      /* Center / Right: Real-time Concurrency Telemetry Dashboard */
+      .telemetry-pane {
+        flex: 1;
+        background: #f6f4ef;
+        padding: 28px 36px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .telemetry-header-card {
+        background: #ffffff;
+        border: 1.5px solid var(--primary-line);
+        border-radius: 14px;
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 4px 14px rgba(15, 107, 92, 0.05);
+      }
+      .telemetry-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+      .telemetry-desc {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+
+      .metrics-quad {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+      .quad-card {
+        background: #ffffff;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 18px 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+      }
+      .quad-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--faint);
+        letter-spacing: 0.05em;
+        margin-bottom: 6px;
+      }
+      .quad-val {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .quad-sub {
+        font-size: 12px;
+        color: var(--good);
+        font-weight: 600;
+        margin-top: 4px;
+      }
+
+      .workers-matrix {
+        background: #ffffff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .matrix-header {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .channels-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+      }
+      .channel-chip {
+        border: 1.5px solid rgba(15, 107, 92, 0.3);
+        background: var(--primary-soft);
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .ch-id {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+      .ch-state {
+        font-size: 10px;
+        color: var(--good);
+        font-weight: 600;
+      }
+
+      .sim-cursor {
+        position: absolute;
+        width: 22px;
+        height: 22px;
+        pointer-events: none;
+        z-index: 100;
+        top: 600px;
+        left: 500px;
+        opacity: 0;
+      }
+
+      .floating-feature-chip {
+        position: absolute;
+        bottom: 24px;
+        right: 28px;
+        background: rgba(15, 107, 92, 0.95);
+        backdrop-filter: blur(8px);
+        color: #ffffff;
+        padding: 8px 16px;
+        border-radius: 100px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        z-index: 50;
+        opacity: 0;
+      }
+      .feature-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #34d399;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="07-concurrency" data-width="1920" data-height="1080" data-duration="20.0" data-layout-allow-overlap>
+      
+      <!-- Full uncropped browser window -->
+      <div class="browser-window" id="browserWindow">
+        <div class="browser-bar">
+          <div class="window-dots">
+            <div class="dot red"></div>
+            <div class="dot yellow"></div>
+            <div class="dot green"></div>
+          </div>
+          <div class="address-pill">
+            <span class="address-lock" style="color: var(--primary);">🔒</span>
+            <span>https://</span><span class="address-text">clinica-arenal.com/desk/concurrency</span>
+          </div>
+          <div class="status-pill">
+            <span>●</span> 10 Concurrent Channels Live
+          </div>
+        </div>
+
+        <div class="desk-nav">
+          <span class="brand-title"><span class="brand-accent">Clínica Arenal</span> · front desk</span>
+          <span style="font-size: 12px; color: var(--live); font-weight: 600;">● Multi-Session Concurrency Stress Engine Active</span>
+        </div>
+
+        <div class="desk-body">
+          <!-- Left: 10 Concurrent Calls List -->
+          <div class="queue-pane">
+            <div class="queue-header">
+              <span class="queue-title">● Parallel Replay Sessions</span>
+              <span class="concurrency-badge">10 at once</span>
+            </div>
+
+            <div class="call-list-scroll" id="callList">
+              <!-- Call 1 -->
+              <div class="concur-item active-stream">
+                <div class="item-left">
+                  <span class="item-name">Josefa Domínguez Navarro</span>
+                  <div class="item-meta"><span>web</span><span>pipeline A</span></div>
+                </div>
+                <div class="item-right">
+                  <div class="wave-bars-mini"><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div></div>
+                  <span class="timer-num">00:24</span>
+                </div>
+              </div>
+
+              <!-- Call 2 -->
+              <div class="concur-item active-stream">
+                <div class="item-left">
+                  <span class="item-name">Lucía Ortega Ruiz</span>
+                  <div class="item-meta"><span>phone</span><span>pipeline A</span></div>
+                </div>
+                <div class="item-right">
+                  <div class="wave-bars-mini"><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div></div>
+                  <span class="timer-num">00:24</span>
+                </div>
+              </div>
+
+              <!-- Call 3 -->
+              <div class="concur-item active-stream">
+                <div class="item-left">
+                  <span class="item-name">Álvaro Martín Santos</span>
+                  <div class="item-meta"><span>phone</span><span>pipeline B</span></div>
+                </div>
+                <div class="item-right">
+                  <div class="wave-bars-mini"><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div></div>
+                  <span class="timer-num">00:24</span>
+                </div>
+              </div>
+
+              <!-- Call 4 -->
+              <div class="concur-item active-stream">
+                <div class="item-left">
+                  <span class="item-name">Teresa López García</span>
+                  <div class="item-meta"><span>web</span><span>pipeline B</span></div>
+                </div>
+                <div class="item-right">
+                  <div class="wave-bars-mini"><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div></div>
+                  <span class="timer-num">00:24</span>
+                </div>
+              </div>
+
+              <!-- Call 5 -->
+              <div class="concur-item active-stream">
+                <div class="item-left">
+                  <span class="item-name">Elena Garrido Soler</span>
+                  <div class="item-meta"><span>phone</span><span>pipeline A</span></div>
+                </div>
+                <div class="item-right">
+                  <div class="wave-bars-mini"><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div></div>
+                  <span class="timer-num">00:24</span>
+                </div>
+              </div>
+
+              <!-- Call 6 -->
+              <div class="concur-item active-stream">
+                <div class="item-left">
+                  <span class="item-name">Carlos Vega Mendez</span>
+                  <div class="item-meta"><span>web</span><span>pipeline A</span></div>
+                </div>
+                <div class="item-right">
+                  <div class="wave-bars-mini"><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div></div>
+                  <span class="timer-num">00:24</span>
+                </div>
+              </div>
+
+              <!-- Call 7 -->
+              <div class="concur-item active-stream">
+                <div class="item-left">
+                  <span class="item-name">Carmen Sánchez Gil</span>
+                  <div class="item-meta"><span>phone</span><span>pipeline B</span></div>
+                </div>
+                <div class="item-right">
+                  <div class="wave-bars-mini"><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div></div>
+                  <span class="timer-num">00:24</span>
+                </div>
+              </div>
+
+              <!-- Call 8 -->
+              <div class="concur-item active-stream">
+                <div class="item-left">
+                  <span class="item-name">Mateo Benítez Díaz</span>
+                  <div class="item-meta"><span>web</span><span>pipeline B</span></div>
+                </div>
+                <div class="item-right">
+                  <div class="wave-bars-mini"><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div><div class="bar-mini"></div></div>
+                  <span class="timer-num">00:24</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Center / Right: Concurrency Telemetry -->
+          <div class="telemetry-pane">
+            <div class="telemetry-header-card">
+              <div>
+                <div class="telemetry-title">Simultaneous Replay &amp; Lock Isolation</div>
+                <div class="telemetry-desc">Independent async state machines, SQLite WAL isolation, zero cross-talk.</div>
+              </div>
+              <div style="font-size: 13px; font-weight: 700; color: var(--good); background: var(--good-soft); padding: 6px 14px; border-radius: 100px;">
+                ● Zero Latency Drift
+              </div>
+            </div>
+
+            <div class="metrics-quad">
+              <div class="quad-card">
+                <div class="quad-label">Active Concurrency</div>
+                <div class="quad-val" style="color: var(--live);">10 Calls</div>
+                <div class="quad-sub">Simultaneous Streams</div>
+              </div>
+
+              <div class="quad-card">
+                <div class="quad-label">Lock Collision Rate</div>
+                <div class="quad-val" style="color: var(--good);">0.00%</div>
+                <div class="quad-sub">Isolated Transactions</div>
+              </div>
+
+              <div class="quad-card">
+                <div class="quad-label">P95 Audio Latency</div>
+                <div class="quad-val" style="color: var(--primary);">740 ms</div>
+                <div class="quad-sub">Constant Under Load</div>
+              </div>
+            </div>
+
+            <!-- Workers Matrix -->
+            <div class="workers-matrix">
+              <div class="matrix-header">
+                <span>Active Telephony Stream Workers</span>
+                <span style="font-size: 12px; color: var(--muted);">10 Worker Channels Ready</span>
+              </div>
+              <div class="channels-grid">
+                <div class="channel-chip"><span class="ch-id">Worker #01</span><span class="ch-state">● Streaming</span></div>
+                <div class="channel-chip"><span class="ch-id">Worker #02</span><span class="ch-state">● Streaming</span></div>
+                <div class="channel-chip"><span class="ch-id">Worker #03</span><span class="ch-state">● Streaming</span></div>
+                <div class="channel-chip"><span class="ch-id">Worker #04</span><span class="ch-state">● Streaming</span></div>
+                <div class="channel-chip"><span class="ch-id">Worker #05</span><span class="ch-state">● Streaming</span></div>
+                <div class="channel-chip"><span class="ch-id">Worker #06</span><span class="ch-state">● Streaming</span></div>
+                <div class="channel-chip"><span class="ch-id">Worker #07</span><span class="ch-state">● Streaming</span></div>
+                <div class="channel-chip"><span class="ch-id">Worker #08</span><span class="ch-state">● Streaming</span></div>
+                <div class="channel-chip"><span class="ch-id">Worker #09</span><span class="ch-state">● Streaming</span></div>
+                <div class="channel-chip"><span class="ch-id">Worker #10</span><span class="ch-state">● Streaming</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Chip -->
+      <div class="floating-feature-chip" id="featureChip">
+        <div class="feature-dot"></div>
+        <span>Concurrency Stress Architecture · 10 Parallel Replays</span>
+      </div>
+
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["07-concurrency"] = tl;
+
+      tl.from("#browserWindow", { opacity: 0, y: 25, duration: 0.8, ease: "power2.out" })
+        .to("#featureChip", { opacity: 1, duration: 0.6 }, "-=0.3");
+
+      // Animate wave bars across all 10 calls
+      const miniBars = document.querySelectorAll(".bar-mini");
+      miniBars.forEach((b, i) => {
+        gsap.to(b, {
+          height: () => 4 + Math.abs(Math.sin(i * 1.5)) * 12,
+          duration: 0.22,
+          repeat: 50,
+          yoyo: true,
+          ease: "sine.inOut",
+          delay: (i % 5) * 0.04
+        });
+      });
+
+      tl.to({}, { duration: 4.0 });
+    </script>
+  </body>
+</html>
