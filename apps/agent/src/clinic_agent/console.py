@@ -310,6 +310,14 @@ async def call_analysis(call_id: str) -> dict:
         raise HTTPException(502, f"the reading failed: {type(err).__name__}") from err
 
 
+@app.post("/api/analysis")
+async def read_more(limit: int = 30) -> dict:
+    """Read the newest finished calls that have no reading yet — the comparison needs moods to compare."""
+    unread = [p.stem for p in _logs() if p.stem not in readings and (s := _summary_of(p.stem))["ended"] and s["turns"]][:limit]
+    results = await asyncio.gather(*(_read_call(call_id) for call_id in unread), return_exceptions=True)
+    return {"read": sum(1 for r in results if isinstance(r, dict)), "failed": sum(1 for r in results if not isinstance(r, dict))}
+
+
 @app.get("/api/pipelines")
 async def pipelines_compared(limit: int = 400) -> dict:
     """Finished calls side by side, by the pipeline that took them — so two agents can be compared on the same desk.

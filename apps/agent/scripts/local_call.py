@@ -10,6 +10,7 @@ import asyncio
 import audioop
 import base64
 import json
+import os
 import sys
 import time
 import uuid
@@ -50,7 +51,8 @@ SCENARIO = sys.argv[1] if len(sys.argv) > 1 else "english"
 URL = sys.argv[2] if len(sys.argv) > 2 else "ws://localhost:7860/ws"
 FROM_NUMBER, VOICE, LINES = SCENARIOS[SCENARIO]
 # What the web page adds to the `start` message (clinic_agent/screen.py): that it is a screen, and the form.
-WEB = {"screen": "1", "prefill": json.dumps({"name": "Josefa Domínguez Navarro", "national_id": "48064716Y"})} if SCENARIO == "web" else {}
+WEB = {"screen": "1", "prefill": json.dumps({"name": "Josefa Domínguez Navarro", "national_id": "48064716Y"}),
+       **({"pipeline": os.environ["PIPELINE"]} if os.getenv("PIPELINE") else {})} if SCENARIO == "web" else {}
 DG = {"Authorization": f"Token {config.DEEPGRAM_API_KEY}"}
 
 
@@ -127,7 +129,7 @@ async def main() -> None:
                 "track": "inbound", "chunk": str(chunk), "timestamp": str(ts), "payload": base64.b64encode(payload).decode()}}))
             seq, chunk, ts = seq + 1, chunk + 1, ts + 20
 
-        async def wait_for_agent(min_wait: float, quiet_for: float = 1.4, give_up: float = 25.0) -> None:
+        async def wait_for_agent(min_wait: float, quiet_for: float = 2.6, give_up: float = 25.0) -> None:
             """Line stays open (silence frames) until the agent has spoken and then gone quiet."""
             start = time.monotonic() - t0
             while True:

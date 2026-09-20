@@ -15,9 +15,15 @@ const show = (v: number | null, unit = "", digits = 0) => (v == null ? "—" : `
 /** Finished calls side by side, by the pipeline that took them. */
 export function Pipelines({ onClose }: { onClose: () => void }) {
   const [rows, setRows] = useState<Row[]>();
-  useEffect(() => {
-    fetch(`${EVENTS_URL}/api/pipelines`).then((r) => r.json()).then((body: { pipelines: Row[] }) => setRows(body.pipelines)).catch(() => setRows([]));
-  }, []);
+  const [reading, setReading] = useState(false);
+  const count = () => fetch(`${EVENTS_URL}/api/pipelines`).then((r) => r.json()).then((body: { pipelines: Row[] }) => setRows(body.pipelines)).catch(() => setRows([]));
+  useEffect(() => { void count(); }, []);
+  const readMore = async () => {
+    setReading(true);
+    await fetch(`${EVENTS_URL}/api/analysis?limit=30`, { method: "POST" }).catch(() => {});
+    await count();
+    setReading(false);
+  };
 
   return (
     <div className="fixed inset-0 z-20 flex items-start justify-center bg-ink/30 p-10 backdrop-blur-[2px]" onClick={onClose}>
@@ -52,6 +58,9 @@ export function Pipelines({ onClose }: { onClose: () => void }) {
               </tbody>
             </table>
           )}
+          <button onClick={readMore} disabled={reading} className="mt-3 rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-soft transition hover:bg-wash disabled:opacity-50">
+            {reading ? "reading…" : "Read the moods of 30 more calls"}
+          </button>
           <p className="mt-3 text-xs text-faint">Medians over finished calls. Mood is read by a model from the call&rsquo;s log after it ends, −2 to +2. Cost is an estimate at list prices from what each call logged: model tokens, characters spoken, minutes listened to.</p>
         </div>
       </div>
