@@ -1,128 +1,170 @@
-# Clínica Arenal — 10-Minute Jury Demo Script
+# Clínica Arenal — Guía de Despliegue y Ejecución para la Demo
+
+> **Guía operativa paso a paso para arrancar, desplegar y presentar el proyecto ante el jurado.**  
+> Equipo: **GING** (Javier, Samer, Mark) · HackSpain 2026 (Prosper Track)
 
 ---
 
-## 👥 Team Roles
+## 🗺️ Mapa de Puertos y Servicios
 
-* **Presenter (Speaker):** Hooks the jury, introduces each test scenario, and explains the clinical/technical decisions.
-* **Patient (Actor):** Speaks naturally on the phone/simulator with realistic pauses and conversational quirks.
-* **Operator (Screen / Tech):** Projects the Live Dashboard, triggers the simulator, and highlights real-time events.
+El sistema se compone de 4 servicios coordinados:
+
+| Puerto | Servicio | Rol | Comando |
+|---|---|---|---|
+| **7860** | `clinic_agent.server:app` | Línea telefónica real (Twilio / Cloudflare Tunnel) | `apps/agent/scripts/restart.sh` |
+| **7861** | `clinic_agent.server:app` | Servidor de llamadas web (Dry-Run seguro) | `apps/agent/scripts/demo.sh` |
+| **7870** | `clinic_agent.console:app` | Servicio de eventos en tiempo real (SSE) | `apps/agent/scripts/demo.sh` |
+| **3100** | Next.js Frontend | Interfaz de operadora (`/desk`) y teléfono web (`/call`) | `apps/agent/scripts/demo.sh` |
 
 ---
 
-## ⏱️ Timeline & Presentation Flow
+## 🚀 Despliegue Rápido (Recomendado para la Demo)
 
+### Paso 1: Comprobar Variables de Entorno (`.env`)
+Asegúrate de que existe el archivo `.env` en la raíz del repositorio con las claves activas:
+```bash
+GOOGLE_API_KEY="AIzaSy..."          # Para Gemini Flash
+DEEPGRAM_API_KEY="b68b..."          # Para transcripción STT Nova-3 y Aura-2
+ELEVENLABS_API_KEY="sk_..."         # Para TTS natural (Pipeline A)
+PROSPER_API_KEY="app_..."           # Token del track Prosper
+PROSPER_BASE_URL="https://..."      # Endpoint de la API de la clínica
 ```
-[00:00 - 01:30]  The Pitch: Why Voice AI in Healthcare Fails (and How We Fixed It)
-[01:30 - 04:00]  Live Call #1: Natural Scheduling, Mid-Call Change of Mind & Insurance
-[04:00 - 06:15]  Live Call #2: Clinical Intelligence & Doctor Name Disambiguation
-[06:15 - 08:00]  Live Call #3: The "WOW" Safety Barrier — Red Flag Triage & 112 Escalation
-[08:00 - 09:15]  Behind the Curtain: Live Audit Trail, 8 kHz Pipeline & 172/172 Points
-[09:15 - 10:00]  Closing & Jury Q&A
+
+---
+
+### Paso 2: Arrancar la Suite de Demo (Un Solo Comando)
+Este script levanta en paralelo el servidor web de llamadas (7861), el gestor de eventos SSE (7870) y la aplicación web Next.js (3100):
+
+```bash
+apps/agent/scripts/demo.sh
+```
+
+**Salida esperada en terminal:**
+```text
+up: 7861
+up: 7870
+up: 3100
+phone line (7860): {"status":"ok","active_calls":0}
+
+  the caller's screen   http://localhost:3100/call
+  the front desk        http://localhost:3100/desk
 ```
 
 ---
 
-## 🎬 Section 1: The Hook (00:00 – 01:30)
+### Paso 3: Arrancar / Comprobar la Línea Telefónica Real (Puerto 7860)
+Si el jurado va a llamar por teléfono real (Twilio / número público):
 
-**Presenter:**
-> *"Good morning, members of the jury. Voice AI in healthcare usually fails where it matters most: it talks over patients, mishears names, gets confused by insurance restrictions, and worse—hallucinates medical advice.*
->
-> *We built an autonomous clinic receptionist for Clínica Arenal that achieves **172 out of 172 points on the benchmark**. It combines sub-second response times, zero hallucinations, strict atomic write guarantees at hang-up, and clinical-grade patient triage.*
->
-> *Today, we’re not showing you a canned video. We’re calling our agent live right now."*
-
----
-
-## 📞 Live Call #1: Conversational Booking & Changing Mind (01:30 – 04:00)
-
-**Presenter:**
-> *"Watch how the agent handles a conversational booking with an immediate change of mind and insurance routing."*
-
-### Spoken Dialogue (English or Spanish)
-
-* **Agent:** *"Clínica Arenal, good morning. How can I help you?"*
-* **Patient:** *"Hi, good morning. I need to book the earliest GP appointment available. My name is Josefa Domínguez Navarro."*
-* **Agent:** *(Runs lookup seamlessly, uses holding phrase if needed)*  
-  *"One moment, please... Josefa, the earliest slot with Dr. Martín Sáez at Arenal Sur is Monday, September 21st at 9:00 AM. Does that work for you?"*
-* **Patient (Change of mind mid-flight):** *"Actually, 9:00 AM is too early. Do you have anything in the afternoon? And by the way, I'm with Mapfre."*
-* **Agent:** *"Checking afternoon slots for Mapfre... I can offer you Monday, September 21st at 4:30 PM with Dr. Sáez at Arenal Sur. Shall I book that for you?"*
-* **Patient:** *"Yes, perfect. Please book it."*
-* **Agent:** *"Your appointment is confirmed for Monday, September 21st at 4:30 PM with Dr. Sáez at Arenal Sur. Thank you for calling Clínica Arenal, have a great day!"*
-
-**Presenter (Pointing at Screen):**
-> *"Notice three critical things on the dashboard:*
-> 1. *When the patient changed their mind, the agent didn't double-book. It atomically replaced the morning offer with the afternoon slot.*
-> 2. *The insurance (Mapfre) was verified against the doctor’s coverage in real time.*
-> 3. *The transaction was finalized strictly when the receiver hung up."*
+1. **Levantar el servidor telefónico:**
+   ```bash
+   apps/agent/scripts/restart.sh
+   ```
+2. **Comprobar salud:**
+   ```bash
+   curl -s http://localhost:7860/health
+   # Respuesta: {"status":"ok","active_calls":0}
+   ```
+3. **Exponer con Cloudflare Tunnel (si no está activo):**
+   ```bash
+   cloudflared tunnel --url http://localhost:7860
+   ```
+   *(Copia la URL `https://xxxx.trycloudflare.com` y configúrala en el Webhook de Twilio).*
 
 ---
 
-## 📞 Live Call #2: Doctor Disambiguation & Near-Miss Names (04:00 – 06:15)
+## 💻 Configuración de Pantallas para la Presentación
 
-**Presenter:**
-> *"In a busy clinic, patients often say: 'Give me an appointment with Dr. Iglesias'. But Clínica Arenal has Dr. Iglesias in Dermatology and Dr. Iglesia in Orthopaedics. Traditional bots pick the wrong doctor. Watch how ours handles ambiguity."*
+Para una demo impactante ante el jurado, utiliza **dos pantallas o pestañas**:
 
-### Spoken Dialogue
+1. **Pantalla Principal (Proyector para el Jurado):**
+   * URL: `http://localhost:3100/desk`
+   * Muestra:
+     * Logo oficial de Prosper con el distintivo **Prosper — GING**.
+     * Tarjetas de acción en vivo (paciente identificado, seguro, ofertas de huecos).
+     * Transcripción en tiempo real y análisis de sentimiento turno a turno.
+     * Coste en céntimos acumulado de la llamada.
 
-* **Agent:** *"Clínica Arenal, good morning. How can I help you?"*
-* **Patient:** *"Hello, I'd like to book an appointment with doctor Iglesias as soon as possible."*
-* **Agent:** *"We have two doctors with similar names: Dr. Carmen Iglesias in Dermatology and Dr. Marcos Iglesia in Orthopaedics. Which specialty or doctor are you looking for?"*
-* **Patient:** *"Oh, Dermatology for a skin checkup, please."*
-* **Agent:** *"Got it, Dr. Carmen Iglesias in Dermatology. Could you give me your full name, please?"*
-* **Patient:** *"Carlos Mendoza Ruiz."*
-* **Agent:** *(Checks patient and finds slots)*  
-  *"Carlos, the first available Dermatology consultation is Wednesday, September 23rd at 11:15 AM at Arenal Centro. Would you like me to book it?"*
-* **Patient:** *"Yes, that’s great. Thank you!"*
-* **Agent:** *"Booked for Wednesday at 11:15 AM with Dr. Carmen Iglesias at Arenal Centro. Have a good day!"*
-
-**Presenter:**
-> *"Zero guesswork. It disambiguated the phonetic collision proactively before hitting the booking engine."*
+2. **Segunda Pantalla / Móvil (Dispositivo que llama):**
+   * URL: `http://localhost:3100/call`
+   * Muestra:
+     * Botón de llamada con audio de navegador (WebRTC/micrófono).
+     * Formulario que se rellena solo con IA conforme el paciente habla.
+     * Calendario interactivo con los huecos disponibles del doctor.
 
 ---
 
-## 🚨 Live Call #3: The "WOW" Factor — Clinical Red Flags & 112 Triage (06:15 – 08:00)
+## 🧪 Pruebas de Humo (Smoke Test) Antes de Subir al Escenario
 
-**Presenter:**
-> *"Now the ultimate test: What happens when an emergency strikes? Many AI bots try to schedule an appointment for next week. That can cost a life. Watch our clinical safety guardrails."*
+Ejecuta estas comprobaciones 5 minutos antes de la presentación:
 
-### Spoken Dialogue
+### 1. Test de Servicios Activos
+```bash
+curl -s http://localhost:7860/health && echo ""
+curl -s http://localhost:7861/health && echo ""
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3100/desk
+```
+*Los tres deben responder código 200.*
 
-* **Agent:** *"Clínica Arenal, good morning. How can I help you?"*
-* **Patient (distressed voice):** *"Hi... I was hoping to see a doctor today. I have intense chest tightness and I'm having trouble breathing..."*
-* **Agent:** *(Halts all booking workflows immediately)*  
-  *"Please hang up and dial 112 immediately. Severe chest tightness and difficulty breathing require immediate emergency medical care. Do not wait for a clinic appointment—call 112 now."*
-* **Patient:** *"Okay, calling 112 now."*
+### 2. Test de Llamada Sintética Local (Sin hablar por micro)
+Para verificar que el pipeline completo (Gemini + STT + Tools) funciona sin tocar el navegador:
+```bash
+PYTHONPATH=apps/agent/src .venv/bin/python apps/agent/scripts/local_call.py
+```
 
-**Presenter (Highlighting Dashboard):**
-> *"Look at the control room:*
-> * *The agent **refused to book a slot**.*
-> * *An `ESCALATE(medical_emergency)` event was latched in the audit log.*
-> * *Even if the caller had asked for a doctor afterwards, the system is hard-locked against booking non-emergency appointments during a red-flag event. This is clinical safety by design."*
-
----
-
-## 💻 Section 4: Under the Hood & Live Audit (08:00 – 09:15)
-
-**Presenter (Operator shows the console timeline):**
-> *"What you see here is why we scored **172/172 points**:*
-> 1. ***Ultra-low latency:*** *Powered by Gemini Flash + Deepgram/ElevenLabs, averaging under 1.5s per turn over raw 8 kHz telephony frames.*
-> 2. ***LookupMute:*** *The microphone is temporarily deafened during API queries so background coughing or 'uh-huh, I’m waiting' never aborts an in-flight search.*
-> 3. ***Complete Post-Call Observability:*** *Every turn, phonetic DNI verification, insurer check, and API response is logged in an append-only audit trail for medical compliance."*
+### 3. Test de Benchmark de Latencia
+Si el jurado pregunta por el rendimiento o queréis mostrar datos empíricos:
+```bash
+PYTHONPATH=apps/agent/src .venv/bin/python scripts/measure_latency.py
+```
+*Muestra latencia mediana de **2.79s** y mínima de **2.12s**.*
 
 ---
 
-## 🎯 Section 5: Closing (09:15 – 10:00)
+## 🛠️ Resolución Rápida de Incidencias (Cheat Sheet)
 
-**Presenter:**
-> *"Clínica Arenal handles 80% of routine inbound administrative calls without adding reception overhead, while protecting patient health with zero tolerance for hallucinations or misdirection.*
->
-> *Thank you very much. We’d love to take your questions or even have one of the judges dial into the system right now!"*
+### Caso 1: Un puerto está ocupado (EADDRINUSE / 7860 / 7861 / 3100)
+Si algún proceso anterior quedó colgado en segundo plano:
+```bash
+# Matar procesos en los puertos de la demo:
+lsof -ti:7860,7861,7870,3100 | xargs kill -9 2>/dev/null || true
+
+# Reejecutar el arranque:
+apps/agent/scripts/demo.sh
+```
+
+### Caso 2: El navegador no captura el micrófono en `/call`
+* Asegúrate de abrir `http://localhost:3100/call` (los navegadores bloquean el micrófono en IPs que no sean `localhost` a menos que tengan HTTPS).
+* Revisa los permisos de micrófono en la barra de direcciones (icono del candado).
+
+### Caso 3: Reiniciar el servidor telefónico limpio
+```bash
+apps/agent/scripts/restart.sh
+```
+*(Espera de forma segura a que no haya llamadas activas antes de reiniciar).*
 
 ---
 
-## 💡 Quick Tips for the Live Room
+## 📞 Casos de Prueba Recomendados para la Demo
 
-1. **Audio Backup:** Have a phone connected to `/phone` or a wired mic; don't rely on laptop room mics in noisy auditoriums.
-2. **Network Backup:** Have a mobile hotspot ready in case the venue's WiFi drops.
-3. **Practice Once:** Do one 3-minute dry run of the 3 calls with your team before heading to the stage.
+1. **Cita estándar con cambio de opinión:**
+   * *"Hola, soy Josefa Domínguez Navarro. Necesito cita con el médico de cabecera lo antes posible."*
+   * *El bot ofrece cita el lunes por la mañana.*
+   * *"Uy, por la mañana no puedo, ¿tienes por la tarde? Y por cierto, tengo Mapfre."*
+   * *El bot cambia atómicamente la cita a la tarde verificando la cobertura.*
+
+2. **Desambiguación de médicos homónimos:**
+   * *"Quiero cita con el doctor Iglesias."*
+   * *El bot detecta la ambigüedad (Dra. Carmen Iglesias en Dermatología vs. Dr. Marcos Iglesia en Traumatología) y pregunta cuál busca.*
+
+3. **Parada de emergencia (Triaje 112 Hard-Lock):**
+   * *"Tengo una opresión muy fuerte en el pecho y me cuesta respirar..."*
+   * *El bot corta en seco cualquier gestión de cita, ordena con voz firme llamar de inmediato al 112 y cuelga registrando el evento de auditoría.*
+
+---
+
+## 👥 Equipo GING
+
+* **Javier**, **Samer**, y **Mark**
+* HackSpain 2026 · Prosper Track
+* Arquitectura: [docs/architecture_diagram.jpg](architecture_diagram.jpg)
+* Latencia: [docs/LATENCY_BENCHMARK.json](LATENCY_BENCHMARK.json)
