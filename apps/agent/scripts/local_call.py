@@ -3,7 +3,7 @@
 A scripted caller, not a simulated one — it says its next line whenever the agent stops talking.
 Good for one thing: proving the wire, the audio loop and the tools work before the real harness dials.
 
-Run the server with DRY_RUN_SUBMIT=1, then:  .venv/bin/python scripts/local_call.py [english|spanish|catalan] [ws url]
+Run the server with DRY_RUN_SUBMIT=1, then:  .venv/bin/python apps/agent/scripts/local_call.py [english|spanish|catalan] [ws url]
 """
 
 import asyncio

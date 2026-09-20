@@ -17,7 +17,7 @@ import time
 import httpx
 from dotenv import load_dotenv
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))  # the repo root
 load_dotenv(os.path.join(ROOT, ".env"))
 BASE = os.environ["PROSPER_BASE_URL"].rstrip("/") + "/leaderboard/api"
 DONE = {"completed", "failed", "cancelled", "canceled", "voided", "error"}

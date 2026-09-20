@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[4]  # the repo root: apps/agent/src/clinic_agent/config.py
 load_dotenv(ROOT / ".env")
 
 # Every date in the challenge resolves in Europe/Madrid.

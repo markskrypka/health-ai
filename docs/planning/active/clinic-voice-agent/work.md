@@ -1,5 +1,7 @@
 # Work — Clinic voice agent
 
+**Parked (2026-09-20, 03:55 Madrid):** the initiative in motion is "The jury demo" (`active/demo-web/work.md`). The agent moved to `apps/agent/` at 03:50 — every path below that starts with `src/`, `scripts/`, `evals/` or `tests/` now starts with `apps/agent/`; run the tests and the evals from `apps/agent`; `.venv/`, `.env`, `logs/` and `docs/` did not move. The phone server and the scored loop were not restarted by the move.
+
 **State (2026-09-20, 03:25 Madrid) — 172 points (maximum, rank 2 of four teams tied at 172); tonight's fixes and the ElevenLabs voice are live; Mark closed the session to build the web demo.**
 - Live since 03:12 (`scripts/restart.sh`, line idle): audit Tier 1 — ten-minute call limit, offer rounds and slots bound to their patient, recording rules and red flags, the lookup mute, the second plan, the shared family line, the wrong read-back, the blocked move — plus two guards found on the way (`discard_recorded` only on the caller's words; a decision on a reply the caller talked over is refused once) and the ElevenLabs voice. Worklog entries of 20 Sep carry the detail and the commit of each.
 - Verified: 111 tests pass, 4 skip; text evals second_policy 8/8 and the_real_call 12/12; scripted local calls in English and Spanish; one practice call through the real harness on the new voice passed (simple_booking, 77 s, no signals).

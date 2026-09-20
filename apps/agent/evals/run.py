@@ -6,10 +6,10 @@ case, submissions are captured instead of POSTed, and the verdict is the leaderb
 (evals/scoring.py): exact match after the published normalization. Repeats give a pass RATE, because
 one green run of a stochastic agent proves little.
 
-  .venv/bin/python -m evals.run                                  all 73 cases, once
-  .venv/bin/python -m evals.run --problem simple_booking,the_rules --runs 5
-  .venv/bin/python -m evals.run --case 14a8720 -v                one case, with the conversation
-  .venv/bin/python -m evals.run --today                          accepted answers as the dashboard shows them today
+  cd apps/agent && ../../.venv/bin/python -m evals.run                                  all 73 cases, once
+  cd apps/agent && ../../.venv/bin/python -m evals.run --problem simple_booking,the_rules --runs 5
+  cd apps/agent && ../../.venv/bin/python -m evals.run --case 14a8720 -v                one case, with the conversation
+  cd apps/agent && ../../.venv/bin/python -m evals.run --today                          accepted answers as the dashboard shows them today
 """
 
 import argparse

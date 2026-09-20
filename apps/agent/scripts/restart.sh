@@ -4,7 +4,7 @@
 # scripts/scored.py dials on its own clock: logs/.hold tells it to stand down, and logs/.run-in-flight says a
 # run it requested has not had its verdict yet (the platform can queue a call for minutes before dialling).
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../../.."  # the repo root: .venv, logs and .env live there
 mkdir -p logs && touch logs/.hold
 trap 'rm -f logs/.hold' EXIT
 for i in $(seq 1 200); do
