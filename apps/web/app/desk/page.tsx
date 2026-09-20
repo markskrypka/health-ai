@@ -77,8 +77,17 @@ export default function Desk() {
 
   return (
     <div className="flex h-full flex-col">
-      <nav className="flex items-center gap-4 border-b border-line bg-card px-5 py-2.5">
-        <Link href="/" className="text-sm font-semibold tracking-tight"><span className="text-clinic">Clínica Arenal</span> · front desk</Link>
+      <nav className="flex items-center gap-3.5 border-b border-line bg-card px-5 py-2.5">
+        <Link href="/" className="flex items-center gap-2.5 transition hover:opacity-85" title="Prosper — GING">
+          <img src="/prosper-mark.png" alt="Prosper" className="size-6 rounded-md object-contain shadow-xs" />
+          <span className="text-base font-bold tracking-tight text-ink">Prosper</span>
+          <span className="text-soft/60 font-light text-sm select-none">—</span>
+          <span className="rounded-md border border-clinic-line/80 bg-clinic-soft/70 px-2 py-0.5 font-mono text-xs font-bold tracking-wider text-clinic shadow-2xs">
+            GING
+          </span>
+        </Link>
+        <span className="h-4 w-px bg-line" />
+        <span className="text-xs font-medium text-soft">front desk</span>
         <span className={`text-xs ${state.connected ? "text-good" : "text-bad"}`}>{state.connected ? "● connected to the call logs" : "○ events service not reachable — is it running on 7870?"}</span>
         <span className="flex-1" />
         <button onClick={() => setComparing(true)} className="inline-flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-soft transition hover:bg-wash">
