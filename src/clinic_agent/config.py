@@ -15,9 +15,14 @@ MADRID = ZoneInfo("Europe/Madrid")
 PROSPER_BASE_URL = os.getenv("PROSPER_BASE_URL", "https://hackspain.getprosperapp.com").rstrip("/")
 PROSPER_API_KEY = os.getenv("PROSPER_API_KEY", "")
 
-# Two keys run the whole voice loop: Deepgram hears and speaks, Gemini decides.
+# Deepgram hears, Gemini decides. The voice is ElevenLabs when its key is present — one voice for both languages,
+# picked by the team's ears (ELEVENLABS_VOICE_ID in .env swaps it; the default is "Sarah") — and Deepgram Aura-2
+# otherwise: take the key out of .env and restart, and the agent speaks with Deepgram again.
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY", "")
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
+ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "") or "EXAVITQu4vr4xnSDxMaL"
+ELEVENLABS_MODEL = os.getenv("ELEVENLABS_MODEL", "") or "eleven_flash_v2_5"  # the fast one; speaks Spanish, not Catalan
 
 # Local test calls carry a call id the platform never issued, so their submissions are captured, not POSTed.
 DRY_RUN_SUBMIT = os.getenv("DRY_RUN_SUBMIT", "") == "1"

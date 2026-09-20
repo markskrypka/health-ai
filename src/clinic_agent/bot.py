@@ -1,7 +1,8 @@
 """One call = one pipeline. Everything here is built fresh per socket; nothing is shared across calls
 except the stateless clinic API client and the static catalogue.
 
-Deepgram hears (Nova-3) and speaks (Aura-2); Gemini Flash decides through the tools in tools.py.
+Deepgram hears (Nova-3), Gemini Flash decides through the tools in tools.py, and ElevenLabs speaks
+(Deepgram Aura-2 when no ElevenLabs key is set — see speech.voice_service).
 Audio stays at the phone line's 8 kHz end to end, so nothing is resampled.
 """
 
@@ -20,7 +21,6 @@ from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.processors.aggregators.llm_response_universal import LLMContextAggregatorPair, LLMUserAggregatorParams
 from pipecat.serializers.twilio import TwilioFrameSerializer
 from pipecat.services.deepgram.stt import DeepgramSTTService, DeepgramSTTSettings
-from pipecat.services.deepgram.tts import DeepgramTTSService, DeepgramTTSSettings
 from pipecat.services.google.llm import GoogleLLMSettings, GoogleThinkingConfig
 from pipecat.services.llm_service import FunctionCallParams
 from pipecat.transports.websocket.fastapi import FastAPIWebsocketParams, FastAPIWebsocketTransport
@@ -29,7 +29,7 @@ from pipecat.turns.user_turn_strategies import UserTurnStrategies
 from . import config, languages, prompt, tools
 from .clinic import ClinicClient
 from .session import CallSession
-from .speech import GuardedGoogleLLM, LookupMute, PatientTurnStop, SpokenClock, VoiceRouter
+from .speech import GuardedGoogleLLM, LookupMute, PatientTurnStop, SpokenClock, VoiceRouter, voice_service
 
 GREETING = "Clínica Arenal, good morning. How can I help you?"
 LINE_RATE = 8000  # Twilio Media Streams: 8 kHz µ-law
@@ -97,7 +97,7 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
         model=config.LLM_MODEL,
         system_instruction=prompt.build(catalogue, session.now, bool(session.from_number)),
         thinking=GoogleThinkingConfig(thinking_level="minimal")))
-    tts = DeepgramTTSService(api_key=config.DEEPGRAM_API_KEY, settings=DeepgramTTSSettings(voice=languages.VOICES[session.language]))
+    tts = voice_service(session.language)
 
     schemas = [FunctionSchema(name=n, description=desc, properties=props, required=req)
                for n, (_, desc, props, req) in tools.TOOLS.items()]

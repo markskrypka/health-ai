@@ -18,13 +18,14 @@ from pipecat.frames.frames import (
     TTSUpdateSettingsFrame,
 )
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
-from pipecat.services.deepgram.tts import DeepgramTTSSettings
+from pipecat.services.deepgram.tts import DeepgramTTSService, DeepgramTTSSettings
+from pipecat.services.elevenlabs.tts import ElevenLabsTTSService, ElevenLabsTTSSettings
 from pipecat.services.google.llm import GoogleLLMService
 from pipecat.services.llm_service import FunctionCallFromLLM
 from pipecat.turns.user_mute.function_call_user_mute_strategy import FunctionCallUserMuteStrategy
 from pipecat.turns.user_stop.speech_timeout_user_turn_stop_strategy import SpeechTimeoutUserTurnStopStrategy
 
-from . import languages, tools
+from . import config, languages, tools
 from .session import CallSession
 
 
@@ -177,10 +178,21 @@ class GuardedGoogleLLM(GoogleLLMService):
         await super().run_function_calls(function_calls)
 
 
+def voice_service(language: str) -> ElevenLabsTTSService | DeepgramTTSService:
+    """The agent's voice. ElevenLabs' one voice reads English and Spanish alike and hears the language from the text.
+    It is not told the language: that is part of its connection, and at a change of language ElevenLabs took two
+    seconds to close the old one — measured on a Spanish call, right before the first Spanish sentence."""
+    if config.ELEVENLABS_API_KEY:
+        return ElevenLabsTTSService(api_key=config.ELEVENLABS_API_KEY, settings=ElevenLabsTTSSettings(
+            voice=config.ELEVENLABS_VOICE_ID, model=config.ELEVENLABS_MODEL))
+    return DeepgramTTSService(api_key=config.DEEPGRAM_API_KEY, settings=DeepgramTTSSettings(voice=languages.VOICES[language]))
+
+
 class VoiceRouter(FrameProcessor):
-    """Sits between the model and the voice. The model answers in the caller's language; each sentence it
-    releases is spoken by the voice of the language it is written in. The voice changes with a settings
-    update sent just ahead of the sentence, so the two can never be out of step."""
+    """Sits between the model and the voice and keeps track of the language the agent is speaking — the stock
+    phrases follow it. Deepgram has a voice per language, so there each sentence is spoken by the voice of the
+    language it is written in: the voice changes with a settings update sent just ahead of the sentence, and the
+    two can never be out of step."""
 
     def __init__(self, session: CallSession):
         super().__init__()
@@ -193,7 +205,8 @@ class VoiceRouter(FrameProcessor):
             if language != self._session.language:
                 self._session.language = language
                 self._session.log("voice", language=language)
-                await self.push_frame(TTSUpdateSettingsFrame(delta=DeepgramTTSSettings(voice=languages.VOICES[language])))
+                if not config.ELEVENLABS_API_KEY:
+                    await self.push_frame(TTSUpdateSettingsFrame(delta=DeepgramTTSSettings(voice=languages.VOICES[language])))
         await self.push_frame(frame, direction)
 
 

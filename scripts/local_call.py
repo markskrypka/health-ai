@@ -71,7 +71,7 @@ def gemini_speech(client, text: str) -> bytes:
 async def transcribe(ulaw: bytes) -> str:
     async with httpx.AsyncClient(timeout=60) as http:
         r = await http.post("https://api.deepgram.com/v1/listen",
-                            params={"model": "nova-3", "encoding": "mulaw", "sample_rate": 8000, "smart_format": "true"},
+                            params={"model": "nova-3", "language": "multi", "encoding": "mulaw", "sample_rate": 8000, "smart_format": "true"},
                             headers={**DG, "Content-Type": "audio/basic"}, content=ulaw)
         r.raise_for_status()
         return r.json()["results"]["channels"][0]["alternatives"][0]["transcript"]
