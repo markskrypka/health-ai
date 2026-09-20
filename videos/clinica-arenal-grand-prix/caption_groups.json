@@ -7,485 +7,479 @@
       "id": "caption-group-0",
       "frame": 1,
       "start": 0,
-      "end": 1.26,
-      "text": "Cada mañana los",
+      "end": 1.34,
+      "text": "Cada mañana los centros",
       "words": [
         {
           "id": "caption-word-0-0",
           "text": "Cada",
           "start": 0,
-          "end": 0.42
+          "end": 0.46
         },
         {
           "id": "caption-word-0-1",
           "text": "mañana",
-          "start": 0.42,
-          "end": 0.7
+          "start": 0.46,
+          "end": 0.76
         },
         {
           "id": "caption-word-0-2",
           "text": "los",
-          "start": 1.06,
-          "end": 1.26
+          "start": 0.98,
+          "end": 1.14
+        },
+        {
+          "id": "caption-word-0-3",
+          "text": "centros",
+          "start": 1.14,
+          "end": 1.34
         }
       ]
     },
     {
       "id": "caption-group-1",
       "frame": 1,
-      "start": 1.26,
-      "end": 2.48,
-      "text": "centros de salud sufren esperas",
+      "start": 1.34,
+      "end": 2.6,
+      "text": "de salud sufren esperas",
       "words": [
         {
           "id": "caption-word-1-0",
-          "text": "centros",
-          "start": 1.26,
-          "end": 1.42
+          "text": "de",
+          "start": 1.34,
+          "end": 1.9
         },
         {
           "id": "caption-word-1-1",
-          "text": "de",
-          "start": 1.42,
-          "end": 1.92
+          "text": "salud",
+          "start": 1.9,
+          "end": 1.9
         },
         {
           "id": "caption-word-1-2",
-          "text": "salud",
-          "start": 1.92,
-          "end": 1.92
+          "text": "sufren",
+          "start": 1.9,
+          "end": 2.2
         },
         {
           "id": "caption-word-1-3",
-          "text": "sufren",
-          "start": 1.92,
-          "end": 2.06
-        },
-        {
-          "id": "caption-word-1-4",
           "text": "esperas",
-          "start": 2.06,
-          "end": 2.48
+          "start": 2.2,
+          "end": 2.6
         }
       ]
     },
     {
       "id": "caption-group-2",
       "frame": 1,
-      "start": 2.48,
-      "end": 3.98,
+      "start": 2.6,
+      "end": 4.1,
       "text": "interminables y citas perdidas",
       "words": [
         {
           "id": "caption-word-2-0",
           "text": "interminables",
-          "start": 2.48,
-          "end": 3.06
+          "start": 2.6,
+          "end": 3.18
         },
         {
           "id": "caption-word-2-1",
           "text": "y",
-          "start": 3.06,
-          "end": 3.3
+          "start": 3.18,
+          "end": 3.46
         },
         {
           "id": "caption-word-2-2",
           "text": "citas",
-          "start": 3.3,
-          "end": 3.46
+          "start": 3.46,
+          "end": 3.6
         },
         {
           "id": "caption-word-2-3",
           "text": "perdidas",
-          "start": 3.46,
-          "end": 3.98
+          "start": 3.6,
+          "end": 4.1
         }
       ]
     },
     {
       "id": "caption-group-3",
       "frame": 1,
-      "start": 5.18,
-      "end": 6.7,
-      "text": "Frente a modelos speak to speech nativos",
+      "start": 4.74,
+      "end": 6.32,
+      "text": "Frente a modelos speech to speech nativos",
       "words": [
         {
           "id": "caption-word-3-0",
           "text": "Frente",
-          "start": 5.18,
-          "end": 5.18
+          "start": 4.74,
+          "end": 4.74
         },
         {
           "id": "caption-word-3-1",
           "text": "a",
-          "start": 5.18,
-          "end": 5.42
+          "start": 4.74,
+          "end": 4.98
         },
         {
           "id": "caption-word-3-2",
           "text": "modelos",
-          "start": 5.42,
-          "end": 5.64
+          "start": 4.98,
+          "end": 5.22
         },
         {
           "id": "caption-word-3-3",
-          "text": "speak",
-          "start": 5.64,
-          "end": 6.02
+          "text": "speech",
+          "start": 5.22,
+          "end": 5.58
         },
         {
           "id": "caption-word-3-4",
           "text": "to",
-          "start": 6.02,
-          "end": 6.08
+          "start": 5.58,
+          "end": 5.72
         },
         {
           "id": "caption-word-3-5",
           "text": "speech",
-          "start": 6.08,
-          "end": 6.34
+          "start": 5.72,
+          "end": 5.92
         },
         {
           "id": "caption-word-3-6",
           "text": "nativos",
-          "start": 6.34,
-          "end": 6.7
+          "start": 5.92,
+          "end": 6.32
         }
       ]
     },
     {
       "id": "caption-group-4",
       "frame": 1,
-      "start": 7.08,
-      "end": 8.32,
+      "start": 6.54,
+      "end": 7.82,
       "text": "cuya precisión cae al 40",
       "words": [
         {
           "id": "caption-word-4-0",
           "text": "cuya",
-          "start": 7.08,
-          "end": 7.2
+          "start": 6.54,
+          "end": 6.68
         },
         {
           "id": "caption-word-4-1",
           "text": "precisión",
-          "start": 7.2,
-          "end": 7.64
+          "start": 6.68,
+          "end": 7.14
         },
         {
           "id": "caption-word-4-2",
           "text": "cae",
-          "start": 7.64,
-          "end": 7.84
+          "start": 7.14,
+          "end": 7.34
         },
         {
           "id": "caption-word-4-3",
           "text": "al",
-          "start": 7.84,
-          "end": 7.98
+          "start": 7.34,
+          "end": 7.5
         },
         {
           "id": "caption-word-4-4",
           "text": "40",
-          "start": 7.98,
-          "end": 8.32
+          "start": 7.5,
+          "end": 7.82
         }
       ]
     },
     {
       "id": "caption-group-5",
       "frame": 1,
-      "start": 8.32,
-      "end": 10.3,
+      "start": 7.82,
+      "end": 9.72,
       "text": " en tareas clínicas Clínica",
       "words": [
         {
           "id": "caption-word-5-0",
           "text": "",
-          "start": 8.32,
-          "end": 8.7
+          "start": 7.82,
+          "end": 8.18
         },
         {
           "id": "caption-word-5-1",
           "text": "en",
-          "start": 8.7,
-          "end": 8.88
+          "start": 8.18,
+          "end": 8.36
         },
         {
           "id": "caption-word-5-2",
           "text": "tareas",
-          "start": 8.88,
-          "end": 9.12
+          "start": 8.36,
+          "end": 8.6
         },
         {
           "id": "caption-word-5-3",
           "text": "clínicas",
-          "start": 9.12,
-          "end": 9.52
+          "start": 8.6,
+          "end": 8.98
         },
         {
           "id": "caption-word-5-4",
           "text": "Clínica",
-          "start": 10.16,
-          "end": 10.3
+          "start": 9.54,
+          "end": 9.72
         }
       ]
     },
     {
       "id": "caption-group-6",
       "frame": 1,
-      "start": 10.3,
-      "end": 11.6,
+      "start": 9.72,
+      "end": 11.1,
       "text": "Arenal eligió una arquitectura",
       "words": [
         {
           "id": "caption-word-6-0",
           "text": "Arenal",
-          "start": 10.3,
-          "end": 10.6
+          "start": 9.72,
+          "end": 10.1
         },
         {
           "id": "caption-word-6-1",
           "text": "eligió",
-          "start": 10.6,
-          "end": 10.88
+          "start": 10.1,
+          "end": 10.44
         },
         {
           "id": "caption-word-6-2",
           "text": "una",
-          "start": 10.88,
-          "end": 11.16
+          "start": 10.44,
+          "end": 10.72
         },
         {
           "id": "caption-word-6-3",
           "text": "arquitectura",
-          "start": 11.16,
-          "end": 11.6
+          "start": 10.72,
+          "end": 11.1
         }
       ]
     },
     {
       "id": "caption-group-7",
       "frame": 1,
-      "start": 11.6,
-      "end": 13.02,
-      "text": "en cascada transcripción",
+      "start": 11.1,
+      "end": 13.44,
+      "text": "encascada Transcripción razonamiento",
       "words": [
         {
           "id": "caption-word-7-0",
-          "text": "en",
-          "start": 11.6,
-          "end": 12
+          "text": "encascada",
+          "start": 11.1,
+          "end": 11.6
         },
         {
           "id": "caption-word-7-1",
-          "text": "cascada",
-          "start": 12,
-          "end": 12.1
+          "text": "Transcripción",
+          "start": 12.42,
+          "end": 12.62
         },
         {
           "id": "caption-word-7-2",
-          "text": "transcripción",
-          "start": 12.84,
-          "end": 13.02
+          "text": "razonamiento",
+          "start": 13.44,
+          "end": 13.44
         }
       ]
     },
     {
       "id": "caption-group-8",
       "frame": 1,
-      "start": 13.86,
-      "end": 16.12,
-      "text": "razonamiento estructurado y síntesis En",
+      "start": 13.44,
+      "end": 14.78,
+      "text": "estructurado y síntesis",
       "words": [
         {
           "id": "caption-word-8-0",
-          "text": "razonamiento",
-          "start": 13.86,
-          "end": 13.86
+          "text": "estructurado",
+          "start": 13.44,
+          "end": 14.06
         },
         {
           "id": "caption-word-8-1",
-          "text": "estructurado",
-          "start": 13.86,
+          "text": "y",
+          "start": 14.06,
           "end": 14.4
         },
         {
           "id": "caption-word-8-2",
-          "text": "y",
-          "start": 14.4,
-          "end": 14.6
-        },
-        {
-          "id": "caption-word-8-3",
           "text": "síntesis",
-          "start": 14.6,
-          "end": 14.92
-        },
-        {
-          "id": "caption-word-8-4",
-          "text": "En",
-          "start": 16.08,
-          "end": 16.12
+          "start": 14.4,
+          "end": 14.78
         }
       ]
     },
     {
       "id": "caption-group-9",
       "frame": 1,
-      "start": 16.12,
-      "end": 17.38,
-      "text": "sanidad alucinar citas",
+      "start": 15.42,
+      "end": 16.86,
+      "text": "En sanidad alucinar citas",
       "words": [
         {
           "id": "caption-word-9-0",
-          "text": "sanidad",
-          "start": 16.12,
-          "end": 16.4
+          "text": "En",
+          "start": 15.42,
+          "end": 15.5
         },
         {
           "id": "caption-word-9-1",
-          "text": "alucinar",
-          "start": 16.88,
-          "end": 17.1
+          "text": "sanidad",
+          "start": 15.5,
+          "end": 15.84
         },
         {
           "id": "caption-word-9-2",
+          "text": "alucinar",
+          "start": 16.28,
+          "end": 16.58
+        },
+        {
+          "id": "caption-word-9-3",
           "text": "citas",
-          "start": 17.1,
-          "end": 17.38
+          "start": 16.58,
+          "end": 16.86
         }
       ]
     },
     {
       "id": "caption-group-10",
       "frame": 1,
-      "start": 17.38,
-      "end": 18.74,
+      "start": 16.86,
+      "end": 18.22,
       "text": "o coberturas es inadmisible",
       "words": [
         {
           "id": "caption-word-10-0",
           "text": "o",
-          "start": 17.38,
-          "end": 17.56
+          "start": 16.86,
+          "end": 17.06
         },
         {
           "id": "caption-word-10-1",
           "text": "coberturas",
-          "start": 17.56,
-          "end": 18
+          "start": 17.06,
+          "end": 17.44
         },
         {
           "id": "caption-word-10-2",
           "text": "es",
-          "start": 18,
-          "end": 18.26
+          "start": 17.44,
+          "end": 17.76
         },
         {
           "id": "caption-word-10-3",
           "text": "inadmisible",
-          "start": 18.26,
-          "end": 18.74
+          "start": 17.76,
+          "end": 18.22
         }
       ]
     },
     {
       "id": "caption-group-11",
       "frame": 1,
-      "start": 19.06,
-      "end": 20.56,
-      "text": "la cascada garantiza determinismo",
+      "start": 18.74,
+      "end": 20.26,
+      "text": "La cascada garantiza determinismo",
       "words": [
         {
           "id": "caption-word-11-0",
-          "text": "la",
-          "start": 19.06,
-          "end": 19.18
+          "text": "La",
+          "start": 18.74,
+          "end": 18.84
         },
         {
           "id": "caption-word-11-1",
           "text": "cascada",
-          "start": 19.18,
-          "end": 19.44
+          "start": 18.84,
+          "end": 19.12
         },
         {
           "id": "caption-word-11-2",
           "text": "garantiza",
-          "start": 19.44,
-          "end": 19.88
+          "start": 19.12,
+          "end": 19.64
         },
         {
           "id": "caption-word-11-3",
           "text": "determinismo",
-          "start": 19.88,
-          "end": 20.56
+          "start": 19.64,
+          "end": 20.26
         }
       ]
     },
     {
       "id": "caption-group-12",
       "frame": 1,
-      "start": 21.12,
-      "end": 22.52,
+      "start": 20.56,
+      "end": 22.08,
       "text": "auditabilidad y cero alucinaciones",
       "words": [
         {
           "id": "caption-word-12-0",
           "text": "auditabilidad",
-          "start": 21.12,
-          "end": 21.6
+          "start": 20.56,
+          "end": 21.06
         },
         {
           "id": "caption-word-12-1",
           "text": "y",
-          "start": 21.6,
-          "end": 21.84
+          "start": 21.06,
+          "end": 21.38
         },
         {
           "id": "caption-word-12-2",
           "text": "cero",
-          "start": 21.84,
-          "end": 21.96
+          "start": 21.38,
+          "end": 21.5
         },
         {
           "id": "caption-word-12-3",
           "text": "alucinaciones",
-          "start": 21.96,
-          "end": 22.52
+          "start": 21.5,
+          "end": 22.08
         }
       ]
     },
     {
       "id": "caption-group-13",
       "frame": 1,
-      "start": 22.52,
-      "end": 23.42,
-      "text": "en base de datos",
+      "start": 22.08,
+      "end": 22.84,
+      "text": "en base de dados",
       "words": [
         {
           "id": "caption-word-13-0",
           "text": "en",
-          "start": 22.52,
-          "end": 22.78
+          "start": 22.08,
+          "end": 22.32
         },
         {
           "id": "caption-word-13-1",
           "text": "base",
-          "start": 22.78,
-          "end": 22.96
+          "start": 22.32,
+          "end": 22.44
         },
         {
           "id": "caption-word-13-2",
           "text": "de",
-          "start": 22.96,
-          "end": 23.42
+          "start": 22.44,
+          "end": 22.84
         },
         {
           "id": "caption-word-13-3",
-          "text": "datos",
-          "start": 23.42,
-          "end": 23.42
+          "text": "dados",
+          "start": 22.84,
+          "end": 22.84
         }
       ]
     },
@@ -493,211 +487,235 @@
       "id": "caption-group-14",
       "frame": 2,
       "start": 24.5,
-      "end": 25.8,
+      "end": 26,
       "text": "Diseñamos la experiencia",
       "words": [
         {
           "id": "caption-word-14-0",
           "text": "Diseñamos",
           "start": 24.5,
-          "end": 25.2
+          "end": 25.34
         },
         {
           "id": "caption-word-14-1",
           "text": "la",
-          "start": 25.2,
-          "end": 25.42
+          "start": 25.34,
+          "end": 25.62
         },
         {
           "id": "caption-word-14-2",
           "text": "experiencia",
-          "start": 25.42,
-          "end": 25.8
+          "start": 25.62,
+          "end": 26
         }
       ]
     },
     {
       "id": "caption-group-15",
       "frame": 2,
-      "start": 25.8,
-      "end": 27.24,
+      "start": 26,
+      "end": 27.64,
       "text": "de doble superficie la",
       "words": [
         {
           "id": "caption-word-15-0",
           "text": "de",
-          "start": 25.8,
-          "end": 26.06
+          "start": 26,
+          "end": 26.42
         },
         {
           "id": "caption-word-15-1",
           "text": "doble",
-          "start": 26.06,
-          "end": 26.18
+          "start": 26.42,
+          "end": 26.58
         },
         {
           "id": "caption-word-15-2",
           "text": "superficie",
-          "start": 26.18,
-          "end": 26.78
+          "start": 26.58,
+          "end": 27.12
         },
         {
           "id": "caption-word-15-3",
           "text": "la",
-          "start": 27.1,
-          "end": 27.24
+          "start": 27.54,
+          "end": 27.64
         }
       ]
     },
     {
       "id": "caption-group-16",
       "frame": 2,
-      "start": 27.24,
-      "end": 29.44,
+      "start": 27.64,
+      "end": 29.28,
       "text": "pantalla del paciente Mientras",
       "words": [
         {
           "id": "caption-word-16-0",
           "text": "pantalla",
-          "start": 27.24,
-          "end": 27.48
+          "start": 27.64,
+          "end": 27.94
         },
         {
           "id": "caption-word-16-1",
           "text": "del",
-          "start": 27.48,
-          "end": 27.74
+          "start": 27.94,
+          "end": 28.18
         },
         {
           "id": "caption-word-16-2",
           "text": "paciente",
-          "start": 27.74,
-          "end": 28.04
+          "start": 28.18,
+          "end": 28.46
         },
         {
           "id": "caption-word-16-3",
           "text": "Mientras",
-          "start": 29.28,
-          "end": 29.44
+          "start": 29.2,
+          "end": 29.28
         }
       ]
     },
     {
       "id": "caption-group-17",
       "frame": 2,
-      "start": 29.44,
-      "end": 30.76,
+      "start": 29.28,
+      "end": 30.62,
       "text": "Josefa habla con naturalidad",
       "words": [
         {
           "id": "caption-word-17-0",
           "text": "Josefa",
-          "start": 29.44,
-          "end": 29.86
+          "start": 29.28,
+          "end": 29.74
         },
         {
           "id": "caption-word-17-1",
           "text": "habla",
-          "start": 29.86,
-          "end": 30
+          "start": 29.74,
+          "end": 29.92
         },
         {
           "id": "caption-word-17-2",
           "text": "con",
-          "start": 30,
-          "end": 30.26
+          "start": 29.92,
+          "end": 30.14
         },
         {
           "id": "caption-word-17-3",
           "text": "naturalidad",
-          "start": 30.26,
-          "end": 30.76
+          "start": 30.14,
+          "end": 30.62
         }
       ]
     },
     {
       "id": "caption-group-18",
       "frame": 2,
-      "start": 31.48,
-      "end": 32.72,
-      "text": "DeepGramNova3 transcribe cada",
+      "start": 31.14,
+      "end": 32.58,
+      "text": "DeepCram Nova 3 transcribe cada",
       "words": [
         {
           "id": "caption-word-18-0",
-          "text": "DeepGramNova3",
-          "start": 31.48,
-          "end": 32.04
+          "text": "DeepCram",
+          "start": 31.14,
+          "end": 31.38
         },
         {
           "id": "caption-word-18-1",
-          "text": "transcribe",
-          "start": 32.04,
-          "end": 32.44
+          "text": "Nova",
+          "start": 31.38,
+          "end": 31.56
         },
         {
           "id": "caption-word-18-2",
+          "text": "3",
+          "start": 31.56,
+          "end": 31.86
+        },
+        {
+          "id": "caption-word-18-3",
+          "text": "transcribe",
+          "start": 31.86,
+          "end": 32.32
+        },
+        {
+          "id": "caption-word-18-4",
           "text": "cada",
-          "start": 32.44,
-          "end": 32.72
+          "start": 32.32,
+          "end": 32.58
         }
       ]
     },
     {
       "id": "caption-group-19",
       "frame": 2,
-      "start": 32.72,
-      "end": 34.1,
+      "start": 32.58,
+      "end": 34.18,
       "text": "120 milisegundos y",
       "words": [
         {
           "id": "caption-word-19-0",
           "text": "120",
-          "start": 32.72,
-          "end": 33.3
+          "start": 32.58,
+          "end": 33.16
         },
         {
           "id": "caption-word-19-1",
           "text": "milisegundos",
-          "start": 33.3,
-          "end": 33.9
+          "start": 33.16,
+          "end": 33.76
         },
         {
           "id": "caption-word-19-2",
           "text": "y",
-          "start": 33.9,
-          "end": 34.1
+          "start": 33.76,
+          "end": 34.18
         }
       ]
     },
     {
       "id": "caption-group-20",
       "frame": 2,
-      "start": 34.1,
+      "start": 34.18,
       "end": 35.6,
-      "text": "con MutaAnova2 casi detecta",
+      "text": "conmuta a Nova 2 si detecta",
       "words": [
         {
           "id": "caption-word-20-0",
-          "text": "con",
-          "start": 34.1,
-          "end": 34.22
+          "text": "conmuta",
+          "start": 34.18,
+          "end": 34.5
         },
         {
           "id": "caption-word-20-1",
-          "text": "MutaAnova2",
-          "start": 34.22,
-          "end": 35.04
+          "text": "a",
+          "start": 34.5,
+          "end": 34.8
         },
         {
           "id": "caption-word-20-2",
-          "text": "casi",
-          "start": 35.04,
-          "end": 35.3
+          "text": "Nova",
+          "start": 34.8,
+          "end": 34.8
         },
         {
           "id": "caption-word-20-3",
+          "text": "2",
+          "start": 34.8,
+          "end": 35.04
+        },
+        {
+          "id": "caption-word-20-4",
+          "text": "si",
+          "start": 35.04,
+          "end": 35.32
+        },
+        {
+          "id": "caption-word-20-5",
           "text": "detecta",
-          "start": 35.3,
+          "start": 35.32,
           "end": 35.6
         }
       ]
@@ -706,275 +724,275 @@
       "id": "caption-group-21",
       "frame": 2,
       "start": 35.6,
-      "end": 37.48,
+      "end": 37.24,
       "text": "catalán La latencia",
       "words": [
         {
           "id": "caption-word-21-0",
           "text": "catalán",
           "start": 35.6,
-          "end": 36.02
+          "end": 35.94
         },
         {
           "id": "caption-word-21-1",
           "text": "La",
-          "start": 37.08,
-          "end": 37.14
+          "start": 36.8,
+          "end": 36.9
         },
         {
           "id": "caption-word-21-2",
           "text": "latencia",
-          "start": 37.14,
-          "end": 37.48
+          "start": 36.9,
+          "end": 37.24
         }
       ]
     },
     {
       "id": "caption-group-22",
       "frame": 2,
-      "start": 37.48,
-      "end": 38.72,
-      "text": "de 2 7 segundos",
+      "start": 37.24,
+      "end": 38.6,
+      "text": "de 2 7 segundos es",
       "words": [
         {
           "id": "caption-word-22-0",
           "text": "de",
-          "start": 37.48,
-          "end": 37.64
+          "start": 37.24,
+          "end": 37.4
         },
         {
           "id": "caption-word-22-1",
           "text": "2",
-          "start": 37.64,
-          "end": 37.88
+          "start": 37.4,
+          "end": 37.56
         },
         {
           "id": "caption-word-22-2",
           "text": "7",
-          "start": 37.88,
-          "end": 38.38
+          "start": 37.56,
+          "end": 37.94
         },
         {
           "id": "caption-word-22-3",
           "text": "segundos",
-          "start": 38.38,
-          "end": 38.72
+          "start": 37.94,
+          "end": 38.3
+        },
+        {
+          "id": "caption-word-22-4",
+          "text": "es",
+          "start": 38.3,
+          "end": 38.6
         }
       ]
     },
     {
       "id": "caption-group-23",
       "frame": 2,
-      "start": 38.72,
-      "end": 40.54,
-      "text": "es deliberada PatientTurnStop",
+      "start": 38.6,
+      "end": 40.72,
+      "text": "deliberada PatientTurnStop no",
       "words": [
         {
           "id": "caption-word-23-0",
-          "text": "es",
-          "start": 38.72,
-          "end": 38.9
+          "text": "deliberada",
+          "start": 38.6,
+          "end": 39.04
         },
         {
           "id": "caption-word-23-1",
-          "text": "deliberada",
-          "start": 38.9,
-          "end": 39.4
+          "text": "PatientTurnStop",
+          "start": 39.86,
+          "end": 40.28
         },
         {
           "id": "caption-word-23-2",
-          "text": "PatientTurnStop",
-          "start": 40.06,
-          "end": 40.54
+          "text": "no",
+          "start": 40.28,
+          "end": 40.72
         }
       ]
     },
     {
       "id": "caption-group-24",
       "frame": 2,
-      "start": 40.54,
-      "end": 41.94,
-      "text": "no corta a pacientes mayores al",
+      "start": 40.72,
+      "end": 41.98,
+      "text": "corta a pacientes mayores al dictar",
       "words": [
         {
           "id": "caption-word-24-0",
-          "text": "no",
-          "start": 40.54,
+          "text": "corta",
+          "start": 40.72,
           "end": 40.78
         },
         {
           "id": "caption-word-24-1",
-          "text": "corta",
+          "text": "a",
           "start": 40.78,
-          "end": 40.96
+          "end": 41.2
         },
         {
           "id": "caption-word-24-2",
-          "text": "a",
-          "start": 40.96,
-          "end": 41.42
+          "text": "pacientes",
+          "start": 41.2,
+          "end": 41.2
         },
         {
           "id": "caption-word-24-3",
-          "text": "pacientes",
-          "start": 41.42,
-          "end": 41.42
+          "text": "mayores",
+          "start": 41.2,
+          "end": 41.54
         },
         {
           "id": "caption-word-24-4",
-          "text": "mayores",
-          "start": 41.42,
-          "end": 41.72
+          "text": "al",
+          "start": 41.54,
+          "end": 41.76
         },
         {
           "id": "caption-word-24-5",
-          "text": "al",
-          "start": 41.72,
-          "end": 41.94
+          "text": "dictar",
+          "start": 41.76,
+          "end": 41.98
         }
       ]
     },
     {
       "id": "caption-group-25",
       "frame": 2,
-      "start": 41.94,
-      "end": 43.34,
-      "text": "dictar su DNI Y",
+      "start": 41.98,
+      "end": 43.28,
+      "text": "su DNI y una frase",
       "words": [
         {
           "id": "caption-word-25-0",
-          "text": "dictar",
-          "start": 41.94,
+          "text": "su",
+          "start": 41.98,
           "end": 42.2
         },
         {
           "id": "caption-word-25-1",
-          "text": "su",
+          "text": "DNI",
           "start": 42.2,
-          "end": 42.4
+          "end": 42.42
         },
         {
           "id": "caption-word-25-2",
-          "text": "DNI",
-          "start": 42.4,
-          "end": 42.98
+          "text": "y",
+          "start": 42.42,
+          "end": 42.94
         },
         {
           "id": "caption-word-25-3",
-          "text": "Y",
-          "start": 43.16,
-          "end": 43.34
+          "text": "una",
+          "start": 42.94,
+          "end": 43.1
+        },
+        {
+          "id": "caption-word-25-4",
+          "text": "frase",
+          "start": 43.1,
+          "end": 43.28
         }
       ]
     },
     {
       "id": "caption-group-26",
       "frame": 2,
-      "start": 43.34,
-      "end": 44.68,
-      "text": "una frase de espera neutraliza",
+      "start": 43.28,
+      "end": 44.7,
+      "text": "de espera neutraliza el silencio",
       "words": [
         {
           "id": "caption-word-26-0",
-          "text": "una",
-          "start": 43.34,
-          "end": 43.48
+          "text": "de",
+          "start": 43.28,
+          "end": 43.7
         },
         {
           "id": "caption-word-26-1",
-          "text": "frase",
-          "start": 43.48,
-          "end": 43.68
+          "text": "espera",
+          "start": 43.7,
+          "end": 43.7
         },
         {
           "id": "caption-word-26-2",
-          "text": "de",
-          "start": 43.68,
-          "end": 44.04
+          "text": "neutraliza",
+          "start": 43.7,
+          "end": 44.24
         },
         {
           "id": "caption-word-26-3",
-          "text": "espera",
-          "start": 44.04,
-          "end": 44.14
+          "text": "el",
+          "start": 44.24,
+          "end": 44.46
         },
         {
           "id": "caption-word-26-4",
-          "text": "neutraliza",
-          "start": 44.14,
-          "end": 44.68
+          "text": "silencio",
+          "start": 44.46,
+          "end": 44.7
         }
       ]
     },
     {
       "id": "caption-group-27",
       "frame": 2,
-      "start": 44.68,
-      "end": 46.04,
-      "text": "el silencio si una consulta",
+      "start": 44.7,
+      "end": 46.2,
+      "text": "si una consulta supera segundo",
       "words": [
         {
           "id": "caption-word-27-0",
-          "text": "el",
-          "start": 44.68,
-          "end": 44.9
+          "text": "si",
+          "start": 44.7,
+          "end": 45
         },
         {
           "id": "caption-word-27-1",
-          "text": "silencio",
-          "start": 44.9,
-          "end": 45.16
+          "text": "una",
+          "start": 45,
+          "end": 45.2
         },
         {
           "id": "caption-word-27-2",
-          "text": "si",
-          "start": 45.16,
-          "end": 45.44
+          "text": "consulta",
+          "start": 45.2,
+          "end": 45.58
         },
         {
           "id": "caption-word-27-3",
-          "text": "una",
-          "start": 45.44,
-          "end": 45.6
+          "text": "supera",
+          "start": 45.58,
+          "end": 45.9
         },
         {
           "id": "caption-word-27-4",
-          "text": "consulta",
-          "start": 45.6,
-          "end": 46.04
+          "text": "segundo",
+          "start": 45.9,
+          "end": 46.2
         }
       ]
     },
     {
       "id": "caption-group-28",
       "frame": 2,
-      "start": 46.04,
-      "end": 47.04,
-      "text": "supera segundo y medio",
+      "start": 46.2,
+      "end": 46.48,
+      "text": "y medio",
       "words": [
         {
           "id": "caption-word-28-0",
-          "text": "supera",
-          "start": 46.04,
-          "end": 46.38
+          "text": "y",
+          "start": 46.2,
+          "end": 46.36
         },
         {
           "id": "caption-word-28-1",
-          "text": "segundo",
-          "start": 46.38,
-          "end": 46.72
-        },
-        {
-          "id": "caption-word-28-2",
-          "text": "y",
-          "start": 46.72,
-          "end": 46.94
-        },
-        {
-          "id": "caption-word-28-3",
           "text": "medio",
-          "start": 46.94,
-          "end": 47.04
+          "start": 46.36,
+          "end": 46.48
         }
       ]
     },
@@ -982,926 +1000,938 @@
       "id": "caption-group-29",
       "frame": 3,
       "start": 48,
-      "end": 49.62,
-      "text": "Al otro lado de la línea el",
+      "end": 49.3,
+      "text": "Al otro lado de la",
       "words": [
         {
           "id": "caption-word-29-0",
           "text": "Al",
           "start": 48,
-          "end": 48.36
+          "end": 48.42
         },
         {
           "id": "caption-word-29-1",
           "text": "otro",
-          "start": 48.36,
-          "end": 48.56
+          "start": 48.42,
+          "end": 48.62
         },
         {
           "id": "caption-word-29-2",
           "text": "lado",
-          "start": 48.56,
-          "end": 48.7
+          "start": 48.62,
+          "end": 48.76
         },
         {
           "id": "caption-word-29-3",
           "text": "de",
-          "start": 48.7,
-          "end": 48.86
+          "start": 48.76,
+          "end": 48.96
         },
         {
           "id": "caption-word-29-4",
           "text": "la",
-          "start": 48.86,
-          "end": 49.16
-        },
-        {
-          "id": "caption-word-29-5",
-          "text": "línea",
-          "start": 49.16,
-          "end": 49.16
-        },
-        {
-          "id": "caption-word-29-6",
-          "text": "el",
-          "start": 49.48,
-          "end": 49.62
+          "start": 48.96,
+          "end": 49.3
         }
       ]
     },
     {
       "id": "caption-group-30",
       "frame": 3,
-      "start": 49.62,
-      "end": 50.82,
-      "text": "front desk de recepción no ve",
+      "start": 49.3,
+      "end": 50.9,
+      "text": "línea el front desk de",
       "words": [
         {
           "id": "caption-word-30-0",
-          "text": "front",
-          "start": 49.62,
-          "end": 49.86
+          "text": "línea",
+          "start": 49.3,
+          "end": 49.3
         },
         {
           "id": "caption-word-30-1",
-          "text": "desk",
-          "start": 49.86,
-          "end": 50.02
+          "text": "el",
+          "start": 49.64,
+          "end": 49.82
         },
         {
           "id": "caption-word-30-2",
-          "text": "de",
-          "start": 50.02,
-          "end": 50.56
+          "text": "front",
+          "start": 49.82,
+          "end": 50.04
         },
         {
           "id": "caption-word-30-3",
-          "text": "recepción",
-          "start": 50.56,
-          "end": 50.56
+          "text": "desk",
+          "start": 50.04,
+          "end": 50.26
         },
         {
           "id": "caption-word-30-4",
-          "text": "no",
-          "start": 50.56,
-          "end": 50.76
-        },
-        {
-          "id": "caption-word-30-5",
-          "text": "ve",
-          "start": 50.76,
-          "end": 50.82
+          "text": "de",
+          "start": 50.26,
+          "end": 50.9
         }
       ]
     },
     {
       "id": "caption-group-31",
       "frame": 3,
-      "start": 50.82,
-      "end": 53.38,
-      "text": "una simple transcripción Observa",
+      "start": 50.9,
+      "end": 52.44,
+      "text": "recepción no ve una simple transcripción",
       "words": [
         {
           "id": "caption-word-31-0",
-          "text": "una",
-          "start": 50.82,
-          "end": 51.06
+          "text": "recepción",
+          "start": 50.9,
+          "end": 50.9
         },
         {
           "id": "caption-word-31-1",
-          "text": "simple",
-          "start": 51.06,
+          "text": "no",
+          "start": 50.9,
           "end": 51.32
         },
         {
           "id": "caption-word-31-2",
-          "text": "transcripción",
+          "text": "ve",
           "start": 51.32,
-          "end": 51.92
+          "end": 51.4
         },
         {
           "id": "caption-word-31-3",
-          "text": "Observa",
-          "start": 53.28,
-          "end": 53.38
+          "text": "una",
+          "start": 51.4,
+          "end": 51.64
+        },
+        {
+          "id": "caption-word-31-4",
+          "text": "simple",
+          "start": 51.64,
+          "end": 51.9
+        },
+        {
+          "id": "caption-word-31-5",
+          "text": "transcripción",
+          "start": 51.9,
+          "end": 52.44
         }
       ]
     },
     {
       "id": "caption-group-32",
       "frame": 3,
-      "start": 53.38,
-      "end": 54.78,
-      "text": "en tiempo real la verificación del",
+      "start": 53.44,
+      "end": 54.66,
+      "text": "Observa en tiempo real la",
       "words": [
         {
           "id": "caption-word-32-0",
-          "text": "en",
-          "start": 53.38,
-          "end": 53.5
+          "text": "Observa",
+          "start": 53.44,
+          "end": 53.56
         },
         {
           "id": "caption-word-32-1",
-          "text": "tiempo",
-          "start": 53.5,
-          "end": 53.68
+          "text": "en",
+          "start": 53.56,
+          "end": 53.66
         },
         {
           "id": "caption-word-32-2",
-          "text": "real",
-          "start": 53.68,
-          "end": 53.96
+          "text": "tiempo",
+          "start": 53.66,
+          "end": 53.86
         },
         {
           "id": "caption-word-32-3",
-          "text": "la",
-          "start": 53.96,
-          "end": 54.1
+          "text": "real",
+          "start": 53.86,
+          "end": 54.22
         },
         {
           "id": "caption-word-32-4",
-          "text": "verificación",
-          "start": 54.1,
-          "end": 54.54
-        },
-        {
-          "id": "caption-word-32-5",
-          "text": "del",
-          "start": 54.54,
-          "end": 54.78
+          "text": "la",
+          "start": 54.22,
+          "end": 54.66
         }
       ]
     },
     {
       "id": "caption-group-33",
       "frame": 3,
-      "start": 54.78,
-      "end": 56.48,
-      "text": "paciente contra el historial clínico",
+      "start": 54.66,
+      "end": 56,
+      "text": "verificación del paciente contra",
       "words": [
         {
           "id": "caption-word-33-0",
-          "text": "paciente",
-          "start": 54.78,
-          "end": 55.1
+          "text": "verificación",
+          "start": 54.66,
+          "end": 55.08
         },
         {
           "id": "caption-word-33-1",
-          "text": "contra",
-          "start": 55.1,
-          "end": 55.4
+          "text": "del",
+          "start": 55.08,
+          "end": 55.36
         },
         {
           "id": "caption-word-33-2",
-          "text": "el",
-          "start": 55.4,
-          "end": 55.58
+          "text": "paciente",
+          "start": 55.36,
+          "end": 55.7
         },
         {
           "id": "caption-word-33-3",
-          "text": "historial",
-          "start": 55.58,
-          "end": 55.86
-        },
-        {
-          "id": "caption-word-33-4",
-          "text": "clínico",
-          "start": 55.86,
-          "end": 56.48
+          "text": "contra",
+          "start": 55.7,
+          "end": 56
         }
       ]
     },
     {
       "id": "caption-group-34",
       "frame": 3,
-      "start": 56.74,
-      "end": 58.12,
-      "text": "con enmascaramiento estricto grado",
+      "start": 56,
+      "end": 57.36,
+      "text": "el historial clínico con",
       "words": [
         {
           "id": "caption-word-34-0",
-          "text": "con",
-          "start": 56.74,
-          "end": 56.82
+          "text": "el",
+          "start": 56,
+          "end": 56.16
         },
         {
           "id": "caption-word-34-1",
-          "text": "enmascaramiento",
-          "start": 56.82,
-          "end": 57.44
+          "text": "historial",
+          "start": 56.16,
+          "end": 56.48
         },
         {
           "id": "caption-word-34-2",
-          "text": "estricto",
-          "start": 57.44,
-          "end": 57.9
+          "text": "clínico",
+          "start": 56.48,
+          "end": 56.88
         },
         {
           "id": "caption-word-34-3",
-          "text": "grado",
-          "start": 57.9,
-          "end": 58.12
+          "text": "con",
+          "start": 56.88,
+          "end": 57.36
         }
       ]
     },
     {
       "id": "caption-group-35",
       "frame": 3,
-      "start": 58.12,
-      "end": 59.38,
-      "text": "y PA de DNI y",
+      "start": 57.36,
+      "end": 58.74,
+      "text": "enmascaramiento estricto grado",
       "words": [
         {
           "id": "caption-word-35-0",
-          "text": "y",
-          "start": 58.12,
-          "end": 58.34
+          "text": "enmascaramiento",
+          "start": 57.36,
+          "end": 57.98
         },
         {
           "id": "caption-word-35-1",
-          "text": "PA",
-          "start": 58.34,
+          "text": "estricto",
+          "start": 57.98,
           "end": 58.48
         },
         {
           "id": "caption-word-35-2",
-          "text": "de",
+          "text": "grado",
           "start": 58.48,
-          "end": 58.6
-        },
-        {
-          "id": "caption-word-35-3",
-          "text": "DNI",
-          "start": 58.6,
-          "end": 59.02
-        },
-        {
-          "id": "caption-word-35-4",
-          "text": "y",
-          "start": 59.02,
-          "end": 59.38
+          "end": 58.74
         }
       ]
     },
     {
       "id": "caption-group-36",
       "frame": 3,
-      "start": 59.38,
-      "end": 60.68,
-      "text": "teléfono aplicado directamente en",
+      "start": 58.74,
+      "end": 60.1,
+      "text": "HIPAA de DNI y",
       "words": [
         {
           "id": "caption-word-36-0",
-          "text": "teléfono",
-          "start": 59.38,
-          "end": 59.5
+          "text": "HIPAA",
+          "start": 58.74,
+          "end": 59.06
         },
         {
           "id": "caption-word-36-1",
-          "text": "aplicado",
-          "start": 59.5,
-          "end": 59.94
+          "text": "de",
+          "start": 59.06,
+          "end": 59.4
         },
         {
           "id": "caption-word-36-2",
-          "text": "directamente",
-          "start": 59.94,
-          "end": 60.44
+          "text": "DNI",
+          "start": 59.4,
+          "end": 59.7
         },
         {
           "id": "caption-word-36-3",
-          "text": "en",
-          "start": 60.44,
-          "end": 60.68
+          "text": "y",
+          "start": 59.7,
+          "end": 60.1
         }
       ]
     },
     {
       "id": "caption-group-37",
       "frame": 3,
-      "start": 60.68,
-      "end": 62.14,
-      "text": "el cable La",
+      "start": 60.1,
+      "end": 61.4,
+      "text": "teléfono aplicado directamente",
       "words": [
         {
           "id": "caption-word-37-0",
-          "text": "el",
-          "start": 60.68,
-          "end": 60.86
+          "text": "teléfono",
+          "start": 60.1,
+          "end": 60.28
         },
         {
           "id": "caption-word-37-1",
-          "text": "cable",
-          "start": 60.86,
-          "end": 60.98
+          "text": "aplicado",
+          "start": 60.28,
+          "end": 60.88
         },
         {
           "id": "caption-word-37-2",
-          "text": "La",
-          "start": 62.1,
-          "end": 62.14
+          "text": "directamente",
+          "start": 60.88,
+          "end": 61.4
         }
       ]
     },
     {
       "id": "caption-group-38",
       "frame": 3,
-      "start": 62.14,
-      "end": 63.74,
-      "text": "recepcionista mantiene supervisión",
+      "start": 61.4,
+      "end": 62.76,
+      "text": "en el cable La",
       "words": [
         {
           "id": "caption-word-38-0",
-          "text": "recepcionista",
-          "start": 62.14,
-          "end": 62.76
+          "text": "en",
+          "start": 61.4,
+          "end": 61.62
         },
         {
           "id": "caption-word-38-1",
-          "text": "mantiene",
-          "start": 62.76,
-          "end": 63.12
+          "text": "el",
+          "start": 61.62,
+          "end": 61.92
         },
         {
           "id": "caption-word-38-2",
-          "text": "supervisión",
-          "start": 63.12,
-          "end": 63.74
+          "text": "cable",
+          "start": 61.92,
+          "end": 61.92
+        },
+        {
+          "id": "caption-word-38-3",
+          "text": "La",
+          "start": 62.7,
+          "end": 62.76
         }
       ]
     },
     {
       "id": "caption-group-39",
       "frame": 3,
-      "start": 63.74,
-      "end": 65.16,
-      "text": "continua mientras la agenda se",
+      "start": 62.76,
+      "end": 64.34,
+      "text": "recepcionista mantiene supervisión",
       "words": [
         {
           "id": "caption-word-39-0",
-          "text": "continua",
-          "start": 63.74,
-          "end": 64.18
+          "text": "recepcionista",
+          "start": 62.76,
+          "end": 63.4
         },
         {
           "id": "caption-word-39-1",
-          "text": "mientras",
-          "start": 64.18,
-          "end": 64.46
+          "text": "mantiene",
+          "start": 63.4,
+          "end": 63.78
         },
         {
           "id": "caption-word-39-2",
-          "text": "la",
-          "start": 64.46,
-          "end": 64.68
-        },
-        {
-          "id": "caption-word-39-3",
-          "text": "agenda",
-          "start": 64.68,
-          "end": 64.9
-        },
-        {
-          "id": "caption-word-39-4",
-          "text": "se",
-          "start": 64.9,
-          "end": 65.16
+          "text": "supervisión",
+          "start": 63.78,
+          "end": 64.34
         }
       ]
     },
     {
       "id": "caption-group-40",
       "frame": 3,
-      "start": 65.16,
-      "end": 65.96,
-      "text": "sincroniza al segundo",
+      "start": 64.34,
+      "end": 65.62,
+      "text": "continua mientras la",
       "words": [
         {
           "id": "caption-word-40-0",
-          "text": "sincroniza",
-          "start": 65.16,
-          "end": 65.52
+          "text": "continua",
+          "start": 64.34,
+          "end": 64.84
         },
         {
           "id": "caption-word-40-1",
-          "text": "al",
-          "start": 65.52,
-          "end": 65.72
+          "text": "mientras",
+          "start": 64.84,
+          "end": 65.34
         },
         {
           "id": "caption-word-40-2",
-          "text": "segundo",
-          "start": 65.72,
-          "end": 65.96
+          "text": "la",
+          "start": 65.34,
+          "end": 65.62
         }
       ]
     },
     {
       "id": "caption-group-41",
-      "frame": 4,
-      "start": 68.5,
-      "end": 69.84,
-      "text": "En medicina la",
+      "frame": 3,
+      "start": 65.62,
+      "end": 66.96,
+      "text": "agenda se sincroniza al segundo",
       "words": [
         {
           "id": "caption-word-41-0",
-          "text": "En",
-          "start": 68.5,
-          "end": 68.88
+          "text": "agenda",
+          "start": 65.62,
+          "end": 65.8
         },
         {
           "id": "caption-word-41-1",
-          "text": "medicina",
-          "start": 68.88,
-          "end": 69.32
+          "text": "se",
+          "start": 65.8,
+          "end": 66.12
         },
         {
           "id": "caption-word-41-2",
-          "text": "la",
-          "start": 69.64,
-          "end": 69.84
+          "text": "sincroniza",
+          "start": 66.12,
+          "end": 66.5
+        },
+        {
+          "id": "caption-word-41-3",
+          "text": "al",
+          "start": 66.5,
+          "end": 66.7
+        },
+        {
+          "id": "caption-word-41-4",
+          "text": "segundo",
+          "start": 66.7,
+          "end": 66.96
         }
       ]
     },
     {
       "id": "caption-group-42",
       "frame": 4,
-      "start": 69.84,
-      "end": 71.12,
-      "text": "inteligencia artificial de caja",
+      "start": 68.5,
+      "end": 70.06,
+      "text": "En medicina la inteligencia",
       "words": [
         {
           "id": "caption-word-42-0",
-          "text": "inteligencia",
-          "start": 69.84,
-          "end": 70.26
+          "text": "En",
+          "start": 68.5,
+          "end": 68.9
         },
         {
           "id": "caption-word-42-1",
-          "text": "artificial",
-          "start": 70.26,
-          "end": 70.72
+          "text": "medicina",
+          "start": 68.9,
+          "end": 69.3
         },
         {
           "id": "caption-word-42-2",
-          "text": "de",
-          "start": 70.72,
-          "end": 70.94
+          "text": "la",
+          "start": 69.54,
+          "end": 69.68
         },
         {
           "id": "caption-word-42-3",
-          "text": "caja",
-          "start": 70.94,
-          "end": 71.12
+          "text": "inteligencia",
+          "start": 69.68,
+          "end": 70.06
         }
       ]
     },
     {
       "id": "caption-group-43",
       "frame": 4,
-      "start": 71.12,
-      "end": 73.62,
-      "text": "negra es inaceptable Elegimos",
+      "start": 70.06,
+      "end": 71.56,
+      "text": "artificial de caja negra es",
       "words": [
         {
           "id": "caption-word-43-0",
-          "text": "negra",
-          "start": 71.12,
-          "end": 71.38
+          "text": "artificial",
+          "start": 70.06,
+          "end": 70.54
         },
         {
           "id": "caption-word-43-1",
-          "text": "es",
-          "start": 71.38,
-          "end": 71.58
+          "text": "de",
+          "start": 70.54,
+          "end": 70.76
         },
         {
           "id": "caption-word-43-2",
-          "text": "inaceptable",
-          "start": 71.58,
-          "end": 72.12
+          "text": "caja",
+          "start": 70.76,
+          "end": 70.94
         },
         {
           "id": "caption-word-43-3",
-          "text": "Elegimos",
-          "start": 73.3,
-          "end": 73.62
+          "text": "negra",
+          "start": 70.94,
+          "end": 71.2
+        },
+        {
+          "id": "caption-word-43-4",
+          "text": "es",
+          "start": 71.2,
+          "end": 71.56
         }
       ]
     },
     {
       "id": "caption-group-44",
       "frame": 4,
-      "start": 73.62,
-      "end": 74.94,
-      "text": "Yemenal 3 8 Flash",
+      "start": 71.56,
+      "end": 73.34,
+      "text": "inaceptable Elegimos Gemini",
       "words": [
         {
           "id": "caption-word-44-0",
-          "text": "Yemenal",
-          "start": 73.62,
-          "end": 73.88
+          "text": "inaceptable",
+          "start": 71.56,
+          "end": 72.48
         },
         {
           "id": "caption-word-44-1",
-          "text": "3",
-          "start": 73.88,
-          "end": 74.22
+          "text": "Elegimos",
+          "start": 72.8,
+          "end": 73.06
         },
         {
           "id": "caption-word-44-2",
-          "text": "8",
-          "start": 74.22,
-          "end": 74.76
-        },
-        {
-          "id": "caption-word-44-3",
-          "text": "Flash",
-          "start": 74.76,
-          "end": 74.94
+          "text": "Gemini",
+          "start": 73.06,
+          "end": 73.34
         }
       ]
     },
     {
       "id": "caption-group-45",
       "frame": 4,
-      "start": 74.94,
-      "end": 76.48,
-      "text": "con razonamiento mínimo frente",
+      "start": 73.34,
+      "end": 74.7,
+      "text": "3 8 Flash con",
       "words": [
         {
           "id": "caption-word-45-0",
-          "text": "con",
-          "start": 74.94,
-          "end": 75.16
+          "text": "3",
+          "start": 73.34,
+          "end": 73.74
         },
         {
           "id": "caption-word-45-1",
-          "text": "razonamiento",
-          "start": 75.16,
-          "end": 75.64
+          "text": "8",
+          "start": 73.74,
+          "end": 74.24
         },
         {
           "id": "caption-word-45-2",
-          "text": "mínimo",
-          "start": 75.64,
-          "end": 76
+          "text": "Flash",
+          "start": 74.24,
+          "end": 74.46
         },
         {
           "id": "caption-word-45-3",
-          "text": "frente",
-          "start": 76.48,
-          "end": 76.48
+          "text": "con",
+          "start": 74.46,
+          "end": 74.7
         }
       ]
     },
     {
       "id": "caption-group-46",
       "frame": 4,
-      "start": 76.48,
-      "end": 78.06,
-      "text": "a Grok que falla un 14",
+      "start": 74.7,
+      "end": 76.18,
+      "text": "razonamiento mínimo frente",
       "words": [
         {
           "id": "caption-word-46-0",
-          "text": "a",
-          "start": 76.48,
-          "end": 76.78
+          "text": "razonamiento",
+          "start": 74.7,
+          "end": 75.2
         },
         {
           "id": "caption-word-46-1",
-          "text": "Grok",
-          "start": 76.78,
-          "end": 77.02
+          "text": "mínimo",
+          "start": 75.2,
+          "end": 75.54
         },
         {
           "id": "caption-word-46-2",
-          "text": "que",
-          "start": 77.24,
-          "end": 77.34
-        },
-        {
-          "id": "caption-word-46-3",
-          "text": "falla",
-          "start": 77.34,
-          "end": 77.52
-        },
-        {
-          "id": "caption-word-46-4",
-          "text": "un",
-          "start": 77.52,
-          "end": 77.66
-        },
-        {
-          "id": "caption-word-46-5",
-          "text": "14",
-          "start": 77.66,
-          "end": 78.06
+          "text": "frente",
+          "start": 76.14,
+          "end": 76.18
         }
       ]
     },
     {
       "id": "caption-group-47",
       "frame": 4,
-      "start": 78.06,
-      "end": 79.42,
-      "text": " en pólizas o",
+      "start": 76.18,
+      "end": 77.6,
+      "text": "a Grok que falla un 14",
       "words": [
         {
           "id": "caption-word-47-0",
-          "text": "",
-          "start": 78.06,
-          "end": 78.46
+          "text": "a",
+          "start": 76.18,
+          "end": 76.54
         },
         {
           "id": "caption-word-47-1",
-          "text": "en",
-          "start": 78.46,
-          "end": 78.66
+          "text": "Grok",
+          "start": 76.54,
+          "end": 76.58
         },
         {
           "id": "caption-word-47-2",
-          "text": "pólizas",
-          "start": 78.66,
-          "end": 79.08
+          "text": "que",
+          "start": 76.96,
+          "end": 76.96
         },
         {
           "id": "caption-word-47-3",
-          "text": "o",
-          "start": 79.3,
-          "end": 79.42
+          "text": "falla",
+          "start": 76.96,
+          "end": 77.08
+        },
+        {
+          "id": "caption-word-47-4",
+          "text": "un",
+          "start": 77.08,
+          "end": 77.24
+        },
+        {
+          "id": "caption-word-47-5",
+          "text": "14",
+          "start": 77.24,
+          "end": 77.6
         }
       ]
     },
     {
       "id": "caption-group-48",
       "frame": 4,
-      "start": 79.42,
-      "end": 80.86,
-      "text": "Cloud y GPT 4o",
+      "start": 77.6,
+      "end": 79.04,
+      "text": " en pólizas o",
       "words": [
         {
           "id": "caption-word-48-0",
-          "text": "Cloud",
-          "start": 79.42,
-          "end": 79.62
+          "text": "",
+          "start": 77.6,
+          "end": 77.96
         },
         {
           "id": "caption-word-48-1",
-          "text": "y",
-          "start": 79.62,
-          "end": 79.74
+          "text": "en",
+          "start": 77.96,
+          "end": 78.2
         },
         {
           "id": "caption-word-48-2",
-          "text": "GPT",
-          "start": 79.74,
-          "end": 80.16
+          "text": "pólizas",
+          "start": 78.2,
+          "end": 78.46
         },
         {
           "id": "caption-word-48-3",
-          "text": "4o",
-          "start": 80.16,
-          "end": 80.86
+          "text": "o",
+          "start": 78.84,
+          "end": 79.04
         }
       ]
     },
     {
       "id": "caption-group-49",
       "frame": 4,
-      "start": 80.96,
-      "end": 82.88,
-      "text": "con colas de 3 segundos Yemenal",
+      "start": 79.04,
+      "end": 80.66,
+      "text": "Cloud y GPT 4 con",
       "words": [
         {
           "id": "caption-word-49-0",
-          "text": "con",
-          "start": 80.96,
-          "end": 81.12
+          "text": "Cloud",
+          "start": 79.04,
+          "end": 79.18
         },
         {
           "id": "caption-word-49-1",
-          "text": "colas",
-          "start": 81.12,
-          "end": 81.34
+          "text": "y",
+          "start": 79.18,
+          "end": 79.48
         },
         {
           "id": "caption-word-49-2",
-          "text": "de",
-          "start": 81.34,
-          "end": 81.48
+          "text": "GPT",
+          "start": 79.48,
+          "end": 79.84
         },
         {
           "id": "caption-word-49-3",
-          "text": "3",
-          "start": 81.48,
-          "end": 81.66
+          "text": "4",
+          "start": 79.84,
+          "end": 80.1
         },
         {
           "id": "caption-word-49-4",
-          "text": "segundos",
-          "start": 81.66,
-          "end": 82.1
-        },
-        {
-          "id": "caption-word-49-5",
-          "text": "Yemenal",
-          "start": 82.68,
-          "end": 82.88
+          "text": "con",
+          "start": 80.26,
+          "end": 80.66
         }
       ]
     },
     {
       "id": "caption-group-50",
       "frame": 4,
-      "start": 82.88,
-      "end": 84.36,
-      "text": "logra un 97 ",
+      "start": 80.66,
+      "end": 82.48,
+      "text": "colas de 3 segundos Gemini",
       "words": [
         {
           "id": "caption-word-50-0",
-          "text": "logra",
-          "start": 82.88,
-          "end": 83.1
+          "text": "colas",
+          "start": 80.66,
+          "end": 80.88
         },
         {
           "id": "caption-word-50-1",
-          "text": "un",
-          "start": 83.1,
-          "end": 83.26
+          "text": "de",
+          "start": 80.88,
+          "end": 81.04
         },
         {
           "id": "caption-word-50-2",
-          "text": "97",
-          "start": 83.26,
-          "end": 83.82
+          "text": "3",
+          "start": 81.04,
+          "end": 81.2
         },
         {
           "id": "caption-word-50-3",
-          "text": "",
-          "start": 83.82,
-          "end": 84.36
+          "text": "segundos",
+          "start": 81.2,
+          "end": 81.62
+        },
+        {
+          "id": "caption-word-50-4",
+          "text": "Gemini",
+          "start": 82.34,
+          "end": 82.48
         }
       ]
     },
     {
       "id": "caption-group-51",
       "frame": 4,
-      "start": 84.36,
-      "end": 85.6,
-      "text": "de éxito en herramientas con",
+      "start": 82.48,
+      "end": 83.9,
+      "text": "logra un 97 ",
       "words": [
         {
           "id": "caption-word-51-0",
-          "text": "de",
-          "start": 84.36,
-          "end": 84.68
+          "text": "logra",
+          "start": 82.48,
+          "end": 82.76
         },
         {
           "id": "caption-word-51-1",
-          "text": "éxito",
-          "start": 84.68,
-          "end": 84.74
+          "text": "un",
+          "start": 82.76,
+          "end": 82.94
         },
         {
           "id": "caption-word-51-2",
-          "text": "en",
-          "start": 84.74,
-          "end": 84.98
+          "text": "97",
+          "start": 82.94,
+          "end": 83.44
         },
         {
           "id": "caption-word-51-3",
-          "text": "herramientas",
-          "start": 84.98,
-          "end": 85.46
-        },
-        {
-          "id": "caption-word-51-4",
-          "text": "con",
-          "start": 85.46,
-          "end": 85.6
+          "text": "",
+          "start": 83.44,
+          "end": 83.9
         }
       ]
     },
     {
       "id": "caption-group-52",
       "frame": 4,
-      "start": 85.6,
-      "end": 86.82,
-      "text": "un primer token en 500",
+      "start": 83.9,
+      "end": 85.36,
+      "text": "de éxito en herramientas con",
       "words": [
         {
           "id": "caption-word-52-0",
-          "text": "un",
-          "start": 85.6,
-          "end": 85.9
+          "text": "de",
+          "start": 83.9,
+          "end": 84.26
         },
         {
           "id": "caption-word-52-1",
-          "text": "primer",
-          "start": 85.9,
-          "end": 85.98
+          "text": "éxito",
+          "start": 84.26,
+          "end": 84.32
         },
         {
           "id": "caption-word-52-2",
-          "text": "token",
-          "start": 85.98,
-          "end": 86.24
+          "text": "en",
+          "start": 84.32,
+          "end": 84.58
         },
         {
           "id": "caption-word-52-3",
-          "text": "en",
-          "start": 86.24,
-          "end": 86.42
+          "text": "herramientas",
+          "start": 84.58,
+          "end": 85.02
         },
         {
           "id": "caption-word-52-4",
-          "text": "500",
-          "start": 86.42,
-          "end": 86.82
+          "text": "con",
+          "start": 85.28,
+          "end": 85.36
         }
       ]
     },
     {
       "id": "caption-group-53",
       "frame": 4,
-      "start": 86.82,
-      "end": 88.28,
-      "text": "milisegundos Cada acción",
+      "start": 85.36,
+      "end": 86.56,
+      "text": "un primer token en 500",
       "words": [
         {
           "id": "caption-word-53-0",
-          "text": "milisegundos",
-          "start": 86.82,
-          "end": 87.48
+          "text": "un",
+          "start": 85.36,
+          "end": 85.62
         },
         {
           "id": "caption-word-53-1",
-          "text": "Cada",
-          "start": 87.98,
-          "end": 88.02
+          "text": "primer",
+          "start": 85.62,
+          "end": 85.7
         },
         {
           "id": "caption-word-53-2",
-          "text": "acción",
-          "start": 88.02,
-          "end": 88.28
+          "text": "token",
+          "start": 85.7,
+          "end": 85.96
+        },
+        {
+          "id": "caption-word-53-3",
+          "text": "en",
+          "start": 85.96,
+          "end": 86.14
+        },
+        {
+          "id": "caption-word-53-4",
+          "text": "500",
+          "start": 86.14,
+          "end": 86.56
         }
       ]
     },
     {
       "id": "caption-group-54",
       "frame": 4,
-      "start": 88.28,
-      "end": 89.42,
-      "text": "es trazable antes de hablar",
+      "start": 86.56,
+      "end": 88.1,
+      "text": "milisegundos Cada acción",
       "words": [
         {
           "id": "caption-word-54-0",
-          "text": "es",
-          "start": 88.28,
-          "end": 88.52
+          "text": "milisegundos",
+          "start": 86.56,
+          "end": 87.2
         },
         {
           "id": "caption-word-54-1",
-          "text": "trazable",
-          "start": 88.52,
-          "end": 88.84
+          "text": "Cada",
+          "start": 87.84,
+          "end": 87.86
         },
         {
           "id": "caption-word-54-2",
+          "text": "acción",
+          "start": 87.86,
+          "end": 88.1
+        }
+      ]
+    },
+    {
+      "id": "caption-group-55",
+      "frame": 4,
+      "start": 88.1,
+      "end": 89.42,
+      "text": "es trazable antes de",
+      "words": [
+        {
+          "id": "caption-word-55-0",
+          "text": "es",
+          "start": 88.1,
+          "end": 88.36
+        },
+        {
+          "id": "caption-word-55-1",
+          "text": "trazable",
+          "start": 88.36,
+          "end": 88.66
+        },
+        {
+          "id": "caption-word-55-2",
           "text": "antes",
-          "start": 88.84,
+          "start": 88.66,
           "end": 89.1
         },
         {
-          "id": "caption-word-54-3",
+          "id": "caption-word-55-3",
           "text": "de",
           "start": 89.1,
           "end": 89.42
-        },
+        }
+      ]
+    },
+    {
+      "id": "caption-group-56",
+      "frame": 4,
+      "start": 89.42,
+      "end": 89.42,
+      "text": "hablar",
+      "words": [
         {
-          "id": "caption-word-54-4",
+          "id": "caption-word-56-0",
           "text": "hablar",
           "start": 89.42,
           "end": 89.42
@@ -1909,1817 +1939,1841 @@
       ]
     },
     {
-      "id": "caption-group-55",
+      "id": "caption-group-57",
       "frame": 5,
       "start": 91,
-      "end": 92.38,
+      "end": 92.44,
       "text": "Al finalizar el",
       "words": [
         {
-          "id": "caption-word-55-0",
+          "id": "caption-word-57-0",
           "text": "Al",
           "start": 91,
-          "end": 91.38
-        },
-        {
-          "id": "caption-word-55-1",
-          "text": "finalizar",
-          "start": 91.38,
-          "end": 91.86
-        },
-        {
-          "id": "caption-word-55-2",
-          "text": "el",
-          "start": 92.14,
-          "end": 92.38
-        }
-      ]
-    },
-    {
-      "id": "caption-group-56",
-      "frame": 5,
-      "start": 92.38,
-      "end": 93.92,
-      "text": "modelo de análisis evalúa la",
-      "words": [
-        {
-          "id": "caption-word-56-0",
-          "text": "modelo",
-          "start": 92.38,
-          "end": 92.5
-        },
-        {
-          "id": "caption-word-56-1",
-          "text": "de",
-          "start": 92.5,
-          "end": 92.76
-        },
-        {
-          "id": "caption-word-56-2",
-          "text": "análisis",
-          "start": 92.76,
-          "end": 93.02
-        },
-        {
-          "id": "caption-word-56-3",
-          "text": "evalúa",
-          "start": 93.02,
-          "end": 93.36
-        },
-        {
-          "id": "caption-word-56-4",
-          "text": "la",
-          "start": 93.36,
-          "end": 93.92
-        }
-      ]
-    },
-    {
-      "id": "caption-group-57",
-      "frame": 5,
-      "start": 93.92,
-      "end": 95.4,
-      "text": "fricción el coste y la satisfacción",
-      "words": [
-        {
-          "id": "caption-word-57-0",
-          "text": "fricción",
-          "start": 93.92,
-          "end": 93.92
+          "end": 91.5
         },
         {
           "id": "caption-word-57-1",
-          "text": "el",
-          "start": 94.3,
-          "end": 94.56
+          "text": "finalizar",
+          "start": 91.5,
+          "end": 92
         },
         {
           "id": "caption-word-57-2",
-          "text": "coste",
-          "start": 94.56,
-          "end": 94.6
-        },
-        {
-          "id": "caption-word-57-3",
-          "text": "y",
-          "start": 94.6,
-          "end": 94.68
-        },
-        {
-          "id": "caption-word-57-4",
-          "text": "la",
-          "start": 94.68,
-          "end": 94.84
-        },
-        {
-          "id": "caption-word-57-5",
-          "text": "satisfacción",
-          "start": 94.84,
-          "end": 95.4
+          "text": "el",
+          "start": 92.3,
+          "end": 92.44
         }
       ]
     },
     {
       "id": "caption-group-58",
       "frame": 5,
-      "start": 96.58,
-      "end": 97.9,
-      "text": "Para evitar dobles reservas si el",
+      "start": 92.44,
+      "end": 94.06,
+      "text": "modelo de análisis evalúa la",
       "words": [
         {
           "id": "caption-word-58-0",
-          "text": "Para",
-          "start": 96.58,
-          "end": 96.62
+          "text": "modelo",
+          "start": 92.44,
+          "end": 92.6
         },
         {
           "id": "caption-word-58-1",
-          "text": "evitar",
-          "start": 96.62,
-          "end": 96.88
+          "text": "de",
+          "start": 92.6,
+          "end": 93
         },
         {
           "id": "caption-word-58-2",
-          "text": "dobles",
-          "start": 96.88,
-          "end": 97.2
+          "text": "análisis",
+          "start": 93,
+          "end": 93.22
         },
         {
           "id": "caption-word-58-3",
-          "text": "reservas",
-          "start": 97.2,
-          "end": 97.62
+          "text": "evalúa",
+          "start": 93.22,
+          "end": 93.6
         },
         {
           "id": "caption-word-58-4",
-          "text": "si",
-          "start": 97.62,
-          "end": 97.76
-        },
-        {
-          "id": "caption-word-58-5",
-          "text": "el",
-          "start": 97.76,
-          "end": 97.9
+          "text": "la",
+          "start": 93.6,
+          "end": 94.06
         }
       ]
     },
     {
       "id": "caption-group-59",
       "frame": 5,
-      "start": 97.9,
-      "end": 99.46,
-      "text": "usuario cuelga o duda el",
+      "start": 94.06,
+      "end": 95.28,
+      "text": "fricción el coste y",
       "words": [
         {
           "id": "caption-word-59-0",
-          "text": "usuario",
-          "start": 97.9,
-          "end": 98.18
+          "text": "fricción",
+          "start": 94.06,
+          "end": 94.16
         },
         {
           "id": "caption-word-59-1",
-          "text": "cuelga",
-          "start": 98.18,
-          "end": 98.44
+          "text": "el",
+          "start": 94.62,
+          "end": 94.9
         },
         {
           "id": "caption-word-59-2",
-          "text": "o",
-          "start": 98.44,
-          "end": 98.86
+          "text": "coste",
+          "start": 94.9,
+          "end": 95.02
         },
         {
           "id": "caption-word-59-3",
-          "text": "duda",
-          "start": 98.86,
-          "end": 98.86
-        },
-        {
-          "id": "caption-word-59-4",
-          "text": "el",
-          "start": 99.38,
-          "end": 99.46
+          "text": "y",
+          "start": 95.02,
+          "end": 95.28
         }
       ]
     },
     {
       "id": "caption-group-60",
       "frame": 5,
-      "start": 99.46,
-      "end": 101,
-      "text": "agente jamás muta la base de",
+      "start": 95.28,
+      "end": 96.72,
+      "text": "la satisfacción Para",
       "words": [
         {
           "id": "caption-word-60-0",
-          "text": "agente",
-          "start": 99.46,
-          "end": 99.7
+          "text": "la",
+          "start": 95.28,
+          "end": 95.48
         },
         {
           "id": "caption-word-60-1",
-          "text": "jamás",
-          "start": 99.7,
-          "end": 100.04
+          "text": "satisfacción",
+          "start": 95.48,
+          "end": 96.32
         },
         {
           "id": "caption-word-60-2",
-          "text": "muta",
-          "start": 100.04,
-          "end": 100.3
-        },
-        {
-          "id": "caption-word-60-3",
-          "text": "la",
-          "start": 100.3,
-          "end": 100.5
-        },
-        {
-          "id": "caption-word-60-4",
-          "text": "base",
-          "start": 100.5,
-          "end": 100.6
-        },
-        {
-          "id": "caption-word-60-5",
-          "text": "de",
-          "start": 100.6,
-          "end": 101
+          "text": "Para",
+          "start": 96.64,
+          "end": 96.72
         }
       ]
     },
     {
       "id": "caption-group-61",
       "frame": 5,
-      "start": 101,
-      "end": 102.58,
-      "text": "datos a mitad de llamada Mantiene",
+      "start": 96.72,
+      "end": 98.1,
+      "text": "evitar dobles reservas si",
       "words": [
         {
           "id": "caption-word-61-0",
-          "text": "datos",
-          "start": 101,
-          "end": 101
+          "text": "evitar",
+          "start": 96.72,
+          "end": 97
         },
         {
           "id": "caption-word-61-1",
-          "text": "a",
-          "start": 101,
-          "end": 101.28
+          "text": "dobles",
+          "start": 97,
+          "end": 97.4
         },
         {
           "id": "caption-word-61-2",
-          "text": "mitad",
-          "start": 101.28,
-          "end": 101.3
+          "text": "reservas",
+          "start": 97.4,
+          "end": 97.86
         },
         {
           "id": "caption-word-61-3",
-          "text": "de",
-          "start": 101.3,
-          "end": 101.64
-        },
-        {
-          "id": "caption-word-61-4",
-          "text": "llamada",
-          "start": 101.64,
-          "end": 101.8
-        },
-        {
-          "id": "caption-word-61-5",
-          "text": "Mantiene",
-          "start": 102.58,
-          "end": 102.58
+          "text": "si",
+          "start": 97.86,
+          "end": 98.1
         }
       ]
     },
     {
       "id": "caption-group-62",
       "frame": 5,
-      "start": 102.58,
-      "end": 103.8,
-      "text": "un estado atómico en",
+      "start": 98.1,
+      "end": 99.84,
+      "text": "el usuario cuelga o duva el",
       "words": [
         {
           "id": "caption-word-62-0",
-          "text": "un",
-          "start": 102.58,
-          "end": 102.84
+          "text": "el",
+          "start": 98.1,
+          "end": 98.58
         },
         {
           "id": "caption-word-62-1",
-          "text": "estado",
-          "start": 102.84,
-          "end": 103
+          "text": "usuario",
+          "start": 98.58,
+          "end": 98.58
         },
         {
           "id": "caption-word-62-2",
-          "text": "atómico",
-          "start": 103,
-          "end": 103.36
+          "text": "cuelga",
+          "start": 98.58,
+          "end": 98.8
         },
         {
           "id": "caption-word-62-3",
-          "text": "en",
-          "start": 103.36,
-          "end": 103.8
+          "text": "o",
+          "start": 98.8,
+          "end": 99.04
+        },
+        {
+          "id": "caption-word-62-4",
+          "text": "duva",
+          "start": 99.04,
+          "end": 99.2
+        },
+        {
+          "id": "caption-word-62-5",
+          "text": "el",
+          "start": 99.72,
+          "end": 99.84
         }
       ]
     },
     {
       "id": "caption-group-63",
       "frame": 5,
-      "start": 103.8,
-      "end": 105.12,
-      "text": "memoria y consolida todas las citas",
+      "start": 99.84,
+      "end": 101.06,
+      "text": "agente jamás muta la",
       "words": [
         {
           "id": "caption-word-63-0",
-          "text": "memoria",
-          "start": 103.8,
-          "end": 103.8
+          "text": "agente",
+          "start": 99.84,
+          "end": 100.04
         },
         {
           "id": "caption-word-63-1",
-          "text": "y",
-          "start": 103.8,
-          "end": 104.08
+          "text": "jamás",
+          "start": 100.04,
+          "end": 100.42
         },
         {
           "id": "caption-word-63-2",
-          "text": "consolida",
-          "start": 104.08,
-          "end": 104.36
+          "text": "muta",
+          "start": 100.42,
+          "end": 100.72
         },
         {
           "id": "caption-word-63-3",
-          "text": "todas",
-          "start": 104.36,
-          "end": 104.68
-        },
-        {
-          "id": "caption-word-63-4",
-          "text": "las",
-          "start": 104.68,
-          "end": 104.98
-        },
-        {
-          "id": "caption-word-63-5",
-          "text": "citas",
-          "start": 104.98,
-          "end": 105.12
+          "text": "la",
+          "start": 100.72,
+          "end": 101.06
         }
       ]
     },
     {
       "id": "caption-group-64",
       "frame": 5,
-      "start": 105.12,
-      "end": 106.4,
-      "text": "en un único que emit durante el",
+      "start": 101.06,
+      "end": 102.98,
+      "text": "base de datos a mitad de llamada mantiene",
       "words": [
         {
           "id": "caption-word-64-0",
-          "text": "en",
-          "start": 105.12,
-          "end": 105.3
+          "text": "base",
+          "start": 101.06,
+          "end": 101.06
         },
         {
           "id": "caption-word-64-1",
-          "text": "un",
-          "start": 105.3,
-          "end": 105.44
+          "text": "de",
+          "start": 101.06,
+          "end": 101.44
         },
         {
           "id": "caption-word-64-2",
-          "text": "único",
-          "start": 105.44,
-          "end": 105.6
+          "text": "datos",
+          "start": 101.44,
+          "end": 101.44
         },
         {
           "id": "caption-word-64-3",
-          "text": "que",
-          "start": 105.6,
-          "end": 105.8
+          "text": "a",
+          "start": 101.44,
+          "end": 101.72
         },
         {
           "id": "caption-word-64-4",
-          "text": "emit",
-          "start": 105.8,
-          "end": 105.86
+          "text": "mitad",
+          "start": 101.72,
+          "end": 101.72
         },
         {
           "id": "caption-word-64-5",
-          "text": "durante",
-          "start": 105.86,
-          "end": 106.16
+          "text": "de",
+          "start": 101.72,
+          "end": 102.04
         },
         {
           "id": "caption-word-64-6",
-          "text": "el",
-          "start": 106.16,
-          "end": 106.4
+          "text": "llamada",
+          "start": 102.04,
+          "end": 102.16
+        },
+        {
+          "id": "caption-word-64-7",
+          "text": "mantiene",
+          "start": 102.98,
+          "end": 102.98
         }
       ]
     },
     {
       "id": "caption-group-65",
       "frame": 5,
-      "start": 106.4,
-      "end": 108.1,
-      "text": "cuelgue con reintentos automáticos",
+      "start": 102.98,
+      "end": 104.32,
+      "text": "un estado atómico en",
       "words": [
         {
           "id": "caption-word-65-0",
-          "text": "cuelgue",
-          "start": 106.4,
-          "end": 106.54
+          "text": "un",
+          "start": 102.98,
+          "end": 103.3
         },
         {
           "id": "caption-word-65-1",
-          "text": "con",
-          "start": 107,
-          "end": 107.1
+          "text": "estado",
+          "start": 103.3,
+          "end": 103.46
         },
         {
           "id": "caption-word-65-2",
-          "text": "reintentos",
-          "start": 107.1,
-          "end": 107.54
+          "text": "atómico",
+          "start": 103.46,
+          "end": 103.86
         },
         {
           "id": "caption-word-65-3",
-          "text": "automáticos",
-          "start": 107.54,
-          "end": 108.1
+          "text": "en",
+          "start": 103.86,
+          "end": 104.32
         }
       ]
     },
     {
       "id": "caption-group-66",
       "frame": 5,
-      "start": 108.1,
-      "end": 109.46,
-      "text": "si la API hospitalaria se",
+      "start": 104.32,
+      "end": 105.58,
+      "text": "memoria y consolida todas",
       "words": [
         {
           "id": "caption-word-66-0",
-          "text": "si",
-          "start": 108.1,
-          "end": 108.32
+          "text": "memoria",
+          "start": 104.32,
+          "end": 104.32
         },
         {
           "id": "caption-word-66-1",
-          "text": "la",
-          "start": 108.32,
-          "end": 108.48
+          "text": "y",
+          "start": 104.32,
+          "end": 104.82
         },
         {
           "id": "caption-word-66-2",
-          "text": "API",
-          "start": 108.48,
-          "end": 108.64
+          "text": "consolida",
+          "start": 104.82,
+          "end": 105.24
         },
         {
           "id": "caption-word-66-3",
-          "text": "hospitalaria",
-          "start": 108.64,
-          "end": 109.22
-        },
-        {
-          "id": "caption-word-66-4",
-          "text": "se",
-          "start": 109.22,
-          "end": 109.46
+          "text": "todas",
+          "start": 105.24,
+          "end": 105.58
         }
       ]
     },
     {
       "id": "caption-group-67",
       "frame": 5,
-      "start": 109.46,
-      "end": 109.84,
-      "text": "retrasa",
+      "start": 105.58,
+      "end": 106.94,
+      "text": "las citas en un único commit",
       "words": [
         {
           "id": "caption-word-67-0",
-          "text": "retrasa",
-          "start": 109.46,
-          "end": 109.84
+          "text": "las",
+          "start": 105.58,
+          "end": 105.9
+        },
+        {
+          "id": "caption-word-67-1",
+          "text": "citas",
+          "start": 105.9,
+          "end": 106.04
+        },
+        {
+          "id": "caption-word-67-2",
+          "text": "en",
+          "start": 106.04,
+          "end": 106.28
+        },
+        {
+          "id": "caption-word-67-3",
+          "text": "un",
+          "start": 106.28,
+          "end": 106.42
+        },
+        {
+          "id": "caption-word-67-4",
+          "text": "único",
+          "start": 106.42,
+          "end": 106.62
+        },
+        {
+          "id": "caption-word-67-5",
+          "text": "commit",
+          "start": 106.62,
+          "end": 106.94
         }
       ]
     },
     {
       "id": "caption-group-68",
-      "frame": 6,
-      "start": 112.5,
-      "end": 113.78,
-      "text": "Para evolucionar el",
+      "frame": 5,
+      "start": 106.94,
+      "end": 108.26,
+      "text": "durante el cuelgue con",
       "words": [
         {
           "id": "caption-word-68-0",
-          "text": "Para",
-          "start": 112.5,
-          "end": 112.88
+          "text": "durante",
+          "start": 106.94,
+          "end": 107.28
         },
         {
           "id": "caption-word-68-1",
-          "text": "evolucionar",
-          "start": 112.88,
-          "end": 113.3
+          "text": "el",
+          "start": 107.28,
+          "end": 107.5
         },
         {
           "id": "caption-word-68-2",
-          "text": "el",
-          "start": 113.3,
-          "end": 113.78
+          "text": "cuelgue",
+          "start": 107.5,
+          "end": 107.68
+        },
+        {
+          "id": "caption-word-68-3",
+          "text": "con",
+          "start": 108.1,
+          "end": 108.26
         }
       ]
     },
     {
       "id": "caption-group-69",
-      "frame": 6,
-      "start": 113.78,
-      "end": 115.18,
-      "text": "sistema diseñamos un arnés de",
+      "frame": 5,
+      "start": 108.26,
+      "end": 109.62,
+      "text": "reintentos automáticos si",
       "words": [
         {
           "id": "caption-word-69-0",
-          "text": "sistema",
-          "start": 113.78,
-          "end": 114.04
+          "text": "reintentos",
+          "start": 108.26,
+          "end": 108.78
         },
         {
           "id": "caption-word-69-1",
-          "text": "diseñamos",
-          "start": 114.28,
-          "end": 114.54
+          "text": "automáticos",
+          "start": 108.78,
+          "end": 109.32
         },
         {
           "id": "caption-word-69-2",
-          "text": "un",
-          "start": 114.54,
-          "end": 114.78
-        },
-        {
-          "id": "caption-word-69-3",
-          "text": "arnés",
-          "start": 114.78,
-          "end": 114.94
-        },
-        {
-          "id": "caption-word-69-4",
-          "text": "de",
-          "start": 114.94,
-          "end": 115.18
+          "text": "si",
+          "start": 109.32,
+          "end": 109.62
         }
       ]
     },
     {
       "id": "caption-group-70",
-      "frame": 6,
-      "start": 115.18,
-      "end": 116.66,
-      "text": "experimentación continua en pipelines",
+      "frame": 5,
+      "start": 109.62,
+      "end": 110.92,
+      "text": "la API hospitalaria se retrasa",
       "words": [
         {
           "id": "caption-word-70-0",
-          "text": "experimentación",
-          "start": 115.18,
-          "end": 115.68
+          "text": "la",
+          "start": 109.62,
+          "end": 109.78
         },
         {
           "id": "caption-word-70-1",
-          "text": "continua",
-          "start": 115.68,
-          "end": 116.14
+          "text": "API",
+          "start": 109.78,
+          "end": 109.88
         },
         {
           "id": "caption-word-70-2",
-          "text": "en",
-          "start": 116.14,
-          "end": 116.34
+          "text": "hospitalaria",
+          "start": 109.88,
+          "end": 110.36
         },
         {
           "id": "caption-word-70-3",
-          "text": "pipelines",
-          "start": 116.34,
-          "end": 116.66
+          "text": "se",
+          "start": 110.36,
+          "end": 110.64
+        },
+        {
+          "id": "caption-word-70-4",
+          "text": "retrasa",
+          "start": 110.64,
+          "end": 110.92
         }
       ]
     },
     {
       "id": "caption-group-71",
       "frame": 6,
-      "start": 116.66,
-      "end": 119.02,
-      "text": "py Permite evaluar",
+      "start": 112.5,
+      "end": 113.8,
+      "text": "Para evolucionar el",
       "words": [
         {
           "id": "caption-word-71-0",
-          "text": "py",
-          "start": 116.66,
-          "end": 117.34
+          "text": "Para",
+          "start": 112.5,
+          "end": 112.7
         },
         {
           "id": "caption-word-71-1",
-          "text": "Permite",
-          "start": 118.6,
-          "end": 118.64
+          "text": "evolucionar",
+          "start": 112.7,
+          "end": 113.14
         },
         {
           "id": "caption-word-71-2",
-          "text": "evaluar",
-          "start": 118.64,
-          "end": 119.02
+          "text": "el",
+          "start": 113.14,
+          "end": 113.8
         }
       ]
     },
     {
       "id": "caption-group-72",
       "frame": 6,
-      "start": 119.02,
-      "end": 120.6,
-      "text": "y comparar diferentes modelos",
+      "start": 113.8,
+      "end": 115.1,
+      "text": "sistema diseñamos un arnés de",
       "words": [
         {
           "id": "caption-word-72-0",
-          "text": "y",
-          "start": 119.02,
-          "end": 119.24
+          "text": "sistema",
+          "start": 113.8,
+          "end": 113.8
         },
         {
           "id": "caption-word-72-1",
-          "text": "comparar",
-          "start": 119.24,
-          "end": 119.5
+          "text": "diseñamos",
+          "start": 114.06,
+          "end": 114.38
         },
         {
           "id": "caption-word-72-2",
-          "text": "diferentes",
-          "start": 119.5,
-          "end": 119.98
+          "text": "un",
+          "start": 114.38,
+          "end": 114.64
         },
         {
           "id": "caption-word-72-3",
-          "text": "modelos",
-          "start": 119.98,
-          "end": 120.6
+          "text": "arnés",
+          "start": 114.64,
+          "end": 114.84
+        },
+        {
+          "id": "caption-word-72-4",
+          "text": "de",
+          "start": 114.84,
+          "end": 115.1
         }
       ]
     },
     {
       "id": "caption-group-73",
       "frame": 6,
-      "start": 121.08,
-      "end": 122.34,
-      "text": "pipelines y proveedores de STT",
+      "start": 115.1,
+      "end": 116.46,
+      "text": "experimentación continua en",
       "words": [
         {
           "id": "caption-word-73-0",
-          "text": "pipelines",
-          "start": 121.08,
-          "end": 121.08
+          "text": "experimentación",
+          "start": 115.1,
+          "end": 115.66
         },
         {
           "id": "caption-word-73-1",
-          "text": "y",
-          "start": 121.08,
-          "end": 121.32
+          "text": "continua",
+          "start": 115.66,
+          "end": 116.14
         },
         {
           "id": "caption-word-73-2",
-          "text": "proveedores",
-          "start": 121.32,
-          "end": 121.66
-        },
-        {
-          "id": "caption-word-73-3",
-          "text": "de",
-          "start": 121.66,
-          "end": 121.9
-        },
-        {
-          "id": "caption-word-73-4",
-          "text": "STT",
-          "start": 121.9,
-          "end": 122.34
+          "text": "en",
+          "start": 116.14,
+          "end": 116.46
         }
       ]
     },
     {
       "id": "caption-group-74",
       "frame": 6,
-      "start": 122.92,
-      "end": 124.48,
-      "text": "LLM y síntesis bajo tráfico",
+      "start": 116.46,
+      "end": 118.24,
+      "text": "pipelines py Permite",
       "words": [
         {
           "id": "caption-word-74-0",
-          "text": "LLM",
-          "start": 122.92,
-          "end": 123.22
+          "text": "pipelines",
+          "start": 116.46,
+          "end": 116.82
         },
         {
           "id": "caption-word-74-1",
-          "text": "y",
-          "start": 123.22,
-          "end": 123.4
+          "text": "py",
+          "start": 116.82,
+          "end": 117.42
         },
         {
           "id": "caption-word-74-2",
-          "text": "síntesis",
-          "start": 123.4,
-          "end": 123.74
-        },
-        {
-          "id": "caption-word-74-3",
-          "text": "bajo",
-          "start": 123.74,
-          "end": 124.04
-        },
-        {
-          "id": "caption-word-74-4",
-          "text": "tráfico",
-          "start": 124.04,
-          "end": 124.48
+          "text": "Permite",
+          "start": 118.16,
+          "end": 118.24
         }
       ]
     },
     {
       "id": "caption-group-75",
       "frame": 6,
-      "start": 124.48,
-      "end": 126.68,
-      "text": "real Así medimos",
+      "start": 118.24,
+      "end": 119.66,
+      "text": "evaluar y comparar diferentes",
       "words": [
         {
           "id": "caption-word-75-0",
-          "text": "real",
-          "start": 124.48,
-          "end": 124.76
+          "text": "evaluar",
+          "start": 118.24,
+          "end": 118.7
         },
         {
           "id": "caption-word-75-1",
-          "text": "Así",
-          "start": 125.94,
-          "end": 126.12
+          "text": "y",
+          "start": 118.7,
+          "end": 118.9
         },
         {
           "id": "caption-word-75-2",
-          "text": "medimos",
-          "start": 126.48,
-          "end": 126.68
+          "text": "comparar",
+          "start": 118.9,
+          "end": 119.22
+        },
+        {
+          "id": "caption-word-75-3",
+          "text": "diferentes",
+          "start": 119.22,
+          "end": 119.66
         }
       ]
     },
     {
       "id": "caption-group-76",
       "frame": 6,
-      "start": 126.68,
-      "end": 128.32,
-      "text": "latencia coste y satisfacción",
+      "start": 119.66,
+      "end": 120.94,
+      "text": "modelos pipelines y",
       "words": [
         {
           "id": "caption-word-76-0",
-          "text": "latencia",
-          "start": 126.68,
-          "end": 127.12
+          "text": "modelos",
+          "start": 119.66,
+          "end": 120.06
         },
         {
           "id": "caption-word-76-1",
-          "text": "coste",
-          "start": 127.7,
-          "end": 127.7
+          "text": "pipelines",
+          "start": 120.66,
+          "end": 120.66
         },
         {
           "id": "caption-word-76-2",
           "text": "y",
-          "start": 127.7,
-          "end": 127.88
-        },
-        {
-          "id": "caption-word-76-3",
-          "text": "satisfacción",
-          "start": 127.88,
-          "end": 128.32
+          "start": 120.66,
+          "end": 120.94
         }
       ]
     },
     {
       "id": "caption-group-77",
       "frame": 6,
-      "start": 128.32,
-      "end": 130.24,
-      "text": "clínica para iterar sin descanso",
+      "start": 120.94,
+      "end": 122.2,
+      "text": "proveedores de STT",
       "words": [
         {
           "id": "caption-word-77-0",
-          "text": "clínica",
-          "start": 128.32,
-          "end": 128.74
+          "text": "proveedores",
+          "start": 120.94,
+          "end": 121.42
         },
         {
           "id": "caption-word-77-1",
-          "text": "para",
-          "start": 128.74,
-          "end": 128.92
+          "text": "de",
+          "start": 121.42,
+          "end": 121.76
         },
         {
           "id": "caption-word-77-2",
-          "text": "iterar",
-          "start": 128.92,
-          "end": 129.28
-        },
-        {
-          "id": "caption-word-77-3",
-          "text": "sin",
-          "start": 129.28,
-          "end": 129.4
-        },
-        {
-          "id": "caption-word-77-4",
-          "text": "descanso",
-          "start": 129.4,
-          "end": 130.24
+          "text": "STT",
+          "start": 121.76,
+          "end": 122.2
         }
       ]
     },
     {
       "id": "caption-group-78",
       "frame": 6,
-      "start": 130.56,
-      "end": 132.1,
-      "text": "desplegando siempre la mejor combinación",
+      "start": 122.66,
+      "end": 124.04,
+      "text": "LLM y síntesis bajo",
       "words": [
         {
           "id": "caption-word-78-0",
-          "text": "desplegando",
-          "start": 130.56,
-          "end": 130.84
+          "text": "LLM",
+          "start": 122.66,
+          "end": 123.02
         },
         {
           "id": "caption-word-78-1",
-          "text": "siempre",
-          "start": 130.84,
-          "end": 131.18
+          "text": "y",
+          "start": 123.02,
+          "end": 123.3
         },
         {
           "id": "caption-word-78-2",
-          "text": "la",
-          "start": 131.18,
-          "end": 131.4
+          "text": "síntesis",
+          "start": 123.3,
+          "end": 123.72
         },
         {
           "id": "caption-word-78-3",
-          "text": "mejor",
-          "start": 131.4,
-          "end": 131.6
-        },
-        {
-          "id": "caption-word-78-4",
-          "text": "combinación",
-          "start": 131.6,
-          "end": 132.1
+          "text": "bajo",
+          "start": 123.72,
+          "end": 124.04
         }
       ]
     },
     {
       "id": "caption-group-79",
       "frame": 6,
-      "start": 132.1,
-      "end": 133.56,
-      "text": "con una conmutación transparente",
+      "start": 124.04,
+      "end": 125.6,
+      "text": "tráfico real Así",
       "words": [
         {
           "id": "caption-word-79-0",
-          "text": "con",
-          "start": 132.1,
-          "end": 132.32
+          "text": "tráfico",
+          "start": 124.04,
+          "end": 124.44
         },
         {
           "id": "caption-word-79-1",
-          "text": "una",
-          "start": 132.32,
-          "end": 132.52
+          "text": "real",
+          "start": 124.44,
+          "end": 124.7
         },
         {
           "id": "caption-word-79-2",
-          "text": "conmutación",
-          "start": 132.52,
-          "end": 132.96
-        },
-        {
-          "id": "caption-word-79-3",
-          "text": "transparente",
-          "start": 132.96,
-          "end": 133.56
+          "text": "Así",
+          "start": 125.46,
+          "end": 125.6
         }
       ]
     },
     {
       "id": "caption-group-80",
       "frame": 6,
-      "start": 133.56,
-      "end": 134.18,
-      "text": "e instantánea",
+      "start": 125.84,
+      "end": 127.08,
+      "text": "medimos latencia coste",
       "words": [
         {
           "id": "caption-word-80-0",
-          "text": "e",
-          "start": 133.56,
-          "end": 134.18
+          "text": "medimos",
+          "start": 125.84,
+          "end": 126.1
         },
         {
           "id": "caption-word-80-1",
-          "text": "instantánea",
-          "start": 134.18,
-          "end": 134.18
+          "text": "latencia",
+          "start": 126.1,
+          "end": 126.54
+        },
+        {
+          "id": "caption-word-80-2",
+          "text": "coste",
+          "start": 126.98,
+          "end": 127.08
         }
       ]
     },
     {
       "id": "caption-group-81",
-      "frame": 7,
-      "start": 135.5,
-      "end": 137.06,
-      "text": "En horas punta Clínica",
+      "frame": 6,
+      "start": 127.08,
+      "end": 128.56,
+      "text": "y satisfacción clínica para",
       "words": [
         {
           "id": "caption-word-81-0",
-          "text": "En",
-          "start": 135.5,
-          "end": 135.88
+          "text": "y",
+          "start": 127.08,
+          "end": 127.32
         },
         {
           "id": "caption-word-81-1",
-          "text": "horas",
-          "start": 135.88,
-          "end": 136.12
+          "text": "satisfacción",
+          "start": 127.32,
+          "end": 127.78
         },
         {
           "id": "caption-word-81-2",
-          "text": "punta",
-          "start": 136.12,
-          "end": 136.46
+          "text": "clínica",
+          "start": 127.78,
+          "end": 128.22
         },
         {
           "id": "caption-word-81-3",
-          "text": "Clínica",
-          "start": 136.88,
-          "end": 137.06
+          "text": "para",
+          "start": 128.22,
+          "end": 128.56
         }
       ]
     },
     {
       "id": "caption-group-82",
-      "frame": 7,
-      "start": 137.06,
-      "end": 138.66,
-      "text": "Arenal no deja pacientes en",
+      "frame": 6,
+      "start": 128.56,
+      "end": 130.32,
+      "text": "itelar sin descanso desplegando",
       "words": [
         {
           "id": "caption-word-82-0",
-          "text": "Arenal",
-          "start": 137.06,
-          "end": 137.38
+          "text": "itelar",
+          "start": 128.56,
+          "end": 128.92
         },
         {
           "id": "caption-word-82-1",
-          "text": "no",
-          "start": 137.38,
-          "end": 137.56
+          "text": "sin",
+          "start": 128.92,
+          "end": 129.08
         },
         {
           "id": "caption-word-82-2",
-          "text": "deja",
-          "start": 137.56,
-          "end": 137.74
+          "text": "descanso",
+          "start": 129.08,
+          "end": 129.52
         },
         {
           "id": "caption-word-82-3",
-          "text": "pacientes",
-          "start": 137.74,
-          "end": 138.12
-        },
-        {
-          "id": "caption-word-82-4",
-          "text": "en",
-          "start": 138.12,
-          "end": 138.66
+          "text": "desplegando",
+          "start": 130.08,
+          "end": 130.32
         }
       ]
     },
     {
       "id": "caption-group-83",
-      "frame": 7,
-      "start": 138.66,
-      "end": 140.1,
-      "text": "espera Aquí vemos",
+      "frame": 6,
+      "start": 130.32,
+      "end": 131.66,
+      "text": "siempre la mejor combinación",
       "words": [
         {
           "id": "caption-word-83-0",
-          "text": "espera",
-          "start": 138.66,
-          "end": 138.66
+          "text": "siempre",
+          "start": 130.32,
+          "end": 130.64
         },
         {
           "id": "caption-word-83-1",
-          "text": "Aquí",
-          "start": 139.84,
-          "end": 139.9
+          "text": "la",
+          "start": 130.64,
+          "end": 130.94
         },
         {
           "id": "caption-word-83-2",
-          "text": "vemos",
-          "start": 139.9,
-          "end": 140.1
+          "text": "mejor",
+          "start": 130.94,
+          "end": 131.12
+        },
+        {
+          "id": "caption-word-83-3",
+          "text": "combinación",
+          "start": 131.12,
+          "end": 131.66
         }
       ]
     },
     {
       "id": "caption-group-84",
-      "frame": 7,
-      "start": 140.1,
-      "end": 141.36,
-      "text": "10 llamadas concurrentes",
+      "frame": 6,
+      "start": 131.66,
+      "end": 133.36,
+      "text": "con una conmutación transparente",
       "words": [
         {
           "id": "caption-word-84-0",
-          "text": "10",
-          "start": 140.1,
-          "end": 140.4
+          "text": "con",
+          "start": 131.66,
+          "end": 132.02
         },
         {
           "id": "caption-word-84-1",
-          "text": "llamadas",
-          "start": 140.4,
-          "end": 140.72
+          "text": "una",
+          "start": 132.02,
+          "end": 132.3
         },
         {
           "id": "caption-word-84-2",
-          "text": "concurrentes",
-          "start": 140.72,
-          "end": 141.36
+          "text": "conmutación",
+          "start": 132.3,
+          "end": 132.72
+        },
+        {
+          "id": "caption-word-84-3",
+          "text": "transparente",
+          "start": 132.72,
+          "end": 133.36
         }
       ]
     },
     {
       "id": "caption-group-85",
-      "frame": 7,
-      "start": 141.36,
-      "end": 142.9,
-      "text": "reproduciéndose a velocidad real",
+      "frame": 6,
+      "start": 133.36,
+      "end": 134.14,
+      "text": "e instantánea",
       "words": [
         {
           "id": "caption-word-85-0",
-          "text": "reproduciéndose",
-          "start": 141.36,
-          "end": 142.1
+          "text": "e",
+          "start": 133.36,
+          "end": 133.78
         },
         {
           "id": "caption-word-85-1",
-          "text": "a",
-          "start": 142.1,
-          "end": 142.26
-        },
-        {
-          "id": "caption-word-85-2",
-          "text": "velocidad",
-          "start": 142.26,
-          "end": 142.52
-        },
-        {
-          "id": "caption-word-85-3",
-          "text": "real",
-          "start": 142.52,
-          "end": 142.9
+          "text": "instantánea",
+          "start": 133.78,
+          "end": 134.14
         }
       ]
     },
     {
       "id": "caption-group-86",
       "frame": 7,
-      "start": 142.9,
-      "end": 144.82,
-      "text": "de producción Gracias",
+      "start": 135.5,
+      "end": 137.26,
+      "text": "En horas punta",
       "words": [
         {
           "id": "caption-word-86-0",
-          "text": "de",
-          "start": 142.9,
-          "end": 143.52
+          "text": "En",
+          "start": 135.5,
+          "end": 136.74
         },
         {
           "id": "caption-word-86-1",
-          "text": "producción",
-          "start": 143.52,
-          "end": 143.52
+          "text": "horas",
+          "start": 136.74,
+          "end": 136.96
         },
         {
           "id": "caption-word-86-2",
-          "text": "Gracias",
-          "start": 144.76,
-          "end": 144.82
+          "text": "punta",
+          "start": 136.96,
+          "end": 137.26
         }
       ]
     },
     {
       "id": "caption-group-87",
       "frame": 7,
-      "start": 144.82,
-      "end": 146.22,
-      "text": "al aislamiento de transacciones",
+      "start": 137.62,
+      "end": 138.96,
+      "text": "Clínica Arenal no deja pacientes",
       "words": [
         {
           "id": "caption-word-87-0",
-          "text": "al",
-          "start": 144.82,
-          "end": 145.02
+          "text": "Clínica",
+          "start": 137.62,
+          "end": 137.78
         },
         {
           "id": "caption-word-87-1",
-          "text": "aislamiento",
-          "start": 145.02,
-          "end": 145.44
+          "text": "Arenal",
+          "start": 137.78,
+          "end": 138.14
         },
         {
           "id": "caption-word-87-2",
-          "text": "de",
-          "start": 145.44,
-          "end": 145.66
+          "text": "no",
+          "start": 138.14,
+          "end": 138.42
         },
         {
           "id": "caption-word-87-3",
-          "text": "transacciones",
-          "start": 145.66,
-          "end": 146.22
+          "text": "deja",
+          "start": 138.42,
+          "end": 138.58
+        },
+        {
+          "id": "caption-word-87-4",
+          "text": "pacientes",
+          "start": 138.58,
+          "end": 138.96
         }
       ]
     },
     {
       "id": "caption-group-88",
       "frame": 7,
-      "start": 146.22,
-      "end": 147.66,
-      "text": "SQLiteWall y arquitecturas",
+      "start": 138.96,
+      "end": 140.28,
+      "text": "en espera Aquí",
       "words": [
         {
           "id": "caption-word-88-0",
-          "text": "SQLiteWall",
-          "start": 146.22,
-          "end": 147
+          "text": "en",
+          "start": 138.96,
+          "end": 139.36
         },
         {
           "id": "caption-word-88-1",
-          "text": "y",
-          "start": 147,
-          "end": 147.12
+          "text": "espera",
+          "start": 139.36,
+          "end": 139.36
         },
         {
           "id": "caption-word-88-2",
-          "text": "arquitecturas",
-          "start": 147.12,
-          "end": 147.66
+          "text": "Aquí",
+          "start": 140.22,
+          "end": 140.28
         }
       ]
     },
     {
       "id": "caption-group-89",
       "frame": 7,
-      "start": 147.66,
-      "end": 149.26,
-      "text": "orientadas a eventos el",
+      "start": 140.28,
+      "end": 141.7,
+      "text": "vemos 10 llamadas concurrentes",
       "words": [
         {
           "id": "caption-word-89-0",
-          "text": "orientadas",
-          "start": 147.66,
-          "end": 148.12
+          "text": "vemos",
+          "start": 140.28,
+          "end": 140.5
         },
         {
           "id": "caption-word-89-1",
-          "text": "a",
-          "start": 148.12,
-          "end": 148.34
+          "text": "10",
+          "start": 140.5,
+          "end": 140.76
         },
         {
           "id": "caption-word-89-2",
-          "text": "eventos",
-          "start": 148.34,
-          "end": 148.68
+          "text": "llamadas",
+          "start": 140.76,
+          "end": 141.04
         },
         {
           "id": "caption-word-89-3",
-          "text": "el",
-          "start": 149.12,
-          "end": 149.26
+          "text": "concurrentes",
+          "start": 141.04,
+          "end": 141.7
         }
       ]
     },
     {
       "id": "caption-group-90",
       "frame": 7,
-      "start": 149.26,
-      "end": 150.88,
-      "text": "sistema gestiona reservas simultáneas",
+      "start": 141.7,
+      "end": 143.1,
+      "text": "reproduciéndose a velocidad real",
       "words": [
         {
           "id": "caption-word-90-0",
-          "text": "sistema",
-          "start": 149.26,
-          "end": 149.48
+          "text": "reproduciéndose",
+          "start": 141.7,
+          "end": 142.4
         },
         {
           "id": "caption-word-90-1",
-          "text": "gestiona",
-          "start": 149.48,
-          "end": 149.9
+          "text": "a",
+          "start": 142.4,
+          "end": 142.56
         },
         {
           "id": "caption-word-90-2",
-          "text": "reservas",
-          "start": 149.9,
-          "end": 150.34
+          "text": "velocidad",
+          "start": 142.56,
+          "end": 142.78
         },
         {
           "id": "caption-word-90-3",
-          "text": "simultáneas",
-          "start": 150.34,
-          "end": 150.88
+          "text": "real",
+          "start": 142.78,
+          "end": 143.1
         }
       ]
     },
     {
       "id": "caption-group-91",
       "frame": 7,
-      "start": 150.88,
-      "end": 152.14,
-      "text": "de agenda y bloqueos de slots",
+      "start": 143.1,
+      "end": 144.76,
+      "text": "de producción Gracias",
       "words": [
         {
           "id": "caption-word-91-0",
           "text": "de",
-          "start": 150.88,
-          "end": 151.26
+          "start": 143.1,
+          "end": 143.66
         },
         {
           "id": "caption-word-91-1",
-          "text": "agenda",
-          "start": 151.26,
-          "end": 151.26
+          "text": "producción",
+          "start": 143.66,
+          "end": 144.02
         },
         {
           "id": "caption-word-91-2",
-          "text": "y",
-          "start": 151.26,
-          "end": 151.46
-        },
-        {
-          "id": "caption-word-91-3",
-          "text": "bloqueos",
-          "start": 151.46,
-          "end": 151.72
-        },
-        {
-          "id": "caption-word-91-4",
-          "text": "de",
-          "start": 151.72,
-          "end": 151.94
-        },
-        {
-          "id": "caption-word-91-5",
-          "text": "slots",
-          "start": 151.94,
-          "end": 152.14
+          "text": "Gracias",
+          "start": 144.74,
+          "end": 144.76
         }
       ]
     },
     {
       "id": "caption-group-92",
       "frame": 7,
-      "start": 152.14,
-      "end": 153.42,
-      "text": "con cero colisiones y una",
+      "start": 144.76,
+      "end": 146.06,
+      "text": "al aislamiento de transacciones",
       "words": [
         {
           "id": "caption-word-92-0",
-          "text": "con",
-          "start": 152.14,
-          "end": 152.44
+          "text": "al",
+          "start": 144.76,
+          "end": 145
         },
         {
           "id": "caption-word-92-1",
-          "text": "cero",
-          "start": 152.44,
-          "end": 152.64
+          "text": "aislamiento",
+          "start": 145,
+          "end": 145.38
         },
         {
           "id": "caption-word-92-2",
-          "text": "colisiones",
-          "start": 152.64,
-          "end": 153.1
+          "text": "de",
+          "start": 145.38,
+          "end": 145.58
         },
         {
           "id": "caption-word-92-3",
-          "text": "y",
-          "start": 153.1,
-          "end": 153.26
-        },
-        {
-          "id": "caption-word-92-4",
-          "text": "una",
-          "start": 153.26,
-          "end": 153.42
+          "text": "transacciones",
+          "start": 145.58,
+          "end": 146.06
         }
       ]
     },
     {
       "id": "caption-group-93",
       "frame": 7,
-      "start": 153.42,
-      "end": 154.9,
-      "text": "latencia constante de",
+      "start": 146.06,
+      "end": 147.9,
+      "text": "SQLite VAAL y",
       "words": [
         {
           "id": "caption-word-93-0",
-          "text": "latencia",
-          "start": 153.42,
-          "end": 153.82
+          "text": "SQLite",
+          "start": 146.06,
+          "end": 146.72
         },
         {
           "id": "caption-word-93-1",
-          "text": "constante",
-          "start": 153.82,
-          "end": 154.68
+          "text": "VAAL",
+          "start": 146.72,
+          "end": 147.46
         },
         {
           "id": "caption-word-93-2",
-          "text": "de",
-          "start": 154.68,
-          "end": 154.9
+          "text": "y",
+          "start": 147.46,
+          "end": 147.9
         }
       ]
     },
     {
       "id": "caption-group-94",
       "frame": 7,
-      "start": 154.9,
-      "end": 156.44,
-      "text": "740 milisegundos",
+      "start": 147.9,
+      "end": 149.28,
+      "text": "arquitecturas orientadas a eventos",
       "words": [
         {
           "id": "caption-word-94-0",
-          "text": "740",
-          "start": 154.9,
-          "end": 155.76
+          "text": "arquitecturas",
+          "start": 147.9,
+          "end": 148.36
         },
         {
           "id": "caption-word-94-1",
-          "text": "milisegundos",
-          "start": 155.76,
-          "end": 156.44
+          "text": "orientadas",
+          "start": 148.36,
+          "end": 148.78
+        },
+        {
+          "id": "caption-word-94-2",
+          "text": "a",
+          "start": 148.78,
+          "end": 149.1
+        },
+        {
+          "id": "caption-word-94-3",
+          "text": "eventos",
+          "start": 149.1,
+          "end": 149.28
         }
       ]
     },
     {
       "id": "caption-group-95",
-      "frame": 8,
-      "start": 158,
-      "end": 159.3,
-      "text": "Detrás de esta interfaz",
+      "frame": 7,
+      "start": 149.62,
+      "end": 151.18,
+      "text": "el sistema gestiona reservas simultáneas",
       "words": [
         {
           "id": "caption-word-95-0",
-          "text": "Detrás",
-          "start": 158,
-          "end": 158.52
+          "text": "el",
+          "start": 149.62,
+          "end": 149.92
         },
         {
           "id": "caption-word-95-1",
-          "text": "de",
-          "start": 158.52,
-          "end": 158.66
+          "text": "sistema",
+          "start": 149.92,
+          "end": 149.92
         },
         {
           "id": "caption-word-95-2",
-          "text": "esta",
-          "start": 158.66,
-          "end": 158.84
+          "text": "gestiona",
+          "start": 149.92,
+          "end": 150.28
         },
         {
           "id": "caption-word-95-3",
-          "text": "interfaz",
-          "start": 158.84,
-          "end": 159.3
+          "text": "reservas",
+          "start": 150.28,
+          "end": 150.68
+        },
+        {
+          "id": "caption-word-95-4",
+          "text": "simultáneas",
+          "start": 150.68,
+          "end": 151.18
         }
       ]
     },
     {
       "id": "caption-group-96",
-      "frame": 8,
-      "start": 159.3,
-      "end": 160.78,
-      "text": "late un rigor técnico absoluto",
+      "frame": 7,
+      "start": 151.18,
+      "end": 152.5,
+      "text": "de agenda y bloqueos de",
       "words": [
         {
           "id": "caption-word-96-0",
-          "text": "late",
-          "start": 159.3,
-          "end": 159.52
+          "text": "de",
+          "start": 151.18,
+          "end": 151.58
         },
         {
           "id": "caption-word-96-1",
-          "text": "un",
-          "start": 159.52,
-          "end": 159.72
+          "text": "agenda",
+          "start": 151.58,
+          "end": 151.58
         },
         {
           "id": "caption-word-96-2",
-          "text": "rigor",
-          "start": 159.72,
-          "end": 159.96
+          "text": "y",
+          "start": 151.58,
+          "end": 151.88
         },
         {
           "id": "caption-word-96-3",
-          "text": "técnico",
-          "start": 159.96,
-          "end": 160.3
+          "text": "bloqueos",
+          "start": 151.88,
+          "end": 152.12
         },
         {
           "id": "caption-word-96-4",
-          "text": "absoluto",
-          "start": 160.3,
-          "end": 160.78
+          "text": "de",
+          "start": 152.12,
+          "end": 152.5
         }
       ]
     },
     {
       "id": "caption-group-97",
-      "frame": 8,
-      "start": 161.32,
-      "end": 162.52,
-      "text": "127 tests de agente",
+      "frame": 7,
+      "start": 152.5,
+      "end": 153.92,
+      "text": "slots con cero colisiones y",
       "words": [
         {
           "id": "caption-word-97-0",
-          "text": "127",
-          "start": 161.32,
-          "end": 161.82
+          "text": "slots",
+          "start": 152.5,
+          "end": 152.5
         },
         {
           "id": "caption-word-97-1",
-          "text": "tests",
-          "start": 161.82,
-          "end": 162.18
+          "text": "con",
+          "start": 152.5,
+          "end": 152.82
         },
         {
           "id": "caption-word-97-2",
-          "text": "de",
-          "start": 162.18,
-          "end": 162.28
+          "text": "cero",
+          "start": 152.82,
+          "end": 152.98
         },
         {
           "id": "caption-word-97-3",
-          "text": "agente",
-          "start": 162.28,
-          "end": 162.52
+          "text": "colisiones",
+          "start": 152.98,
+          "end": 153.44
+        },
+        {
+          "id": "caption-word-97-4",
+          "text": "y",
+          "start": 153.44,
+          "end": 153.92
         }
       ]
     },
     {
       "id": "caption-group-98",
-      "frame": 8,
-      "start": 163.5,
-      "end": 164.74,
-      "text": "73 evaluaciones de benchmark",
+      "frame": 7,
+      "start": 153.92,
+      "end": 155.16,
+      "text": "una latencia constante de",
       "words": [
         {
           "id": "caption-word-98-0",
-          "text": "73",
-          "start": 163.5,
-          "end": 163.68
+          "text": "una",
+          "start": 153.92,
+          "end": 154.14
         },
         {
           "id": "caption-word-98-1",
-          "text": "evaluaciones",
-          "start": 163.68,
-          "end": 164.2
+          "text": "latencia",
+          "start": 154.14,
+          "end": 154.38
         },
         {
           "id": "caption-word-98-2",
-          "text": "de",
-          "start": 164.2,
-          "end": 164.44
+          "text": "constante",
+          "start": 154.38,
+          "end": 154.8
         },
         {
           "id": "caption-word-98-3",
-          "text": "benchmark",
-          "start": 164.44,
-          "end": 164.74
+          "text": "de",
+          "start": 154.8,
+          "end": 155.16
         }
       ]
     },
     {
       "id": "caption-group-99",
-      "frame": 8,
-      "start": 164.74,
-      "end": 165.96,
-      "text": "con ensayos repetidos y",
+      "frame": 7,
+      "start": 155.16,
+      "end": 156.44,
+      "text": "740 milisegundos",
       "words": [
         {
           "id": "caption-word-99-0",
-          "text": "con",
-          "start": 164.74,
-          "end": 165.02
+          "text": "740",
+          "start": 155.16,
+          "end": 155.9
         },
         {
           "id": "caption-word-99-1",
-          "text": "ensayos",
-          "start": 165.02,
-          "end": 165.34
-        },
-        {
-          "id": "caption-word-99-2",
-          "text": "repetidos",
-          "start": 165.34,
-          "end": 165.76
-        },
-        {
-          "id": "caption-word-99-3",
-          "text": "y",
-          "start": 165.76,
-          "end": 165.96
+          "text": "milisegundos",
+          "start": 155.9,
+          "end": 156.44
         }
       ]
     },
     {
       "id": "caption-group-100",
       "frame": 8,
-      "start": 165.96,
-      "end": 167.36,
-      "text": "con puertas de seguridad en código",
+      "start": 158,
+      "end": 159.5,
+      "text": "Detrás de esta",
       "words": [
         {
           "id": "caption-word-100-0",
-          "text": "con",
-          "start": 165.96,
-          "end": 166.34
+          "text": "Detrás",
+          "start": 158,
+          "end": 159.16
         },
         {
           "id": "caption-word-100-1",
-          "text": "puertas",
-          "start": 166.34,
-          "end": 166.34
+          "text": "de",
+          "start": 159.16,
+          "end": 159.32
         },
         {
           "id": "caption-word-100-2",
-          "text": "de",
-          "start": 166.34,
-          "end": 166.64
-        },
-        {
-          "id": "caption-word-100-3",
-          "text": "seguridad",
-          "start": 166.64,
-          "end": 166.82
-        },
-        {
-          "id": "caption-word-100-4",
-          "text": "en",
-          "start": 166.82,
-          "end": 167.16
-        },
-        {
-          "id": "caption-word-100-5",
-          "text": "código",
-          "start": 167.16,
-          "end": 167.36
+          "text": "esta",
+          "start": 159.32,
+          "end": 159.5
         }
       ]
     },
     {
       "id": "caption-group-101",
       "frame": 8,
-      "start": 167.36,
-      "end": 168.82,
-      "text": "que derivan Emergencias",
+      "start": 159.5,
+      "end": 160.78,
+      "text": "interfaz late un rigor",
       "words": [
         {
           "id": "caption-word-101-0",
-          "text": "que",
-          "start": 167.36,
-          "end": 167.58
+          "text": "interfaz",
+          "start": 159.5,
+          "end": 159.96
         },
         {
           "id": "caption-word-101-1",
-          "text": "derivan",
-          "start": 167.58,
-          "end": 168.16
+          "text": "late",
+          "start": 159.96,
+          "end": 160.34
         },
         {
           "id": "caption-word-101-2",
-          "text": "Emergencias",
-          "start": 168.74,
-          "end": 168.82
+          "text": "un",
+          "start": 160.34,
+          "end": 160.6
+        },
+        {
+          "id": "caption-word-101-3",
+          "text": "rigor",
+          "start": 160.6,
+          "end": 160.78
         }
       ]
     },
     {
       "id": "caption-group-102",
       "frame": 8,
-      "start": 168.82,
-      "end": 170.88,
-      "text": "al instante Creatividad",
+      "start": 160.78,
+      "end": 162.64,
+      "text": "técnico absoluto 127",
       "words": [
         {
           "id": "caption-word-102-0",
-          "text": "al",
-          "start": 168.82,
-          "end": 169.04
+          "text": "técnico",
+          "start": 160.78,
+          "end": 161.14
         },
         {
           "id": "caption-word-102-1",
-          "text": "instante",
-          "start": 169.04,
-          "end": 169.32
+          "text": "absoluto",
+          "start": 161.14,
+          "end": 161.66
         },
         {
           "id": "caption-word-102-2",
-          "text": "Creatividad",
-          "start": 170.78,
-          "end": 170.88
+          "text": "127",
+          "start": 162.22,
+          "end": 162.64
         }
       ]
     },
     {
       "id": "caption-group-103",
       "frame": 8,
-      "start": 171.62,
-      "end": 173.12,
-      "text": "resolución de problemas y artesanía técnica",
+      "start": 162.64,
+      "end": 164.14,
+      "text": "test de agente 73",
       "words": [
         {
           "id": "caption-word-103-0",
-          "text": "resolución",
-          "start": 171.62,
-          "end": 171.62
+          "text": "test",
+          "start": 162.64,
+          "end": 162.86
         },
         {
           "id": "caption-word-103-1",
           "text": "de",
-          "start": 171.62,
-          "end": 171.96
+          "start": 162.86,
+          "end": 163.04
         },
         {
           "id": "caption-word-103-2",
-          "text": "problemas",
-          "start": 171.96,
-          "end": 172.14
+          "text": "agente",
+          "start": 163.04,
+          "end": 163.3
         },
         {
           "id": "caption-word-103-3",
-          "text": "y",
-          "start": 172.14,
-          "end": 172.4
-        },
-        {
-          "id": "caption-word-103-4",
-          "text": "artesanía",
-          "start": 172.4,
-          "end": 172.72
-        },
-        {
-          "id": "caption-word-103-5",
-          "text": "técnica",
-          "start": 172.72,
-          "end": 173.12
+          "text": "73",
+          "start": 163.96,
+          "end": 164.14
         }
       ]
     },
     {
       "id": "caption-group-104",
       "frame": 8,
-      "start": 173.12,
-      "end": 175.28,
-      "text": "unidas en salud Diseñado",
+      "start": 164.14,
+      "end": 165.44,
+      "text": "evaluaciones de benchmark con",
       "words": [
         {
           "id": "caption-word-104-0",
-          "text": "unidas",
-          "start": 173.12,
-          "end": 173.4
+          "text": "evaluaciones",
+          "start": 164.14,
+          "end": 164.6
         },
         {
           "id": "caption-word-104-1",
-          "text": "en",
-          "start": 173.4,
-          "end": 173.68
+          "text": "de",
+          "start": 164.6,
+          "end": 164.86
         },
         {
           "id": "caption-word-104-2",
-          "text": "salud",
-          "start": 173.68,
-          "end": 173.86
+          "text": "benchmark",
+          "start": 164.86,
+          "end": 165.14
         },
         {
           "id": "caption-word-104-3",
-          "text": "Diseñado",
-          "start": 175.12,
-          "end": 175.28
+          "text": "con",
+          "start": 165.14,
+          "end": 165.44
         }
       ]
     },
     {
       "id": "caption-group-105",
       "frame": 8,
-      "start": 175.28,
-      "end": 176.66,
-      "text": "para clínicos construido",
+      "start": 165.44,
+      "end": 166.8,
+      "text": "ensayos repetidos y con",
       "words": [
         {
           "id": "caption-word-105-0",
-          "text": "para",
-          "start": 175.28,
-          "end": 175.48
+          "text": "ensayos",
+          "start": 165.44,
+          "end": 165.72
         },
         {
           "id": "caption-word-105-1",
-          "text": "clínicos",
-          "start": 175.48,
-          "end": 175.88
+          "text": "repetidos",
+          "start": 165.72,
+          "end": 166.18
         },
         {
           "id": "caption-word-105-2",
-          "text": "construido",
-          "start": 176.48,
-          "end": 176.66
+          "text": "y",
+          "start": 166.18,
+          "end": 166.5
+        },
+        {
+          "id": "caption-word-105-3",
+          "text": "con",
+          "start": 166.5,
+          "end": 166.8
         }
       ]
     },
     {
       "id": "caption-group-106",
       "frame": 8,
-      "start": 176.66,
-      "end": 178.02,
-      "text": "para pacientes y preparado para",
+      "start": 166.8,
+      "end": 168.16,
+      "text": "puertas de seguridad en código que",
       "words": [
         {
           "id": "caption-word-106-0",
-          "text": "para",
-          "start": 176.66,
-          "end": 176.88
+          "text": "puertas",
+          "start": 166.8,
+          "end": 166.8
         },
         {
           "id": "caption-word-106-1",
-          "text": "pacientes",
-          "start": 176.88,
-          "end": 177.22
+          "text": "de",
+          "start": 166.8,
+          "end": 167.08
         },
         {
           "id": "caption-word-106-2",
-          "text": "y",
-          "start": 177.22,
-          "end": 177.48
+          "text": "seguridad",
+          "start": 167.08,
+          "end": 167.28
         },
         {
           "id": "caption-word-106-3",
-          "text": "preparado",
-          "start": 177.48,
-          "end": 177.82
+          "text": "en",
+          "start": 167.28,
+          "end": 167.86
         },
         {
           "id": "caption-word-106-4",
-          "text": "para",
-          "start": 177.82,
-          "end": 178.02
+          "text": "código",
+          "start": 167.86,
+          "end": 167.86
+        },
+        {
+          "id": "caption-word-106-5",
+          "text": "que",
+          "start": 167.86,
+          "end": 168.16
         }
       ]
     },
     {
       "id": "caption-group-107",
       "frame": 8,
-      "start": 178.02,
-      "end": 178.46,
-      "text": "el Grand Prix",
+      "start": 168.16,
+      "end": 169.46,
+      "text": "derivan emergencias al instante",
       "words": [
         {
           "id": "caption-word-107-0",
-          "text": "el",
-          "start": 178.02,
-          "end": 178.2
+          "text": "derivan",
+          "start": 168.16,
+          "end": 168.44
         },
         {
           "id": "caption-word-107-1",
-          "text": "Grand",
-          "start": 178.2,
-          "end": 178.4
+          "text": "emergencias",
+          "start": 168.44,
+          "end": 168.9
         },
         {
           "id": "caption-word-107-2",
-          "text": "Prix",
-          "start": 178.4,
-          "end": 178.46
+          "text": "al",
+          "start": 168.9,
+          "end": 169.18
+        },
+        {
+          "id": "caption-word-107-3",
+          "text": "instante",
+          "start": 169.18,
+          "end": 169.46
+        }
+      ]
+    },
+    {
+      "id": "caption-group-108",
+      "frame": 8,
+      "start": 170.36,
+      "end": 171.98,
+      "text": "Creatividad resolución de",
+      "words": [
+        {
+          "id": "caption-word-108-0",
+          "text": "Creatividad",
+          "start": 170.36,
+          "end": 170.6
+        },
+        {
+          "id": "caption-word-108-1",
+          "text": "resolución",
+          "start": 171.4,
+          "end": 171.4
+        },
+        {
+          "id": "caption-word-108-2",
+          "text": "de",
+          "start": 171.4,
+          "end": 171.98
+        }
+      ]
+    },
+    {
+      "id": "caption-group-109",
+      "frame": 8,
+      "start": 171.98,
+      "end": 173.42,
+      "text": "problemas y artesanía técnica unidas",
+      "words": [
+        {
+          "id": "caption-word-109-0",
+          "text": "problemas",
+          "start": 171.98,
+          "end": 171.98
+        },
+        {
+          "id": "caption-word-109-1",
+          "text": "y",
+          "start": 171.98,
+          "end": 172.3
+        },
+        {
+          "id": "caption-word-109-2",
+          "text": "artesanía",
+          "start": 172.3,
+          "end": 172.64
+        },
+        {
+          "id": "caption-word-109-3",
+          "text": "técnica",
+          "start": 172.64,
+          "end": 173.06
+        },
+        {
+          "id": "caption-word-109-4",
+          "text": "unidas",
+          "start": 173.06,
+          "end": 173.42
+        }
+      ]
+    },
+    {
+      "id": "caption-group-110",
+      "frame": 8,
+      "start": 173.42,
+      "end": 174.9,
+      "text": "en salud Diseñado",
+      "words": [
+        {
+          "id": "caption-word-110-0",
+          "text": "en",
+          "start": 173.42,
+          "end": 173.68
+        },
+        {
+          "id": "caption-word-110-1",
+          "text": "salud",
+          "start": 173.68,
+          "end": 173.86
+        },
+        {
+          "id": "caption-word-110-2",
+          "text": "Diseñado",
+          "start": 174.78,
+          "end": 174.9
+        }
+      ]
+    },
+    {
+      "id": "caption-group-111",
+      "frame": 8,
+      "start": 174.9,
+      "end": 176.18,
+      "text": "para clínicos construido",
+      "words": [
+        {
+          "id": "caption-word-111-0",
+          "text": "para",
+          "start": 174.9,
+          "end": 175.06
+        },
+        {
+          "id": "caption-word-111-1",
+          "text": "clínicos",
+          "start": 175.06,
+          "end": 175.44
+        },
+        {
+          "id": "caption-word-111-2",
+          "text": "construido",
+          "start": 176.14,
+          "end": 176.18
+        }
+      ]
+    },
+    {
+      "id": "caption-group-112",
+      "frame": 8,
+      "start": 176.18,
+      "end": 177.66,
+      "text": "para pacientes y preparado",
+      "words": [
+        {
+          "id": "caption-word-112-0",
+          "text": "para",
+          "start": 176.18,
+          "end": 176.4
+        },
+        {
+          "id": "caption-word-112-1",
+          "text": "pacientes",
+          "start": 176.4,
+          "end": 176.76
+        },
+        {
+          "id": "caption-word-112-2",
+          "text": "y",
+          "start": 176.76,
+          "end": 177.3
+        },
+        {
+          "id": "caption-word-112-3",
+          "text": "preparado",
+          "start": 177.3,
+          "end": 177.66
+        }
+      ]
+    },
+    {
+      "id": "caption-group-113",
+      "frame": 8,
+      "start": 177.66,
+      "end": 178.32,
+      "text": "para Hackspain",
+      "words": [
+        {
+          "id": "caption-word-113-0",
+          "text": "para",
+          "start": 177.66,
+          "end": 177.84
+        },
+        {
+          "id": "caption-word-113-1",
+          "text": "Hackspain",
+          "start": 177.84,
+          "end": 178.32
         }
       ]
     }

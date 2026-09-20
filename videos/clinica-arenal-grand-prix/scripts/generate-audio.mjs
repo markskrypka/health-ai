@@ -5,9 +5,6 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
-const edgeTtsBin = existsSync("/home/Shodan/Miniforge3/bin/edge-tts")
-  ? "/home/Shodan/Miniforge3/bin/edge-tts"
-  : "edge-tts";
 
 let apiKey = process.env.OPENAI_API_KEY;
 if (!apiKey) {
@@ -19,6 +16,19 @@ if (!apiKey) {
 }
 if (!apiKey) {
   console.error("Missing OPENAI_API_KEY for Whisper word alignment");
+  process.exit(1);
+}
+
+let geminiApiKey = process.env.GEMINI_API_KEY;
+if (!geminiApiKey) {
+  try {
+    const envStr = readFileSync("/home/Shodan/strangemed/.env.local", "utf8");
+    const m = envStr.match(/^GEMINI_API_KEY=(.+)$/m);
+    if (m) geminiApiKey = m[1].trim();
+  } catch (e) {}
+}
+if (!geminiApiKey) {
+  console.error("Missing GEMINI_API_KEY for Google Gemini TTS");
   process.exit(1);
 }
 
@@ -38,14 +48,14 @@ const FRAME_STARTS = {
 };
 
 const FRAME_MAX_DURS = {
-  1: 22.5,
-  2: 22.5,
-  3: 21.0,
-  4: 22.5,
-  5: 21.5,
-  6: 22.0,
+  1: 24.0,
+  2: 23.0,
+  3: 20.0,
+  4: 22.0,
+  5: 21.0,
+  6: 22.5,
   7: 22.0,
-  8: 26.0,
+  8: 21.5,
 };
 
 function parseScript(md) {
@@ -69,14 +79,87 @@ function parseScript(md) {
   return lines;
 }
 
-async function synthesize(text, voicePath) {
-  console.log(`Synthesizing Spanish Edge-TTS (es-ES-AlvaroNeural): "${text.slice(0, 50)}..." -> ${voicePath}`);
-  await execFileAsync(edgeTtsBin, [
-    "--voice", "es-ES-AlvaroNeural",
-    "--rate=+11%",
-    "--text", text,
-    "--write-media", voicePath,
+async function synthesize(text, voicePath, targetMaxDur) {
+  console.log(`Synthesizing with Google Gemini TTS (Puck): "${text.slice(0, 50)}..." -> ${voicePath}`);
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${geminiApiKey}`;
+  
+  const payload = {
+    contents: [
+      {
+        parts: [
+          {
+            text: `Por favor, lee el siguiente texto en voz alta con entonación natural, ritmo fluido y acento de español europeo de España, sin añadir comentarios ni preámbulos:\n\n${text}`
+          }
+        ]
+      }
+    ],
+    generationConfig: {
+      responseModalities: ["AUDIO"],
+      speechConfig: {
+        voiceConfig: {
+          prebuiltVoiceConfig: {
+            voiceName: "Puck"
+          }
+        }
+      }
+    }
+  };
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Gemini TTS failed with status ${res.status}: ${await res.text()}`);
+  }
+
+  const json = await res.json();
+  const cand = json.candidates?.[0]?.content?.parts?.[0];
+  if (!cand || !cand.inlineData?.data) {
+    throw new Error(`Gemini TTS returned no audio: ${JSON.stringify(json)}`);
+  }
+
+  const rawPcm = Buffer.from(cand.inlineData.data, "base64");
+  const rawPath = voicePath + ".raw";
+  await writeFile(rawPath, rawPcm);
+
+  const tmpMp3 = voicePath + ".tmp.mp3";
+  await execFileAsync("ffmpeg", [
+    "-y",
+    "-f", "s16le",
+    "-ar", "24000",
+    "-ac", "1",
+    "-i", rawPath,
+    tmpMp3
   ]);
+
+  const { stdout: probeOut } = await execFileAsync("ffprobe", [
+    "-v", "error",
+    "-show_entries", "format=duration",
+    "-of", "default=noprint_wrappers=1:nokey=1",
+    tmpMp3
+  ]);
+  const rawDur = parseFloat(probeOut.trim());
+
+  let tempo = 1.0;
+  if (targetMaxDur && rawDur > targetMaxDur - 0.5) {
+    tempo = rawDur / (targetMaxDur - 0.8);
+    tempo = Math.max(1.05, Math.min(tempo, 1.30));
+  }
+
+  if (Math.abs(tempo - 1.0) > 0.02) {
+    console.log(`Adjusting tempo by x${tempo.toFixed(2)} (raw: ${rawDur.toFixed(2)}s -> target: ~${(rawDur / tempo).toFixed(2)}s)`);
+    await execFileAsync("ffmpeg", [
+      "-y",
+      "-i", tmpMp3,
+      "-filter:a", `atempo=${tempo.toFixed(3)}`,
+      voicePath
+    ]);
+  } else {
+    copyFileSync(tmpMp3, voicePath);
+  }
 }
 
 async function transcribe(voicePath) {
@@ -190,10 +273,10 @@ async function main() {
     const relPath = `audio/${filename}`;
     const absPath = join(audioDir, filename);
 
-    await synthesize(item.text, absPath);
+    const maxDur = FRAME_MAX_DURS[item.frame] || 22.0;
+    await synthesize(item.text, absPath, maxDur);
     const trans = await transcribe(absPath);
 
-    const maxDur = FRAME_MAX_DURS[item.frame] || 22.0;
     console.log(`Frame ${item.frame}: generated ${trans.duration_s}s (max target: ${maxDur}s)`);
 
     voices.push({

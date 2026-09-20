@@ -1,9 +1,9 @@
-# SCRIPT — clinica-arenal-grand-prix (European Spanish Edition)
+# SCRIPT — clinica-arenal-hackspain (European Spanish Edition)
 
-**Voice:** Álvaro Neural (`es-ES-AlvaroNeural`)
-**Voice settings:** edge-tts · speed +11%
+**Voice:** Puck (Google Gemini TTS `gemini-2.5-flash-preview-tts`)
+**Voice settings:** Gemini Multimodal Audio · Voice Puck · European Spanish
 **Language:** European Spanish (es-ES)
-**Voice direction:** Natural, cálido, seguro, técnico y profundamente humano.
+**Voice direction:** Dinámico, natural, seguro, técnico y profundamente humano.
 **Mantra:** "Un vídeo de 3 minutos. Contad el proyecto a fondo, para que puedan juzgar creatividad, problem solving y craftsmanship."
 
 ---
@@ -57,9 +57,9 @@
 
     En horas punta, Clínica Arenal no deja pacientes en espera. Aquí vemos diez llamadas concurrentes reproduciéndose a velocidad real de producción. Gracias al aislamiento de transacciones SQLite WAL y arquitecturas orientadas a eventos, el sistema gestiona reservas simultáneas de agenda y bloqueos de slots con cero colisiones y una latencia constante de setecientos cuarenta milisegundos.
 
-## Line 8 — Rigor de Ingeniería y Grand Prix (Frame 8)
+## Line 8 — Rigor de Ingeniería y HackSpain (Frame 8)
 
 **Time:** 154.0 – 180.0s
-**Delivery:** Solemne, inspirador y concluyente para el jurado del Grand Prix.
+**Delivery:** Solemne, inspirador y concluyente para el jurado de HackSpain.
 
-    Detrás de esta interfaz late un rigor técnico absoluto: ciento veintisiete tests de agente, setenta y tres evaluaciones de benchmark con ensayos repetidos y compuertas de seguridad en código que derivan emergencias al instante. Creatividad, resolución de problemas y artesanía técnica unidas en salud. Diseñado para clínicos, construido para pacientes y preparado para el Grand Prix.
+    Detrás de esta interfaz late un rigor técnico absoluto: ciento veintisiete tests de agente, setenta y tres evaluaciones de benchmark con ensayos repetidos y compuertas de seguridad en código que derivan emergencias al instante. Creatividad, resolución de problemas y artesanía técnica unidas en salud. Diseñado para clínicos, construido para pacientes y preparado para HackSpain.
