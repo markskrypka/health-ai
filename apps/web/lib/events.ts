@@ -28,6 +28,9 @@ export type Summary = {
   patient_id?: string | null;
   patient_name?: string | null;
   stage: string;
+  mood?: number | null; // the kept reading of a finished call, when there is one
+  answer_secs?: number | null; // median seconds from the caller's last word to the agent's first
+  cost_usd?: number | null; // an estimate at list prices, for calls that logged what they used
 };
 
 export type Pipeline = { id: string; label?: string; stt?: string; llm?: string; tts?: string; prompt?: string; build?: string };

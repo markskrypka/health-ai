@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { Play, Rows3 } from "lucide-react";
+import { GitCompareArrows, Play, Rows3 } from "lucide-react";
 import { EVENTS_URL } from "@/lib/config";
 import { DeskStore } from "@/lib/desk-store";
 import { build } from "@/lib/events";
 import { CallList } from "@/components/desk/CallList";
 import { Chat, ChatHeader } from "@/components/desk/Chat";
+import { Insights } from "@/components/desk/Insights";
 import { PatientPanel } from "@/components/desk/PatientPanel";
+import { Pipelines } from "@/components/desk/Pipelines";
 import { NO_NAMES, type Names } from "@/components/desk/ActionCard";
 
 const NOTHING: never[] = [];
@@ -19,6 +21,7 @@ export default function Desk() {
   const [tab, setTab] = useState<"live" | "past">("live");
   const [selected, setSelected] = useState<string>();
   const [names, setNames] = useState<Names>(NO_NAMES);
+  const [comparing, setComparing] = useState(false);
   const followed = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -46,17 +49,25 @@ export default function Desk() {
   }, [selected, store]);
 
   const summary = selected ? state.calls[selected] : undefined;
+  const finished = Boolean(summary?.ended && summary.source !== "replay");
+
+  // A finished call is read once when it is first opened; the reading is kept on disk by the events service.
+  useEffect(() => {
+    if (selected && finished) void store.analyse(selected);
+  }, [selected, finished, store]);
+
   const events = (selected && state.events[selected]) || NOTHING;
   const view = useMemo(() => (selected && events.length ? build(events) : undefined), [selected, events]);
   const listMoods = useMemo(() => {
     const out: Record<string, number | undefined> = {};
-    for (const [id, a] of Object.entries(state.analysis)) out[id] = a.mood;
+    for (const c of Object.values(state.calls)) if (c.mood != null) out[c.call_id] = c.mood;
+    for (const [id, a] of Object.entries(state.analysis)) if (a.mood != null) out[id] = a.mood;
     for (const [id, byTurn] of Object.entries(state.moods)) {
       const values = Object.entries(byTurn).sort(([a], [b]) => Number(a) - Number(b)).map(([, v]) => v);
       if (values.length && out[id] == null) out[id] = values[values.length - 1];
     }
     return out;
-  }, [state.analysis, state.moods]);
+  }, [state.analysis, state.moods, state.calls]);
 
   const replayMany = async () => {
     const finished = calls.filter((c) => !c.live && c.source !== "replay" && c.outcome.length > 0 && c.seconds > 40).slice(0, 10);
@@ -70,6 +81,9 @@ export default function Desk() {
         <Link href="/" className="text-sm font-semibold tracking-tight"><span className="text-clinic">Clínica Arenal</span> · front desk</Link>
         <span className={`text-xs ${state.connected ? "text-good" : "text-bad"}`}>{state.connected ? "● connected to the call logs" : "○ events service not reachable — is it running on 7870?"}</span>
         <span className="flex-1" />
+        <button onClick={() => setComparing(true)} className="inline-flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-soft transition hover:bg-wash">
+          <GitCompareArrows className="size-3.5" /> Compare pipelines
+        </button>
         <button onClick={replayMany} className="inline-flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-soft transition hover:bg-wash" title="Replay ten recorded calls at once, at their real speed">
           <Rows3 className="size-3.5" /> Replay ten at once
         </button>
@@ -90,6 +104,7 @@ export default function Desk() {
                   </button>
                 )}
               </ChatHeader>
+              {summary.ended && <Insights summary={summary} view={view} analysis={state.analysis[summary.call_id]} />}
               <Chat key={summary.call_id} view={view} names={names} moods={state.moods[summary.call_id] ?? state.analysis[summary.call_id]?.by_turn ?? {}} live={summary.live} />
             </>
           ) : (
@@ -101,6 +116,7 @@ export default function Desk() {
 
         <PatientPanel view={view} names={names} />
       </div>
+      {comparing && <Pipelines onClose={() => setComparing(false)} />}
     </div>
   );
 }

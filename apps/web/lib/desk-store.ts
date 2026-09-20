@@ -99,10 +99,14 @@ export class DeskStore {
     try {
       const res = await fetch(`${EVENTS_URL}/api/calls/${encodeURIComponent(callId)}`);
       if (!res.ok) return;
-      const body = (await res.json()) as { summary: Summary; events: CallEvent[] };
+      const body = (await res.json()) as { summary: Summary; events: CallEvent[]; moods?: Record<number, number>; analysis?: Analysis | null };
       const have = this.state.events[callId];
       if (!have || body.events.length >= have.length)
-        this.set({ events: { ...this.state.events, [callId]: body.events }, calls: { ...this.state.calls, [callId]: body.summary } });
+        this.set({
+          events: { ...this.state.events, [callId]: body.events }, calls: { ...this.state.calls, [callId]: body.summary },
+          moods: { ...this.state.moods, [callId]: { ...body.moods, ...this.state.moods[callId] } },
+          analysis: body.analysis ? { ...this.state.analysis, [callId]: body.analysis } : this.state.analysis,
+        });
     } finally {
       this.loading.delete(callId);
     }
@@ -116,7 +120,8 @@ export class DeskStore {
   }
 
   async analyse(callId: string) {
-    if (this.state.analysis[callId]) return;
+    const known = this.state.analysis[callId];
+    if (known && !known.error) return;
     this.set({ analysis: { ...this.state.analysis, [callId]: { pending: true } } });
     try {
       const res = await fetch(`${EVENTS_URL}/api/calls/${encodeURIComponent(callId)}/analysis`);
