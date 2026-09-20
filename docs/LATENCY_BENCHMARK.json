@@ -1,0 +1,58 @@
+{
+  "total_turns_tested": 8,
+  "median_turn_latency_sec": 2.79,
+  "mean_turn_latency_sec": 2.95,
+  "min_turn_latency_sec": 2.12,
+  "max_turn_latency_sec": 4.07,
+  "p90_turn_latency_sec": 4.07,
+  "turns": [
+    {
+      "scenario": "spanish_booking",
+      "turn": "Greeting & Specialty Request",
+      "caller_text": "Hola, buenos d\u00edas. Quer\u00eda pedir la primera cita libre de medicina general.",
+      "latency_sec": 3.407487336997292
+    },
+    {
+      "scenario": "spanish_booking",
+      "turn": "Patient Identification",
+      "caller_text": "Me llamo Josefa Dom\u00ednguez Navarro.",
+      "latency_sec": 2.123384486003488
+    },
+    {
+      "scenario": "spanish_booking",
+      "turn": "Confirmation",
+      "caller_text": "S\u00ed, me viene bien. Res\u00e9rvela, por favor.",
+      "latency_sec": 2.3695927020016825
+    },
+    {
+      "scenario": "spanish_booking",
+      "turn": "Closing",
+      "caller_text": "Muchas gracias. Adi\u00f3s.",
+      "latency_sec": 3.747290071005409
+    },
+    {
+      "scenario": "english_booking",
+      "turn": "Greeting & Request",
+      "caller_text": "Hi, I would like to book a general practice appointment please.",
+      "latency_sec": 2.327912134001963
+    },
+    {
+      "scenario": "english_booking",
+      "turn": "Patient Identification",
+      "caller_text": "My name is Josefa Dom\u00ednguez Navarro.",
+      "latency_sec": 3.0131463980069384
+    },
+    {
+      "scenario": "english_booking",
+      "turn": "Confirmation",
+      "caller_text": "Yes, that works for me. Please book it.",
+      "latency_sec": 2.5604772880033124
+    },
+    {
+      "scenario": "english_booking",
+      "turn": "Closing",
+      "caller_text": "Thank you very much. Goodbye.",
+      "latency_sec": 4.071699940002873
+    }
+  ]
+}

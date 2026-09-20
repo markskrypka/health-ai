@@ -1,11 +1,5 @@
 <!-- stem -->
 Always work through the stem skill: size the work, keep
 docs/planning/ current, verify before done.
-Now: Clinic voice agent (HackSpain Prosper track) — 172 points, the maximum (four teams tied); all 16 open scored problems credited 4/4. Live since 03:12 on 20 Sep: the gap audit's Tier 1 and the ElevenLabs voice (one voice for English and Spanish — .env selects "Elise"; ELEVENLABS_VOICE_ID swaps it; without ELEVENLABS_API_KEY the agent speaks with Deepgram). Next: the team keeps or swaps the voice after hearing its Spanish; then the audit's Tier 2 if Mark wants it before the demo — docs/planning/active/clinic-voice-agent/work.md lists what is left. scripts/scored.py loop and the ngrok tunnel run in the assistant's session (Mark: scripts/night.sh in your own terminal); change code only via scripts/restart.sh. Standing decisions: commit after each verified fix (no pushes), no full text-eval runs unasked. Wall freezes Sunday 20 Sep 06:00 Madrid; demos 11:00–13:00.
+Now: The jury demo (caller's screen + front desk; demos Sunday 20 Sep 11:00–13:00) — every piece built and verified in a browser by 04:30: apps/agent/scripts/demo.sh starts it (7861 dry-run call server, 7870 events service, 3100 web app), docs/demo.md is the script. Next: Mark's spoken call from http://localhost:3100/call (Chrome, headset), then a rehearsal; state in docs/planning/active/demo-web/work.md. The phone server (:7860) still runs the 03:14 build: never restart it or stop the scored loop before the 06:00 freeze, and afterwards only through apps/agent/scripts/restart.sh with Mark's yes. Monorepo since 03:50: agent in apps/agent, web in apps/web; .venv, .env, logs, docs at the root. Parked: Clinic voice agent — 172 points, the maximum; docs/planning/active/clinic-voice-agent/work.md. Standing decisions: commit after each verified piece (no pushes), no full text-eval runs unasked.
 <!-- /stem -->
-
-## Admin web interface — a separate initiative, not started
-
-Mark wants a live front-desk screen (patients on the left, the conversation with booking and cancellation artifacts in
-the middle, the patient card on the right; monorepo, Next.js). Read `docs/planning/active/admin-web/brief.md` and ask
-Mark its questions before writing any code. It must never touch the call server or the scored loop.

@@ -1,0 +1,12 @@
+{
+  "name": "health-ai",
+  "private": true,
+  "description": "Clínica Arenal voice agent (apps/agent, Python) and the screens around it (apps/web, Next.js)",
+  "scripts": {
+    "web": "pnpm --filter web dev",
+    "web:build": "pnpm --filter web build",
+    "web:test": "pnpm --filter web test",
+    "demo": "bash apps/agent/scripts/demo.sh"
+  },
+  "packageManager": "pnpm@9.15.9"
+}
