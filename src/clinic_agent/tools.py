@@ -71,6 +71,12 @@ def _name_is_recognisable(said: str, record: dict) -> bool:
     return any(SequenceMatcher(None, w, h).ratio() >= 0.8 for w in want for h in have)
 
 
+def _given_name_agrees(said: str, record: dict) -> bool:
+    given = fold(record["given_name"]).split()
+    want = [t for t in fold(said).replace(",", " ").split() if len(t) > 1]
+    return any(SequenceMatcher(None, w, g).ratio() >= 0.8 for w in want for g in given)
+
+
 def _identifies(said: str, id_is_sound: bool, match: dict) -> bool:
     if not said or _name_agrees(said, match) or _two_exact_details(match):
         return True
@@ -109,6 +115,10 @@ async def find_patient(s: CallSession, api: ClinicClient, name: str = "", nation
         # mother's caller id returns the MOTHER, flagged name+phone. So the name is compared here, in code.
         strong = [m for m in matches if _identifies(name, id_is_sound, m)]
         via_caller_id = "phone" in query and not phone
+        if via_caller_id and name:
+            # A family shares a line and often both surnames: the number plus "Muñoz Torres" fits the grandson as well
+            # as the grandmother who is calling. Through the caller id the given name must agree too, or two exact details.
+            strong = [m for m in strong if _given_name_agrees(name, m) or _two_exact_details(m)]
         if not strong and via_caller_id:
             if matches and name:
                 s.caller_record = matches[0]
@@ -122,6 +132,8 @@ async def find_patient(s: CallSession, api: ClinicClient, name: str = "", nation
     if not strong:
         return {"status": "not_found",
                 "say": "No record matches. Re-check the identifier once (read it back). If it still fails, the caller may be new: offer to register them."}
+    if len(strong) > 1 and name:
+        strong = [m for m in strong if _given_name_agrees(name, m)] or strong  # relatives share surnames, not first names
     if len(strong) > 1:
         missing = [k for k in ("date_of_birth", "national_id") if k not in query]
         return {"status": "several_match", "count": len(strong),
@@ -144,9 +156,9 @@ async def find_patient(s: CallSession, api: ClinicClient, name: str = "", nation
     if fields < 2:
         result["say"] = "Matched on one field only. Confirm a second one (name, date of birth or id) before booking anything."
     if s.caller_record and s.caller_record["patient_id"] != m["patient_id"]:
-        result["caller"] = (f'The number they are ringing from belongs to another patient on file, '
-                            f'{s.caller_record["given_name"]} {s.caller_record["first_surname"]} — probably the caller. '
-                            "Book for the patient named above, not for the caller.")
+        result["caller"] = (f'The number they are ringing from is on another patient\'s record, '
+                            f'{s.caller_record["given_name"]} {s.caller_record["first_surname"]} — the caller or a relative. '
+                            "Book for the patient named above, not for that record.")
     s.log("patient", patient_id=m["patient_id"], matched_on=list(query), status=result["status"])
     return result
 
@@ -234,6 +246,15 @@ async def find_slots(s: CallSession, api: ClinicClient, patient_id: str, special
     if s.search_locked and s.last_offered_slot:
         return {"status": "no_time", "say": f"No time for another search. If the caller accepted or has not refused your last "
                                             f"offer, record it now with slot_ref {s.last_offered_slot}, then say goodbye."}
+    # A second plan is one the caller named on this call. The plan on file is priced anyway, and passing it used to
+    # switch off the question that finds the real second plan; a plan nobody said is the model's invention.
+    if insurer == s.patients[patient_id]["insurer"]:
+        insurer = ""
+    if insurer and not _caller_said_insurer(s, insurer) and not s.insurer_challenged:
+        s.insurer_challenged = True
+        return {"status": "insurer_not_heard",
+                "say": "The caller has not named that plan on this call. Ask whether they hold a second insurance plan and what it "
+                       "is called; if they cannot bring the name to mind, ask them to read it off the card, and wait. Then search again."}
     cat = await api.catalogue()
     today = s.now.astimezone(MADRID).date()
     notes: list[str] = []
@@ -323,44 +344,45 @@ async def find_slots(s: CallSession, api: ClinicClient, patient_id: str, special
     # The API still lists slots on a published closure day (as it does for today); neither is ever accepted.
     closed_days = set(cat["calendar"]["closure_days"])
     blocked: list[dict] = []
-    for site in sites:
-        cursor, picked = start, []
-        while cursor <= calendar_end and not picked:
-            window_end = min(cursor + timedelta(days=13), calendar_end)
-            try:
-                res = await api.availability(cursor.isoformat(), window_end.isoformat(),
-                                             provider_id=provider["id"] if provider else None,
-                                             specialty_id=None if provider else specialty_id,
-                                             location_id=site, patient_id=patient_id,
-                                             insurers=[insurer] if insurer else None)
-            except ClinicError as err:
-                return {"status": "error", "detail": str(err.detail)[:200]}
-            blocked = res["blocked"]
-            for slot in res["slots"]:
-                t = datetime.fromisoformat(slot["start_time"]).astimezone(MADRID)
-                if t.date().isoformat() in closed_days or t.date() <= today or (not_before and t <= not_before):
-                    continue
-                if slot["provider_id"] in allowed and dates.in_part_of_day(t, part_of_day):
-                    picked.append(slot)
-            if not res["slots"] and blocked:
-                break  # a standing rule, not a full diary: later windows will say the same
-            cursor = window_end + timedelta(days=1)
-        if picked:
-            return _offer(s, cat, picked, wanted_day, site, part_of_day, notes, provider, patient_id)
-        if provider and blocked:
-            # The named doctor cannot take this patient; someone of the same kind may.
-            notes.append(f'{provider["name"]} cannot take this patient ({blocked[0]["restriction"]}). Looking at the same specialty.')
-            return await find_slots(s, api, patient_id, specialty_id=specialty_id, location_id=location_id,
-                                    day_kind=day_kind, weekday=weekday, date_iso=date_iso, part_of_day=part_of_day,
-                                    language=language, insurer=insurer, caller_address=caller_address,
-                                    after_appointment_id=after_appointment_id)
+    # A doctor who cannot take this patient (a standing rule) gives way to the others of the same kind. A loop, not
+    # a second call of this function: a move pins its doctor again on every call, and that never ended.
+    for doctor in ([provider, None] if provider else [None]):
+        for site in sites:
+            cursor, picked = start, []
+            while cursor <= calendar_end and not picked:
+                window_end = min(cursor + timedelta(days=13), calendar_end)
+                try:
+                    res = await api.availability(cursor.isoformat(), window_end.isoformat(),
+                                                 provider_id=doctor["id"] if doctor else None,
+                                                 specialty_id=None if doctor else specialty_id,
+                                                 location_id=site, patient_id=patient_id,
+                                                 insurers=[insurer] if insurer else None)
+                except ClinicError as err:
+                    return {"status": "error", "detail": str(err.detail)[:200]}
+                blocked = res["blocked"]
+                for slot in res["slots"]:
+                    t = datetime.fromisoformat(slot["start_time"]).astimezone(MADRID)
+                    if t.date().isoformat() in closed_days or t.date() <= today or (not_before and t <= not_before):
+                        continue
+                    if slot["provider_id"] in allowed and dates.in_part_of_day(t, part_of_day):
+                        picked.append(slot)
+                if not res["slots"] and blocked:
+                    break  # a standing rule, not a full diary: later windows will say the same
+                cursor = window_end + timedelta(days=1)
+            if picked:
+                return _offer(s, cat, picked, wanted_day, site, part_of_day, notes, doctor, patient_id)
+        if not (doctor and blocked):
+            break
+        notes.append(f'{doctor["name"]} cannot take this patient ({blocked[0]["restriction"]}). Looking at the same specialty.')
 
     if blocked:
         kinds = [b["restriction"] for b in blocked]
         reason = max(set(kinds), key=lambda k: (kinds.count(k), k != "provider_not_in_network"))
         say = f"The clinic's rules stop this booking: {reason}. Explain it plainly."
         if reason in _COVERAGE and not insurer:
-            say += " First ask whether they hold a second insurance plan; if they name one, search again with insurer set."
+            say += (" First ask whether they hold a second insurance plan. If they name one, search again with insurer set. "
+                    "If they have one but cannot bring its name to mind, ask them to find the card and read it out, and wait for it. "
+                    f"Only when they hold no other plan: end_without_booking({reason}).")
         else:
             say += f" Then end_without_booking({reason})."
         s.log("blocked", reason=reason, blocked=blocked)
@@ -369,6 +391,16 @@ async def find_slots(s: CallSession, api: ClinicClient, patient_id: str, special
     s.last_offered_slot, s.last_refusal_reason = None, "no_availability"
     return {"status": "no_availability",
             "say": "Nothing free matches. Offer to widen the search (another day, time of day, doctor or site). If nothing they accept exists, end_without_booking(no_availability)."}
+
+
+def _already_recorded(s: CallSession, slot: dict, patient_id: str) -> bool:
+    """This very slot is already booked, or is where an appointment was already moved to, for this patient on this call."""
+    for record in s.submissions:
+        whose = record.get("patient_id") or s.appointments.get(record.get("appointment_id", ""), {}).get("patient_id")
+        if record["action"] in ("book", "reschedule") and whose == patient_id and \
+                (record["slot"], record["provider_id"], record["location_id"]) == (slot["start_time"], slot["provider_id"], slot["location_id"]):
+            return True
+    return False
 
 
 def _offer(s: CallSession, cat: dict, picked: list[dict], wanted_day: date | None, site: str | None,
@@ -401,6 +433,12 @@ def _offer(s: CallSession, cat: dict, picked: list[dict], wanted_day: date | Non
                        "payable_with": slot["payable_with"]})
         if len(offers) == 3:
             break
+    if _already_recorded(s, first, patient_id):
+        # Seen live: booked 14:00, the caller repeated it back as "fourteen thirty", the model searched again,
+        # apologised for "booking 14:00 by mistake" and moved a correct booking to 15:30.
+        notes.append("The first slot here is the one you have ALREADY recorded for this patient, and it is still the first that "
+                     "matches. A caller who repeats a time back wrongly has misheard it, not changed their mind: say the day "
+                     "and the time again, slowly, and change nothing unless they now ask for a different time.")
     s.last_offered_slot, s.last_offered_patient, s.last_refusal_reason = offers[0]["slot_ref"], patient_id, None
     s.log("offer", offers=offers, notes=notes)
     return {"status": "slots_found", "offers": offers, "notes": notes,
@@ -530,9 +568,11 @@ async def _record(s: CallSession, api: ClinicClient, action: str, payload: dict)
 
 
 def _policy(s: CallSession, slot: dict, patient_id: str, insurer: str) -> str:
+    """The plan on file pays whenever it can; a second plan only for what the first will not cover. The organizers
+    publish a control case for exactly this: the first plan works, the caller holds another, and billing it fails."""
     payable = slot["payable_with"]
     on_file = s.patients[patient_id]["insurer"]
-    return next((p for p in (insurer, on_file) if p in payable), payable[0] if payable else on_file)
+    return next((p for p in (on_file, insurer) if p in payable), payable[0] if payable else on_file)
 
 
 def _not_on_the_table(s: CallSession, slot: dict, patient_id: str) -> dict | None:

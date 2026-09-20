@@ -608,3 +608,101 @@ async def test_the_caller_is_not_heard_during_a_lookup_nor_as_the_answer_begins(
     await mute.process_frame(FunctionCallResultFrame(function_name="find_slots", tool_call_id="c1", arguments={}, result={}))
     clock["now"] += speech.LookupMute.SAFETY_SECS + 0.1
     assert not await mute.process_frame(audio)
+
+
+# --- the second plan: billed only for what the plan on file will not cover, asked for, never invented ---
+class _CoveredBySecondPlanOnly(_Diary):
+    """The plan on file does not cover this; a second plan named in the search does — as the clinic answers."""
+    async def availability(self, date_from, date_to, *, insurers=None, **kw):
+        self.asked.append({"insurers": insurers})
+        if insurers != ["sanitas"]:
+            return {"slots": [], "blocked": [{"provider_id": "PR03", "restriction": "location_not_covered"}]}
+        found = await super().availability(date_from, date_to, **kw)
+        return {"blocked": [], "slots": [dict(sl, payable_with=["sanitas"]) for sl in found["slots"]]}
+
+
+async def test_the_plan_on_file_pays_whenever_it_can_and_the_second_plan_only_when_it_cannot():
+    from clinic_agent import tools
+    s = _session_with_a_booking()
+    s.patients["P3"]["insurer"] = "nueva_mutua"
+    s.slots["S1"]["payable_with"] = ["nueva_mutua", "asisa"]       # the published control case: the first plan works
+    await tools.book(s, _Catalogue(), "P3", "S1", insurer="asisa")
+    assert s.submissions[0]["policy_id"] == "nueva_mutua"
+    s.slots["S1"]["payable_with"] = ["asisa"]                       # …and when it does not, the plan that pays is billed
+    await tools.book(s, _Catalogue(), "P3", "S1", insurer="asisa")
+    assert [a["policy_id"] for a in s.submissions] == ["asisa"]
+
+
+async def test_a_blocked_search_asks_for_the_second_plan_even_when_the_model_passed_the_plan_on_file():
+    from clinic_agent import tools
+    s, api = _saturday_evening_call(), _CoveredBySecondPlanOnly()
+    s.heard.append("I'm with DKV.")
+    blocked = await tools.find_slots(s, api, "P00902", specialty_id="general_practice", location_id="sur", insurer="dkv")
+    assert blocked["status"] == "blocked" and api.asked[-1] == {"insurers": None}
+    assert "second insurance plan" in blocked["say"] and "read it out" in blocked["say"]
+
+
+async def test_a_plan_nobody_named_is_questioned_once_and_a_plan_the_caller_read_off_the_card_opens_the_slot():
+    from clinic_agent import tools
+    s, api = _saturday_evening_call(), _CoveredBySecondPlanOnly()
+    invented = await tools.find_slots(s, api, "P00902", specialty_id="general_practice", location_id="sur", insurer="sanitas")
+    assert invented["status"] == "insurer_not_heard" and api.asked == []
+    s.heard.append("Let me look… here is the card. It says Sanitas.")
+    found = await tools.find_slots(s, api, "P00902", specialty_id="general_practice", location_id="sur", insurer="sanitas")
+    assert found["status"] == "slots_found"
+    await tools.book(s, api, "P00902", found["offers"][0]["slot_ref"], insurer="sanitas")
+    assert s.submissions[0]["policy_id"] == "sanitas"
+
+
+# --- "I agreed to fourteen thirty": a time repeated back wrongly does not move a correct booking ---
+async def test_a_search_that_finds_the_slot_already_booked_says_so():
+    from clinic_agent import tools
+    s, api = _saturday_evening_call(), _Diary()
+    first = await tools.find_slots(s, api, "P00902", specialty_id="general_practice")
+    assert not any("ALREADY" in n for n in first["notes"])
+    await tools.book(s, api, "P00902", first["offers"][0]["slot_ref"])
+    again = await tools.find_slots(s, api, "P00902", specialty_id="general_practice", day_kind="date", date_iso="2026-09-21")
+    assert any("ALREADY recorded" in n and "change nothing" in n for n in again["notes"])
+
+
+# --- a family on one line, sharing both surnames: the number does not make the grandson the grandmother ---
+class _FamilyDirectory(_Directory):
+    def __init__(self):
+        super().__init__()
+        base = {"has_visited_before": True, "insurer": "dkv", "referrals": [], "note": ""}
+        self.records = [
+            dict(base, patient_id="P00330", given_name="Guillermo", first_surname="Muñoz", second_surname="Torres",
+                 national_id="18921027P", phone="600777888", date_of_birth="2015-03-02"),
+            dict(base, patient_id="P00331", given_name="Manuela", first_surname="Muñoz", second_surname="Torres",
+                 national_id="50454876Y", phone="600999000", date_of_birth="1948-11-23"),
+        ]
+
+
+async def test_the_callers_number_on_a_relatives_record_does_not_identify_the_relative_as_the_caller():
+    from clinic_agent import tools
+    s = _ringing_from("600777888")                            # the number on the grandson's record
+    found = await tools.find_patient(s, _FamilyDirectory(), name="Manuela Muñoz Torres", use_caller_id=True)
+    assert (found["status"], found["patient_id"]) == ("one_field_only", "P00331")   # her own record, and a second detail is owed
+    assert "Guillermo" in found["caller"]
+    grandson = await tools.find_patient(s, _FamilyDirectory(), name="Guillermo Muñoz Torres", use_caller_id=True)
+    assert (grandson["status"], grandson["patient_id"]) == ("identified", "P00330")
+
+
+# --- a move whose doctor can no longer take the patient looks at the same kind of doctor, once ---
+class _DoctorBlocked(_Diary):
+    async def availability(self, date_from, date_to, *, provider_id=None, **kw):
+        if provider_id == "PR07":
+            self.asked.append({"provider_id": provider_id})
+            return {"slots": [], "blocked": [{"provider_id": "PR07", "restriction": "provider_not_in_network"}]}
+        return await super().availability(date_from, date_to, provider_id=provider_id, **kw)
+
+
+async def test_a_later_move_whose_doctor_is_blocked_ends_and_keeps_the_site_and_the_later_time():
+    from clinic_agent import tools
+    s, api = _saturday_evening_call(), _DoctorBlocked()
+    s.appointments["A1"] = {"appointment_id": "A1", "patient_id": "P00902", "provider_id": "PR07", "location_id": "centro",
+                            "start_time": "2026-09-21T09:15:00+02:00"}
+    found = await tools.find_slots(s, api, "P00902", after_appointment_id="A1")
+    assert len(api.asked) == 2                                # the doctor, then the specialty — it used to call itself for ever
+    assert (found["offers"][0]["when"], found["offers"][0]["site"]) == ("Monday 21 September at 09:30", "Arenal Centro")
+    assert any("cannot take this patient" in n for n in found["notes"])
