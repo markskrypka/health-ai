@@ -575,6 +575,17 @@ def _policy(s: CallSession, slot: dict, patient_id: str, insurer: str) -> str:
     return next((p for p in (on_file, insurer) if p in payable), payable[0] if payable else on_file)
 
 
+def _not_heard(s: CallSession) -> dict | None:
+    """The caller spoke over the agent's last reply before most of it was played, so their "okay" answers nothing.
+    Refused once; the reply is said again and the next answer counts."""
+    if not s.unheard:
+        return None
+    s.unheard = None
+    return {"status": "caller_did_not_hear_you",
+            "say": "Nothing was recorded: the caller spoke over your last reply and did not hear it, so their words were not an "
+                   "answer to it. Say it again in one sentence — the offer, or the question — and wait for their answer."}
+
+
 def _not_on_the_table(s: CallSession, slot: dict, patient_id: str) -> dict | None:
     """A slot can be recorded only for the patient it was found for, and only while its offer stands."""
     if slot["found_for"] != patient_id:
@@ -591,7 +602,7 @@ async def book(s: CallSession, api: ClinicClient, patient_id: str, slot_ref: str
     slot = s.slots.get(slot_ref)
     if slot is None or patient_id not in s.patients:
         return {"status": "error", "say": "Use a patient_id from find_patient and a slot_ref from find_slots in this call."}
-    if refusal := _not_on_the_table(s, slot, patient_id):
+    if refusal := _not_on_the_table(s, slot, patient_id) or _not_heard(s):
         return refusal
     return await _record(s, api, "book", {
         "patient_id": patient_id, "provider_id": slot["provider_id"], "location_id": slot["location_id"],
@@ -619,7 +630,7 @@ async def reschedule(s: CallSession, api: ClinicClient, appointment_id: str, slo
     slot, appt = s.slots.get(slot_ref), s.appointments.get(appointment_id)
     if slot is None or appt is None:
         return {"status": "error", "say": "Use an appointment_id from list_appointments and a slot_ref from find_slots in this call."}
-    if refusal := _not_on_the_table(s, slot, appt["patient_id"]):
+    if refusal := _not_on_the_table(s, slot, appt["patient_id"]) or _not_heard(s):
         return refusal
     if not s.move_challenged and not _caller_asked_to_move(s):
         s.move_challenged = True
@@ -635,6 +646,8 @@ async def reschedule(s: CallSession, api: ClinicClient, appointment_id: str, slo
 async def cancel(s: CallSession, api: ClinicClient, appointment_id: str) -> dict:
     if appointment_id not in s.appointments:
         return {"status": "error", "say": "Use an appointment_id from list_appointments in this call."}
+    if refusal := _not_heard(s):
+        return refusal
     return await _record(s, api, "cancel", {"appointment_id": appointment_id})
 
 
@@ -680,11 +693,30 @@ async def escalate(s: CallSession, api: ClinicClient, reason: str = "medical_eme
                                           "You cannot alert anyone yourself: never say you have called or are calling the emergency services."}
 
 
+# Words of a caller who takes back what was just agreed and wants nothing in its place.
+_TAKE_BACK_WORDS = ["forget it", "forget about", "never mind", "nevermind", "changed my mind", "change my mind", "don't want",
+                    "do not want", "dont want", "no longer", "don't book", "do not book", "dont book", "don't move", "do not move",
+                    "don't change", "do not change", "don't cancel", "do not cancel", "cancel that", "scrap", "undo", "take it back",
+                    "leave it as", "keep it as", "keep the original", "keep my original", "as it was", "not go ahead",
+                    "olvid", "dejalo", "dejelo", "dejarlo", "ya no", "no quiero", "no lo quiero", "mejor no", "no reserve",
+                    "no la reserve", "no lo cambie", "no la cambie", "no lo anule", "no la anule", "cambiado de opinion",
+                    "cambie de opinion", "como estaba"]
+
+
 async def discard_recorded(s: CallSession, api: ClinicClient) -> dict:
     """The caller took the last decision back. Only the last one: a call can hold two (a move for a relative, a
     booking for the caller). The offer goes too, or the hang-up fallback would book what was just withdrawn."""
     if not s.submissions or s.submissions[-1]["action"] == "escalate":
         return {"status": "nothing_to_discard", "say": "There is nothing the caller can take back."}
+    # Seen in an eval of the two-request call: "Wait, don't hang up yet! I also need an appointment for myself" —
+    # and the model threw away the move it had just recorded. One challenge, then trust, as with a move.
+    taken_back = any(w in " ".join(fold(t) for t in s.heard[-2:]) for w in _TAKE_BACK_WORDS)
+    if not taken_back and not s.discard_challenged:
+        s.discard_challenged = True
+        return {"status": "caller_did_not_take_it_back",
+                "say": "Nothing was discarded: the caller did not take that decision back. A caller who asks for something more "
+                       "wants BOTH — leave what you recorded and carry on with the new request. Call discard_recorded again "
+                       "only if they clearly said they no longer want what you recorded."}
     dropped = s.submissions.pop()
     s.withdraw_offer()
     s.log("discarded", dropped=[dropped])
@@ -758,6 +790,7 @@ async def finalize(s: CallSession, api: ClinicClient) -> None:
     if not s.submissions:
         await recover_leaked_calls(s, api)
     if not s.submissions:
+        s.unheard = None  # the caller has gone: nothing can be said again
         if s.last_offered_slot and s.last_offered_patient in s.patients:
             await book(s, api, s.last_offered_patient, s.last_offered_slot)
         else:
@@ -833,7 +866,8 @@ TOOLS: dict[str, tuple[Tool, str, dict, list[str]]] = {
     "end_without_booking": (end_without_booking, "The call ends with nothing written. The reason is the answer.",
         {"reason": _E(REASONS)}, ["reason"]),
     "discard_recorded": (discard_recorded,
-        "The caller took back the decision recorded last on this call (nothing has been sent yet). Removes that one.", {}, []),
+        "ONLY when the caller says they no longer want what you recorded last and want nothing in its place. Removes that one "
+        "decision. Never for 'wait', 'one more thing' or a second request — a second request is simply a second action.", {}, []),
     "escalate": (escalate, "Hand the call to a human: a medical emergency. Book nothing.",
         {"reason": _E(["medical_emergency"])}, ["reason"]),
 }

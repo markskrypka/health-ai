@@ -29,7 +29,7 @@ from pipecat.turns.user_turn_strategies import UserTurnStrategies
 from . import config, languages, prompt, tools
 from .clinic import ClinicClient
 from .session import CallSession
-from .speech import GuardedGoogleLLM, LookupMute, PatientTurnStop, VoiceRouter
+from .speech import GuardedGoogleLLM, LookupMute, PatientTurnStop, SpokenClock, VoiceRouter
 
 GREETING = "Clínica Arenal, good morning. How can I help you?"
 LINE_RATE = 8000  # Twilio Media Streams: 8 kHz µ-law
@@ -43,6 +43,8 @@ _WRAP_UP_WITH_OFFER = ("[CLOCK] This call will be cut off in about a minute. Do 
                        "anything else. Your last offer, slot_ref {ref}, is what the caller is answering: unless they "
                        "refused it, record it NOW with book — or with reschedule if they asked to move an appointment — "
                        "then say goodbye in one short sentence.")
+_NOT_HEARD = ("[LINE] The caller spoke over you: they did not hear your last reply, so whatever they say next is not "
+              "an answer to it. Say it again in one short sentence, then wait for their answer.")
 # A turn ends after this much silence (plus the VAD's 0.2 s). Pipecat's default end-of-turn model
 # closes the turn at "Hi." and after each group of a dictated id; a plain timeout keeps an id whole,
 # and behaves the same in every language.
@@ -110,7 +112,8 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
             stop=[PatientTurnStop(user_speech_timeout=TURN_END_SILENCE_SECS,
                                   unfinished_extra_secs=UNFINISHED_EXTRA_SECS)])))
 
-    pipeline = Pipeline([transport.input(), stt, user_agg, llm, VoiceRouter(session), tts, transport.output(), assistant_agg])
+    spoken = SpokenClock()
+    pipeline = Pipeline([transport.input(), stt, user_agg, llm, VoiceRouter(session), tts, transport.output(), spoken, assistant_agg])
     worker = PipelineWorker(pipeline, enable_rtvi=False, params=PipelineParams(
         audio_in_sample_rate=LINE_RATE, audio_out_sample_rate=LINE_RATE, enable_metrics=True, enable_usage_metrics=True))
 
@@ -154,7 +157,14 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
     async def on_agent_said(_agg, message):
         text = getattr(message, "content", str(message))
         session.said.append(text)
-        session.log("agent", text=text)
+        # The context already holds the whole reply, played or not. A reply the caller talked over is marked as
+        # unheard for the model, and code refuses one decision on it (tools._not_heard).
+        cut_off = bool(text) and getattr(message, "interrupted", False) and not spoken.heard(text)
+        if text:  # a turn that was only a tool call says nothing either way
+            session.unheard = text if cut_off else None
+        session.log("agent", text=text, **({"cut_off": True} if cut_off else {}))
+        if cut_off:
+            context.add_message({"role": "user", "content": _NOT_HEARD})
 
     @user_agg.event_handler("on_user_turn_idle")
     async def on_quiet_line(_agg):

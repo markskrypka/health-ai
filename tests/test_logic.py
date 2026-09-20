@@ -563,9 +563,21 @@ async def test_a_withdrawn_booking_is_not_sent_at_hang_up():
     s, api = _session_with_a_booking(), _Catalogue()
     s.last_offered_slot, s.last_offered_patient = "S1", "P3"
     await tools.book(s, api, "P3", "S1")
-    await tools.discard_recorded(s, api)                      # "actually, forget it"
+    s.heard.append("Actually, forget it. I'll call back another day.")
+    await tools.discard_recorded(s, api)
     await tools.finalize(s, api)
     assert [a["action"] for a in s.submissions] == ["no-action"]
+
+
+async def test_one_more_thing_is_not_taking_the_first_thing_back():
+    from clinic_agent import tools
+    s, api = _session_with_a_booking(), _Catalogue()
+    await tools.book(s, api, "P3", "S1")
+    s.heard.append("Wait, please don't hang up yet! I also need an appointment for myself.")   # from an eval: the move was discarded
+    kept = await tools.discard_recorded(s, api)
+    assert kept["status"] == "caller_did_not_take_it_back" and [a["action"] for a in s.submissions] == ["book"]
+    insisted = await tools.discard_recorded(s, api)           # one challenge, then the model is trusted
+    assert insisted["status"] == "discarded" and s.submissions == []
 
 
 def test_no_patient_id_sits_in_anything_the_model_reads():
@@ -706,3 +718,38 @@ async def test_a_later_move_whose_doctor_is_blocked_ends_and_keeps_the_site_and_
     assert len(api.asked) == 2                                # the doctor, then the specialty — it used to call itself for ever
     assert (found["offers"][0]["when"], found["offers"][0]["site"]) == ("Monday 21 September at 09:30", "Arenal Centro")
     assert any("cannot take this patient" in n for n in found["notes"])
+
+
+# --- "Ajá" over an offer that never played is not a yes ---
+def test_a_reply_counts_as_heard_only_when_most_of_it_was_played(monkeypatch):
+    from pipecat.frames.frames import BotStartedSpeakingFrame, BotStoppedSpeakingFrame, LLMFullResponseStartFrame
+    from clinic_agent import speech
+
+    clock = {"now": 50.0}
+    monkeypatch.setattr(speech.time, "monotonic", lambda: clock["now"])
+    offer = "The earliest appointment is on Monday the twenty-first at nine with Doctor Martín Sáez at Arenal Sur. Would you like me to book it?"
+    spoken = speech.SpokenClock()
+    spoken.note(BotStartedSpeakingFrame())                    # "One moment, please." is playing…
+    clock["now"] += 1.2
+    spoken.note(LLMFullResponseStartFrame())                  # …when the answer starts: the phrase does not count
+    clock["now"] += 0.3
+    assert not spoken.heard(offer)                            # d080b697: cut off a third of a second in
+    clock["now"] += 7.0
+    spoken.note(BotStoppedSpeakingFrame())
+    assert spoken.heard(offer)                                # "Yes" as the question ends is an answer
+    assert spoken.heard("")                                   # nothing to hear
+
+
+async def test_a_decision_on_a_reply_the_caller_talked_over_is_refused_once():
+    from clinic_agent import tools
+    s, api = _session_with_a_booking(), _Catalogue()
+    s.appointments["A1"] = {"appointment_id": "A1", "patient_id": "P3"}
+    s.unheard = "May I cancel the appointment on Monday at nine?"          # 8207a8bb: never played, "Ajá.", cancelled
+    refused = await tools.cancel(s, api, "A1")
+    assert refused["status"] == "caller_did_not_hear_you" and s.submissions == []
+    assert (await tools.cancel(s, api, "A1"))["status"] == "recorded"      # said again, answered, recorded
+    s.unheard = "Would you like me to book it?"
+    s.submissions.clear()
+    s.last_offered_slot, s.last_offered_patient = "S1", "P3"
+    await tools.finalize(s, api)                                           # but a hang-up is never left empty over it
+    assert [a["action"] for a in s.submissions] == ["book"]

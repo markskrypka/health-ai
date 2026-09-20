@@ -44,11 +44,15 @@ class CallSession:
     heard: list[str] = field(default_factory=list)
     said: list[str] = field(default_factory=list)
     insurer_challenged: bool = False
+    # The agent's last reply, when the caller spoke over it before most of it was played: whatever they said is
+    # not an answer to it. A decision is refused once while this is set; a reply played to the end clears it.
+    unheard: str | None = None
     # The language the agent is speaking right now ("en" or "es") — it picks the voice and the stock phrases —
     # and whether the caller turned out to speak Catalan, which needs its own listening model.
     language: str = "en"
     catalan: bool = False
     move_challenged: bool = False
+    discard_challenged: bool = False
     # A search for "later than the appointment I hold" is itself the caller asking to move it.
     move_intended: bool = False
     # Set when the wrap-up clock fires with an offer on the table, cleared by the caller's next turn:

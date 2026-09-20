@@ -13,6 +13,7 @@ from pipecat.frames.frames import (
     BotStoppedSpeakingFrame,
     Frame,
     LLMContextFrame,
+    LLMFullResponseStartFrame,
     LLMTextFrame,
     TTSUpdateSettingsFrame,
 )
@@ -226,3 +227,39 @@ class LookupMute(FunctionCallUserMuteStrategy):
         elif began_to_speak and now < self._listen_again_at:
             self._listen_again_at = now + self.REPLY_TAIL_SECS  # the answer has begun
         return looking_up or now < self._listen_again_at
+
+
+class SpokenClock(FrameProcessor):
+    """Sits after the phone line's output and counts the seconds of the current reply that were really played.
+
+    Pipecat puts a sentence into the model's context when it is synthesised, not when it is heard. Seen live, in
+    22 calls: an offer went to the voice, the caller's "Ajá" cut it off a third of a second later, the context
+    still held the whole offer with "Would you like me to book that?" — and the model booked on the "Ajá".
+    """
+
+    CHARS_PER_SEC = 16.0  # both voices, measured over the logged calls
+    HEARD_SHARE = 0.8
+
+    def __init__(self):
+        super().__init__()
+        self._played = 0.0
+        self._since: float | None = None
+
+    def heard(self, reply: str) -> bool:
+        """Whether the caller can have heard this reply, given how long the voice has been playing it."""
+        played = self._played + (time.monotonic() - self._since if self._since is not None else 0.0)
+        return played >= self.HEARD_SHARE * len(reply) / self.CHARS_PER_SEC
+
+    def note(self, frame: Frame) -> None:
+        now = time.monotonic()
+        if isinstance(frame, LLMFullResponseStartFrame):  # a new reply: the holding phrase before it does not count
+            self._played, self._since = 0.0, (now if self._since is not None else None)
+        elif isinstance(frame, BotStartedSpeakingFrame) and self._since is None:
+            self._since = now
+        elif isinstance(frame, BotStoppedSpeakingFrame) and self._since is not None:
+            self._played, self._since = self._played + now - self._since, None
+
+    async def process_frame(self, frame: Frame, direction: FrameDirection):
+        await super().process_frame(frame, direction)
+        self.note(frame)
+        await self.push_frame(frame, direction)
