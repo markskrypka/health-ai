@@ -76,7 +76,7 @@ async def _follow() -> None:
             hub.publish({"type": "event", "call_id": call_id, "seq": seq, "event": event})
             if call_id not in touched:
                 touched.append(call_id)
-        for call_id in touched:
+        for call_id in touched:  # the list's line for that call: who, where the call is, how it ended
             hub.publish({"type": "call", "summary": _summary_of(call_id)})
         await asyncio.sleep(POLL_SECS)
 
@@ -295,7 +295,7 @@ async def _replay(call_id: str, of: str, source: list[dict], speed: float) -> No
             event.update(source="replay", replay_of=of)
         replays[call_id].append(event)
         hub.publish({"type": "event", "call_id": call_id, "seq": seq, "event": event})
-        if event["kind"] not in ("caller", "agent", "tool_result") or seq == 0:
+        if event["kind"] not in ("caller", "agent", "hearing", "speaking"):
             hub.publish({"type": "call", "summary": _summary_of(call_id)})
 
 

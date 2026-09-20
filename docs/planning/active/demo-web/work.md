@@ -1,11 +1,15 @@
 # Work — The jury demo: the caller's screen and the front desk screen
 
-**State (2026-09-20, 03:40 Madrid) — agreed, building piece 0.** Mark's go came at 03:30 with five changes (see
-`contract.md`, top). Work happens on `main` in the one checkout; the worktree made at 00:50 is gone. The phone line
-(:7860, restarted 03:14 by the voice-agent work) and the scored loop keep running from this same checkout — the move to
-a monorepo must not disturb them, and does not (see piece 0). Demos start at 11:00: seven hours.
-**Next action:** piece 0 "A room to build in" — the monorepo move, then the web app's scaffold.
-**Waiting on Mark:** one spoken test call from his browser when piece 3 lands (about 07:30).
+**State (2026-09-20, 03:55 Madrid) — pieces 0, 1 and 2 done: the front desk works on today's events.** The repo is a
+monorepo (`67f0434`); the events service streams the call logs and replays recorded calls (`01afe19`); `/desk` shows
+calls in progress and past calls, the chat with the agent's actions as cards, "why did it say that?", and the patient's
+card — verified in a browser with one replay, ten replays at once and a past call; 15 reducer tests (one builds all 206
+real logs), 5 follower tests. Running now, started by the assistant: events service on 7870 (`logs/events-service.log`),
+web app on 3100 (`logs/web-dev.log`). The phone line (:7860) and the scored loop were never restarted. The browser's
+phone module (`apps/web/lib/phone`) is being built by a helper agent alongside.
+**Next action:** piece 3 "A phone in the browser" — the demo call server on 7861, the `start` message's `screen`,
+`prefill` and `pipeline`, and `/call` with the call button.
+**Waiting on Mark:** one spoken test call from his browser when piece 3 lands.
 
 ## How it fits together
 

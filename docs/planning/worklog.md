@@ -2,6 +2,18 @@
 
 Newest first. One entry per change, written when the change lands.
 
+## 2026-09-20 · feat · the front desk screen, on the events the agent already writes
+By: Mark Skrypka
+Why: the jury scores "what you can see while a call is in flight" and "why did it say that?" afterwards; piece 2 of "The jury demo". It had to work on the phone line as it runs today, with no change to the agent.
+How: `apps/web` (Next.js 16, Tailwind 4). `lib/events.ts` is one reducer — a call's event log in, what a screen shows out: the turns, the agent's actions as cards (identification with the patient on it, appointments on the books, nearest clinic, search with its offers, a clinic rule, decisions with what they replaced struck through, refusals by the code with their reason, safety nets, sent to the clinic), the patient's card, the form's fields, the booked slot. Every sentence of the agent carries the actions since its last one, so clicking it answers "why did it say that?" with the tool's own words to the model. `lib/desk-store.ts` follows the events service's stream and joins a call half-way without a gap. `/desk`: calls in progress or past calls on the left, the chat in the middle, the patient on the right with upcoming appointments read from the clinic; "Replay as if live" and "Replay ten at once". Verified: 15 reducer tests, one of which builds every call log on this machine (206) and checks each lookup got its card and each ended call its end; in a browser a replayed booking built list, chat and card in step, ten replays at once stayed readable, and a past move showed its why-panel. National ids and phone numbers are masked on the desk.
+Ref: pending
+
+## 2026-09-20 · feat · the log becomes a stream; a recorded call can be replayed as if live
+By: Mark Skrypka
+Why: piece 1 of "The jury demo": the screens need every event the moment it is written, from the phone line too, without touching the server that takes the calls.
+How: `clinic_agent/tail.py` follows `logs/calls/` and hands out every complete new line once, with its position in its log; `console.py` became the events service (port 7870): `/api/stream` (server-sent events: a snapshot of recent calls, then each new event and a fresh summary line per call), `/api/replay` (a recorded call re-emitted in memory with its original timing, its first event marked `source: replay`), the patient's upcoming appointments and the catalogue's names; summaries now carry who the call is about, its language, its source, its stage and whether it was a dry run. The old console page and its endpoints still work. Verified: five tests for the follower (history is not news, a late file, a half-written line, positions agree with a full read around a damaged line); a replay at 14x arrived over the stream in order with its stages.
+Ref: 01afe19
+
 ## 2026-09-20 · refactor · the repo becomes a monorepo: the agent moves to apps/agent
 By: Mark Skrypka
 Why: the jury demo adds a web app (`apps/web`), and Mark chose a full monorepo now rather than after the demo — the voice-agent changes are finished and merged to `main`, so the move collides with nothing.

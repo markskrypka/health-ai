@@ -24,3 +24,6 @@ dist/
 
 # raw eval results (large; the summary is what gets shown)
 eval-runs/
+
+# browser checks made while building
+.playwright-mcp/

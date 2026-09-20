@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* Clínica Arenal: warm paper, dark ink, one clinical green. Light only — it is shown on a projector. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, Menlo, monospace;
+
+  --color-paper: #f6f4ef;
+  --color-card: #ffffff;
+  --color-ink: #1c1a17;
+  --color-soft: #6f6a61;
+  --color-faint: #a39d92;
+  --color-line: #e6e1d6;
+  --color-wash: #efece4;
+
+  --color-clinic: #0f6b5c;
+  --color-clinic-soft: #e3f1ed;
+  --color-clinic-line: #bfded6;
+
+  --color-live: #e5484d;
+  --color-good: #1f7a4d;
+  --color-good-soft: #e4f3ea;
+  --color-warn: #a35c00;
+  --color-warn-soft: #fbefdc;
+  --color-bad: #b3261e;
+  --color-bad-soft: #fbe6e3;
+  --color-tool: #3b4a5a;
+  --color-tool-soft: #eef1f4;
+
+  --animate-arrive: arrive 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-pulse-dot: pulse-dot 1.6s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.4s linear infinite;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@keyframes arrive {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-live) 55%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-live) 0%, transparent); }
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+html, body { height: 100%; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Thin, quiet scrollbars inside the panes. */
+.pane { scrollbar-width: thin; scrollbar-color: var(--color-line) transparent; }
+
+.running {
+  background: linear-gradient(90deg, var(--color-tool-soft) 25%, #ffffff 50%, var(--color-tool-soft) 75%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }

@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  devIndicators: false, // the screens are shown to a jury straight from `next dev`
 };
 
 export default nextConfig;
