@@ -1,6 +1,13 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync, copyFileSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
+const edgeTtsBin = existsSync("/home/Shodan/Miniforge3/bin/edge-tts")
+  ? "/home/Shodan/Miniforge3/bin/edge-tts"
+  : "edge-tts";
 
 let apiKey = process.env.OPENAI_API_KEY;
 if (!apiKey) {
@@ -11,7 +18,7 @@ if (!apiKey) {
   } catch (e) {}
 }
 if (!apiKey) {
-  console.error("Missing OPENAI_API_KEY");
+  console.error("Missing OPENAI_API_KEY for Whisper word alignment");
   process.exit(1);
 }
 
@@ -63,25 +70,13 @@ function parseScript(md) {
 }
 
 async function synthesize(text, voicePath) {
-  console.log(`Synthesizing Spanish TTS: "${text.slice(0, 50)}..." -> ${voicePath}`);
-  const res = await fetch("https://api.openai.com/v1/audio/speech", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "tts-1-hd",
-      voice: "onyx",
-      input: text,
-      speed: 1.12,
-    }),
-  });
-  if (!res.ok) {
-    throw new Error(`TTS failed with status ${res.status}: ${await res.text()}`);
-  }
-  const buffer = Buffer.from(await res.arrayBuffer());
-  await writeFile(voicePath, buffer);
+  console.log(`Synthesizing Spanish Edge-TTS (es-ES-AlvaroNeural): "${text.slice(0, 50)}..." -> ${voicePath}`);
+  await execFileAsync(edgeTtsBin, [
+    "--voice", "es-ES-AlvaroNeural",
+    "--rate=+11%",
+    "--text", text,
+    "--write-media", voicePath,
+  ]);
 }
 
 async function transcribe(voicePath) {
@@ -222,7 +217,7 @@ async function main() {
   ];
 
   const audioMeta = {
-    bgm: { path: "audio/bgm.loop.mp3", volume: 0.18, query: "ambient cinematic piano", duration_s: 180 },
+    bgm: { path: "audio/bgm.loop.mp3", volume: 0.07, query: "ambient cinematic piano", duration_s: 180 },
     bgm_pending: false,
     voices,
     sfx: sfxList,

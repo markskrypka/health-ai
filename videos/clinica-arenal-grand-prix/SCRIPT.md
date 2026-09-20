@@ -1,9 +1,9 @@
 # SCRIPT — clinica-arenal-grand-prix (European Spanish Edition)
 
-**Voice:** Onyx (OpenAI)
-**Voice settings:** model tts-1-hd · speed 1.12
+**Voice:** Álvaro Neural (`es-ES-AlvaroNeural`)
+**Voice settings:** edge-tts · speed +11%
 **Language:** European Spanish (es-ES)
-**Voice direction:** Natural, seguro, cinematográfico, técnico y profundamente humano.
+**Voice direction:** Natural, cálido, seguro, técnico y profundamente humano.
 **Mantra:** "Un vídeo de 3 minutos. Contad el proyecto a fondo, para que puedan juzgar creatividad, problem solving y craftsmanship."
 
 ---
@@ -43,12 +43,12 @@
 
     Al finalizar, el modelo de análisis evalúa la fricción, el coste y la satisfacción. Para evitar dobles reservas si el usuario cuelga o duda, el agente jamás muta la base de datos a mitad de llamada: mantiene un estado atómico en memoria y consolida todas las citas en un único commit durante el cuelgue, con reintentos automáticos si la API hospitalaria se retrasa.
 
-## Line 6 — Resiliencia con Gemelos Digitales: Pipeline A y B (Frame 6)
+## Line 6 — Resiliencia y Evaluación Continua en pipelines.py (Frame 6)
 
 **Time:** 110.0 – 132.0s
-**Delivery:** Experto y artesanal, detallando el testing A/B en pipelines.py y la conmutación instantánea.
+**Delivery:** Experto y artesanal, explicando el arnés de experimentación continua para testear pipelines y servicios.
 
-    La fiabilidad clínica exige redundancia arquitectónica. En pipelines.py implementamos pruebas A/B en vivo: el Pipeline A ofrece voz bilingüe natural con ElevenLabs Flash v2.5, mientras que el Pipeline B aporta contingencia instantánea con Deepgram Aura-2. Los operadores comparan latencia y sentimiento en tiempo real, con una conmutación transparente en menos de catorce milisegundos.
+    Para evolucionar el sistema, diseñamos un arnés de experimentación continua en pipelines.py. Permite evaluar y comparar diferentes modelos, pipelines y proveedores de STT, LLM y síntesis bajo tráfico real. Así, medimos latencia, coste y satisfacción clínica para iterar sin descanso, desplegando siempre la mejor combinación con una conmutación transparente e instantánea.
 
 ## Line 7 — Concurrencia Masiva a Escala (Frame 7)
 
