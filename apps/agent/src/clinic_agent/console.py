@@ -176,7 +176,7 @@ def _summarise(call_id: str, events: list[dict], last_at: float) -> dict:
         "actions": (ended or {}).get("submissions", []),
         "delivered": all(p.get("http") in (200, 201, 409) for p in (ended or {}).get("posted", [])),
         # A dry run (a browser call, a local test) captures its decisions and POSTs nothing: no attempt is made.
-        "dry_run": bool(ended) and any(p.get("attempts") == 0 for p in ended.get("posted", [])),
+        "dry_run": started.get("source") == "web" or (bool(ended) and any(p.get("attempts") == 0 for p in ended.get("posted", []))),
         "turns": sum(1 for e in events if e["kind"] == "caller"),
         "lookups": sum(1 for e in events if e["kind"] == "tool_call"),
         "first_words": next((e["text"] for e in events if e["kind"] == "caller" and len(e["text"]) > 12), ""),
@@ -252,7 +252,7 @@ def _stage(events: list[dict], ended: dict | None) -> str:
 # Moments worth a badge in the list: the call did something other than the plain path.
 _FLAGS = {"wrap_up_clock": "wrap-up clock", "inferred_at_hangup": "decided at hang-up", "recovered_leaked_call": "recovered tool call",
           "voice": "changed voice", "listening_model": "Catalan ear", "blocked": "rule applied", "refusal_not_recorded": "refusal dropped",
-          "quiet_line": "nudged a quiet line", "discarded": "decision taken back"}
+          "quiet_line": "nudged a quiet line", "discarded": "decision taken back", "hung_up_undecided": "hung up before deciding"}
 
 
 def _in_words(action: dict) -> str:

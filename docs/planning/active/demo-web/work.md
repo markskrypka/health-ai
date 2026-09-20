@@ -1,17 +1,17 @@
 # Work — The jury demo: the caller's screen and the front desk screen
 
-**State (2026-09-20, 04:15 Madrid) — pieces 0–4 done: both screens work; checkpoint B reached five hours early.**
-The front desk (`/desk`) runs on today's events; the caller's screen (`/call`) dials the dry-run call server on 7861
-from the browser, a filled form is known before the greeting, an empty one fills itself, the calendar shows every free
-slot of the agent's search. Verified from a real browser with a recorded caller (`/call?clip=/phone/test-caller.wav`)
-and with a scripted web call; 127 agent tests, 126 web tests. Running now, started by the assistant: events service
-7870, demo call server 7861, web app 3100 (logs in `logs/`). **The phone line (:7860) was never restarted and still
-runs the 03:14 build — the new events (live words, answer times, pipeline badge, slot list, masked card) reach the desk
-from web calls only until Mark decides to restart it after the freeze.**
-**Next action:** piece 5 "What we learn, during and after" — `analysis.py` (mood per turn, the call's analysis), the
-past-call header, the pipeline comparison table. Then photos, `demo.sh`, `docs/demo.md`.
-**Waiting on Mark:** one spoken call from his own browser at `http://localhost:3100/call` (microphone, headset) — the
-one thing a recorded caller cannot prove; and after 06:00 the decision about restarting the phone line on this build.
+**State (2026-09-20, 04:30 Madrid) — every piece is built; what is left needs Mark.** Both screens work and are
+verified in a browser with a recorded caller; mood per turn, the reading of finished calls, cost, the pipeline
+comparison, eight portraits, `apps/agent/scripts/demo.sh` and `docs/demo.md` are in. 127 agent tests, 126 web tests.
+Running now, started by the assistant (they die with its session — `demo.sh` in Mark's own terminal replaces them):
+events service 7870, dry-run call server 7861, web app 3100. **The phone line (:7860) was never restarted and still runs
+the 03:14 build**: phone calls show on the desk with turns, lookups, identification, offers, rules, decisions and
+delivery, but without live words, answer times, the pipeline badge, the slot list and the masked card.
+**Next action:** Mark's spoken call from `http://localhost:3100/call` (Chrome, headset) — the one path a recorded
+caller cannot prove (microphone, echo); fix what it shows. Then a rehearsal against `docs/demo.md`.
+**Waiting on Mark:** (1) that spoken call; (2) after the 06:00 freeze, yes or no to restarting the phone line on this
+build (`apps/agent/scripts/restart.sh`, then one practice call through the harness; back to `a7c0062` if anything
+differs) — see "Decisions still to come".
 
 ## How it fits together
 

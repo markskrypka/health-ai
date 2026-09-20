@@ -19,7 +19,8 @@ export function Insights({ summary, view, analysis }: { summary: Summary; view: 
           {summary.outcome.length
             ? summary.outcome.map((o, i) => <Chip key={i} tone={o.startsWith("NO_ACTION") ? "plain" : o.startsWith("ESCALATE") ? "bad" : o.startsWith("CANCEL") ? "warn" : "good"}>{o}</Chip>)
             : <Chip tone="plain">no decision recorded</Chip>}
-          {summary.ended && (summary.dry_run ? <Chip tone="warn">captured, not sent</Chip> : summary.delivered ? <Chip tone="good">delivered to the clinic</Chip> : <Chip tone="bad">not delivered</Chip>)}
+          {summary.ended && summary.outcome.length > 0 && (summary.dry_run ? <Chip tone="warn">captured, not sent — a dry run</Chip> : summary.delivered ? <Chip tone="good">delivered to the clinic</Chip> : <Chip tone="bad">not delivered</Chip>)}
+          {summary.ended && summary.outcome.length === 0 && summary.dry_run && <Chip tone="warn">a dry run</Chip>}
           {summary.flags.map((f) => <Chip key={f} tone="tool"><TriangleAlert className="size-3" />{f}</Chip>)}
         </div>
 

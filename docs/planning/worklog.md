@@ -2,6 +2,12 @@
 
 Newest first. One entry per change, written when the change lands.
 
+## 2026-09-20 · feat · what we learn from a call; portraits; one command to start the demo; the runbook
+By: Mark Skrypka
+Why: pieces 5–7 of "The jury demo": the jury asks what we can learn from a call afterwards and how we know the agent works; Mark asked for mood, the pipeline that took the call so agents can be A/B tested, a photo on identification, and live mood per turn.
+How: `clinic_agent/analysis.py` reads calls beside the line, never on it — the caller's mood about a second after each of their turns, and every finished call once (mood across it and by turn, friction, effort, a summary, one lesson), kept in `logs/analysis/`; replays reuse the kept reading and cost nothing. The events service adds the reading (`/api/calls/{id}/analysis`), a batch (`POST /api/analysis`), cost per call from what it logged (`PRICES`, an estimate at list prices) and `/api/pipelines`; the desk shows a strip on a finished call (outcome, delivery, notes, seconds, seconds to decision, answer time, cost, pipeline, the reading) and "Compare pipelines". `scripts/portraits.py` generated faces for the eight patients who rang most, from the record's sex and age (the personas are invented; so are the faces); everyone else keeps initials. `scripts/demo.sh` starts the dry-run call server, the events service and the web app; `docs/demo.md` is the ten-minute script and what to do when something fails. A web call with no decision reads "hung up before deciding", not as a failure. Verified in a browser: a filled form greeted "good morning, Josefa" with every field ticked at second zero; on the desk the same call showed the form's lookup before the greeting, the portrait, a mood mark on the caller's turn and its reading; the comparison holds A (4 calls), B (1) and 212 earlier calls, 34 of them read. Spend so far tonight: seven short test calls, 35 readings, 8 images — about one dollar.
+Ref: pending
+
 ## 2026-09-20 · feat · the caller's screen: a phone in the browser, a form that fills itself, a calendar of the free times
 By: Mark Skrypka
 Why: pieces 3 and 4 of "The jury demo" — the part nobody asked for. A patient on the clinic's web page calls from the browser; what they typed is known before the greeting, what they say fills the form, and the free times the agent finds appear on a calendar, so the agent says one and lets them choose with their eyes.

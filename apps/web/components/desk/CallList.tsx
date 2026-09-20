@@ -9,6 +9,7 @@ const SOURCE_ICON = { phone: Phone, web: Globe, replay: RotateCcw } as const;
 
 function outcomeWord(s: Summary): { text: string; tone: "good" | "warn" | "bad" | "plain" } {
   const first = s.outcome[0]?.split(" ")[0];
+  if (!first && s.flags.includes("hung up before deciding")) return { text: "hung up before deciding", tone: "plain" };
   if (!first) return { text: s.ended ? "no decision" : s.stage, tone: s.ended ? "bad" : "plain" };
   const more = s.outcome.length > 1 ? ` +${s.outcome.length - 1}` : "";
   if (first === "BOOK") return { text: `Booked${more}`, tone: "good" };
