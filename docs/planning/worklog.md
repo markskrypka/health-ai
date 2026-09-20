@@ -2,6 +2,48 @@
 
 Newest first. One entry per change, written when the change lands.
 
+## 2026-09-20 · feat · the agent speaks with ElevenLabs
+By: Mark Skrypka
+Why: the team found the Deepgram voices robotic and the Spanish one Latin American; Mark put `ELEVENLABS_API_KEY` in `.env` and asked for a plain switch now rather than more work on Deepgram.
+How: `speech.voice_service`: with the key set, Pipecat's `ElevenLabsTTSService` — one voice for English and Spanish (`ELEVENLABS_VOICE_ID`, default "Sarah"; `ELEVENLABS_MODEL`, default `eleven_flash_v2_5`), 8 kHz PCM straight to the line; without the key, Deepgram Aura-2 as before. The voice is not told the language: that is part of its connection, and the first cut reconnected at the change to Spanish and ElevenLabs took 2.1 s to close the old socket, right before the first Spanish sentence. `VoiceRouter` still tracks the language for the stock phrases. Verified: 111 tests; scripted local calls in English (the accepted booking, 68 s) and Spanish (every sentence came back as Spanish on the wire), no reconnects, no server errors, first audio byte median 0.13 s (max 0.39 s) over 13 sentences; deployed 03:12 with the line idle. Not known: the plan behind the key (it lacks `user_read`), so neither its character quota nor its concurrent-stream limit; if the voice goes silent, take the key out of `.env` and run `scripts/restart.sh`. The team has not picked a voice by ear yet.
+Ref: e27a31d
+
+## 2026-09-20 · fix · "one more thing" discards nothing; an "okay" over a reply nobody heard is not an answer
+By: Mark Skrypka
+Why: a text eval of "The Real Call" failed once in six: after the grandson's move was recorded the caller said "Wait, don't hang up yet! I also need an appointment for myself" and the model called `discard_recorded` — the move was gone. And from the audit: 23 of 138 live decisions were recorded on an offer or a question the caller had talked over (Pipecat puts a sentence into the context when it is synthesised, not when it is heard), one of them a cancellation.
+How: `tools.discard_recorded` runs only when the caller's last words take the decision back (English and Spanish), one challenge, then trust; its description and the prompt say a second request is a second action. `speech.SpokenClock` sits after the line's output and counts the seconds of the current reply really played; a reply interrupted with under 80% played (16 characters a second) is marked for the model ("[LINE] the caller did not hear your last reply") and `book`, `reschedule` and `cancel` refuse once while it stands (`tools._not_heard`); a hang-up clears it so the fallback still sends something. Verified: 3 new tests; the_real_call 12/12 over four runs; on a local call the scripted caller talked over the offer, the agent said it again and booked the accepted slot.
+Ref: 6310c64
+
+## 2026-09-20 · fix · the second plan, a family on one line, a time repeated back wrongly, a move whose doctor is blocked
+By: Mark Skrypka
+Why: audit findings on the two problems still unopened. second_policy: "I have something through work, not sure what it is called" ended the call, passing the plan on file switched off the question that finds the second one, and nothing checked that a billed plan was ever said; the organizers' control case (the first plan works) fails if the second is billed. the_real_call: the caller's number plus two shared surnames identified the grandson as the grandmother in 10 of 14 eval runs; a caller who repeated 14:00 back as "fourteen thirty" got a correct booking moved to 15:30 (live, 64300d72); a later move whose doctor cannot take the patient called `find_slots` for ever (stopped after 60 availability calls, offline).
+How: `find_slots` drops an insurer equal to the one on file, answers a plan nobody said with `insurer_not_heard` once, and its blocked text and the prompt say: ask, and if they cannot name it ask them to read the card and wait; `_policy` bills the plan on file whenever it can pay. `find_patient`: through the caller id the given name must agree, or two exact details; several matches are narrowed by given name. `_offer` notes when its first slot is the one already recorded for that patient ("misheard, not changed their mind: say it again, change nothing"), and the prompt says the same. The blocked-doctor retry is a loop, not a recursion. Verified: 7 new tests, 108 in all; text evals second_policy 8/8, the_real_call 5/6 (the miss is the entry above).
+Ref: 0c35fae
+
+## 2026-09-20 · fix · the caller is not listened to while a lookup runs, nor as the answer begins
+By: Mark Skrypka
+Why: audit: "One moment, please." drew an "Okay" or "Sure, I'll wait" 78 times in 340; 38 cut the agent's reply off, 22 threw the model's run away, 18 cancelled the lookup itself (all 23 lookups that never returned were cancellations), about six seconds lost each — and twice a booking on a slot the caller had refused.
+How: `speech.LookupMute`, a subclass of Pipecat's `FunctionCallUserMuteStrategy`: deaf from the start of a lookup until one second into the agent's answer, and never for more than six seconds after the last lookup returned. Verified: a unit test with a pinned clock; a local call booked the accepted slot.
+Ref: 052b395
+
+## 2026-09-20 · fix · what a refusal, an emergency and a withdrawal may undo; more red flags; no patient id in the tool schema
+By: Mark Skrypka
+Why: audit (privacy and safety): an off-topic refusal after a booking deleted the booking; an emergency could be followed by a booking or discarded; `discard_recorded` then a hang-up sent the booking the caller had withdrawn; the agent once said it was "escalating to emergency services" (nothing alerts anyone); a wish to die, an overdose, anaphylaxis and bleeding in pregnancy were not red flags; a published patient's DNI sat in the `find_patient` schema as an example and was spoken once to another caller.
+How: `tools._record`: a refusal displaces a booking only with the very reason the last search gave for that patient and doctor; nothing is recorded after an ESCALATE; `discard_recorded` pops only the last decision, never an emergency, and withdraws the offer; `escalate` tells the model to say "call 112" and never to claim anyone was alerted; the red flags are broader and end with "anything that sounds life-threatening: escalate first"; the example id is gone, and a test keeps patient ids out of everything the model reads. Verified: 101 tests.
+Ref: 724ea65
+
+## 2026-09-20 · fix · an offer stands only until a later search or a nearest-clinic answer replaces it, and only for its patient
+By: Mark Skrypka
+Why: audit (scheduling): `last_offered_slot` changed only when a search returned, and `book` took any slot ref. Live, twice: the caller refused an offer, their next words cancelled the new search, and the refused slot was booked (ea105d64 after a nearest-clinic answer, e9096923 at the wrap-up clock). Offline: a relative's appointment could be moved onto the caller's slot and billed to the caller's plan.
+How: `session.offer_round`, bumped by `withdraw_offer()` whenever a search goes out and when `nearest_site` names another clinic; every slot carries its round and the patient it was found for; `book` and `reschedule` answer `stale_offer` or `slot_of_another_patient`; an appointment anchor of another patient is refused. Verified: regression tests for both live calls' shape.
+Ref: e17981d
+
+## 2026-09-20 · fix · the call limit is ten minutes now
+By: Mark Skrypka
+Why: audit: `docs/organizers/rules.md` now caps a call at ten minutes (it was three), and our wrap-up clock still fired at 140 s. Since noon it had fired in four live conversations — three hurt, none helped: twice it made the agent say "call back" and record NO_ACTION while the caller was still spelling a name.
+How: `config.WRAP_UP_AT_SECS = 540`; the two registration gates use it; the prompt's three-minute pressure is gone ("never rush a caller who is spelling… there is time"). Verified: the suite.
+Ref: b65662b
+
 ## 2026-09-19 · fix · a question about the clinic gets only what was asked
 By: Mark Skrypka
 Why: the first scored run of "The Questions" passed 3 of 4. In the fourth the agent answered "Mondays and Wednesdays, from four to eight in the afternoon" to "which days is she there?" — the days were right, the caller's judge took the hours for a mistake and hung up; the same answer passed in another call of that run.
