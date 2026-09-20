@@ -29,7 +29,7 @@ from pipecat.turns.user_turn_strategies import UserTurnStrategies
 from . import config, languages, prompt, tools
 from .clinic import ClinicClient
 from .session import CallSession
-from .speech import GuardedGoogleLLM, PatientTurnStop, VoiceRouter
+from .speech import GuardedGoogleLLM, LookupMute, PatientTurnStop, VoiceRouter
 
 GREETING = "Clínica Arenal, good morning. How can I help you?"
 LINE_RATE = 8000  # Twilio Media Streams: 8 kHz µ-law
@@ -105,7 +105,7 @@ async def run_call(websocket: WebSocket, call_data: dict, api: ClinicClient, act
     # The greeting is spoken by code, so the model has to be told it already happened.
     context = LLMContext(messages=[{"role": "assistant", "content": GREETING}], tools=ToolsSchema(standard_tools=schemas))
     user_agg, assistant_agg = LLMContextAggregatorPair(context, user_params=LLMUserAggregatorParams(
-        vad_analyzer=SileroVADAnalyzer(), user_idle_timeout=QUIET_LINE_SECS,
+        vad_analyzer=SileroVADAnalyzer(), user_idle_timeout=QUIET_LINE_SECS, user_mute_strategies=[LookupMute()],
         user_turn_strategies=UserTurnStrategies(
             stop=[PatientTurnStop(user_speech_timeout=TURN_END_SILENCE_SECS,
                                   unfinished_extra_secs=UNFINISHED_EXTRA_SECS)])))

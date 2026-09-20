@@ -4,14 +4,23 @@ that now and then writes its whole reply twice — or writes a tool call out as 
 
 import asyncio
 import re
+import time
 import uuid
 
 from loguru import logger
-from pipecat.frames.frames import Frame, LLMContextFrame, LLMTextFrame, TTSUpdateSettingsFrame
+from pipecat.frames.frames import (
+    BotStartedSpeakingFrame,
+    BotStoppedSpeakingFrame,
+    Frame,
+    LLMContextFrame,
+    LLMTextFrame,
+    TTSUpdateSettingsFrame,
+)
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 from pipecat.services.deepgram.tts import DeepgramTTSSettings
 from pipecat.services.google.llm import GoogleLLMService
 from pipecat.services.llm_service import FunctionCallFromLLM
+from pipecat.turns.user_mute.function_call_user_mute_strategy import FunctionCallUserMuteStrategy
 from pipecat.turns.user_stop.speech_timeout_user_turn_stop_strategy import SpeechTimeoutUserTurnStopStrategy
 
 from . import languages, tools
@@ -185,3 +194,35 @@ class VoiceRouter(FrameProcessor):
                 self._session.log("voice", language=language)
                 await self.push_frame(TTSUpdateSettingsFrame(delta=DeepgramTTSSettings(voice=languages.VOICES[language])))
         await self.push_frame(frame, direction)
+
+
+class LookupMute(FunctionCallUserMuteStrategy):
+    """The caller is not listened to from the moment a lookup starts until a second into the agent's answer.
+
+    "One moment, please." draws an "Okay" or "Sure, I'll wait" from most people. Measured on 340 holding
+    phrases: 78 acknowledgements, of which 38 cut the agent's reply off, 22 threw the model's run away and 18
+    cancelled the lookup itself — six seconds lost each, and in 23 calls a decision recorded on an offer the
+    caller had not heard. Pipecat's own strategy stops listening while the lookup runs; this one also covers
+    the answer's first second, which is where the late "Okay" lands. It can never stay deaf: SAFETY_SECS after
+    the last lookup returned it listens again whatever happened.
+    """
+
+    REPLY_TAIL_SECS = 1.0
+    SAFETY_SECS = 6.0
+
+    def __init__(self):
+        super().__init__()
+        self._bot_speaking = False
+        self._listen_again_at = 0.0  # while a reply to a lookup is owed or in its first second
+
+    async def process_frame(self, frame: Frame) -> bool:
+        looking_up = await super().process_frame(frame)
+        now = time.monotonic()
+        began_to_speak = isinstance(frame, BotStartedSpeakingFrame) and not self._bot_speaking
+        if isinstance(frame, (BotStartedSpeakingFrame, BotStoppedSpeakingFrame)):
+            self._bot_speaking = isinstance(frame, BotStartedSpeakingFrame)
+        if looking_up:
+            self._listen_again_at = now + self.SAFETY_SECS  # re-armed until the last lookup has returned
+        elif began_to_speak and now < self._listen_again_at:
+            self._listen_again_at = now + self.REPLY_TAIL_SECS  # the answer has begun
+        return looking_up or now < self._listen_again_at

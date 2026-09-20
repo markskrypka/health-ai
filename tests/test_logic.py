@@ -575,3 +575,36 @@ def test_no_patient_id_sits_in_anything_the_model_reads():
     from datetime import datetime
     text = prompt.build(cat, datetime.now(config.MADRID), True) + json.dumps([(d, p) for _, d, p, _ in tools.TOOLS.values()])
     assert not re.search(r"\b\d{8}[A-Za-z]\b|\b[XYZxyz]\d{7}[A-Za-z]\b", text)
+
+
+# --- "Okay, I'll wait": the caller is not listened to during a lookup or the first second of the answer ---
+async def test_the_caller_is_not_heard_during_a_lookup_nor_as_the_answer_begins(monkeypatch):
+    from pipecat.frames.frames import (BotStartedSpeakingFrame, BotStoppedSpeakingFrame, FunctionCallFromLLM,
+                                       FunctionCallResultFrame, FunctionCallsStartedFrame, InputAudioRawFrame)
+    from clinic_agent import speech
+
+    clock = {"now": 100.0}
+    monkeypatch.setattr(speech.time, "monotonic", lambda: clock["now"])
+    mute = speech.LookupMute()
+    audio = InputAudioRawFrame(audio=b"\x00" * 160, sample_rate=8000, num_channels=1)
+    call = FunctionCallFromLLM(function_name="find_slots", tool_call_id="c1", arguments={}, context=None)
+
+    assert not await mute.process_frame(audio)                                   # an ordinary moment: listening
+    assert await mute.process_frame(FunctionCallsStartedFrame(function_calls=[call]))
+    assert await mute.process_frame(BotStartedSpeakingFrame())                   # "One moment, please."
+    clock["now"] += 0.4
+    assert await mute.process_frame(FunctionCallResultFrame(function_name="find_slots", tool_call_id="c1", arguments={}, result={}))
+    clock["now"] += 0.9
+    assert await mute.process_frame(BotStoppedSpeakingFrame())                   # the phrase ends; "Okay" lands about here
+    clock["now"] += 1.0
+    assert await mute.process_frame(BotStartedSpeakingFrame())                   # the answer begins…
+    clock["now"] += 0.9
+    assert await mute.process_frame(audio)                                       # …and its first second is protected
+    clock["now"] += 0.2
+    assert not await mute.process_frame(audio)                                   # then the caller can cut in again
+
+    # and it can never stay deaf: no answer ever comes, the safety window runs out
+    await mute.process_frame(FunctionCallsStartedFrame(function_calls=[call]))
+    await mute.process_frame(FunctionCallResultFrame(function_name="find_slots", tool_call_id="c1", arguments={}, result={}))
+    clock["now"] += speech.LookupMute.SAFETY_SECS + 0.1
+    assert not await mute.process_frame(audio)
