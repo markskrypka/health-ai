@@ -34,7 +34,7 @@ export function Calendar({ view, names }: { view: CallView; names: Names }) {
   const booked = view.booked;
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-line bg-card">
+    <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-line bg-card">
       <header className="flex items-center gap-2 border-b border-line px-5 py-3.5">
         <CalendarDays className="size-4 text-clinic" />
         <h2 className="text-sm font-semibold">Free appointments</h2>

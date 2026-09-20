@@ -47,7 +47,15 @@ export default function CallPage() {
   const [levels, setLevels] = useState({ mic: 0, agent: 0 });
   const [startedAt, setStartedAt] = useState<number>();
   const phone = useRef<Phone | null>(null);
+  const pressedAt = useRef(0);
   const now = useNow(500);
+
+  // The one big button both starts and ends a call. A nervous double press must not end the call it has just started.
+  const pressed = () => {
+    const tooSoon = Date.now() - pressedAt.current < 1500;
+    if (!tooSoon) pressedAt.current = Date.now();
+    return !tooSoon;
+  };
 
   useEffect(() => {
     store.start();
@@ -60,6 +68,7 @@ export default function CallPage() {
   const live = phoneState === "live" || phoneState === "connecting";
 
   const call = useCallback(async () => {
+    if (!pressed()) return;
     const id = crypto.randomUUID();
     const clip = new URLSearchParams(window.location.search).get("clip") ?? undefined; // a recorded caller instead of the microphone: for checks
     const prefill = Object.fromEntries(Object.entries(typed).filter(([, v]) => v?.trim()));
@@ -74,7 +83,12 @@ export default function CallPage() {
     await next.start().catch((err: unknown) => { setPhoneState("error"); setProblem(err instanceof Error ? err.message : String(err)); });
   }, [pipeline, typed]);
 
-  const hangUp = useCallback(() => { phone.current?.hangUp(); phone.current = null; setLevels({ mic: 0, agent: 0 }); }, []);
+  const hangUp = useCallback(() => {
+    if (!pressed()) return;
+    phone.current?.hangUp();
+    phone.current = null;
+    setLevels({ mic: 0, agent: 0 });
+  }, []);
 
   // What a field shows: what the caller typed before ringing, else what the agent heard, ticked once the clinic's record agrees.
   const lastAgent = [...view.items].reverse().find((i) => i.type === "turn" && i.who === "agent");

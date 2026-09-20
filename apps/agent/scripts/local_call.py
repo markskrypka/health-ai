@@ -3,7 +3,7 @@
 A scripted caller, not a simulated one — it says its next line whenever the agent stops talking.
 Good for one thing: proving the wire, the audio loop and the tools work before the real harness dials.
 
-Run the server with DRY_RUN_SUBMIT=1, then:  .venv/bin/python apps/agent/scripts/local_call.py [english|spanish|catalan|web] [ws url]
+Run the server with DRY_RUN_SUBMIT=1, then:  .venv/bin/python apps/agent/scripts/local_call.py [english|spanish|catalan|web|calendar] [ws url]
 """
 
 import asyncio
@@ -41,6 +41,12 @@ SCENARIOS = {
         "Hi, I'd like to book a general practice appointment, the earliest one you have please.",
         "Yes, that works for me. Please book it.",
         "Thank you very much. Goodbye."]),
+    # The same caller reads another time off the calendar on her screen, and takes that one.
+    "calendar": ("", "aura-2-luna-en", [
+        "Hi, I'd like to book a general practice appointment, the earliest one you have please.",
+        "Could I have Tuesday the twenty-second at half past ten instead?",
+        "Yes, please book that one.",
+        "Thank you very much. Goodbye."]),
     "catalan": ("+34669394942", "gemini", [
         "Bon dia. Voldria demanar la primera hora lliure de traumatologia. Necessito que m'atengui algú amb qui pugui parlar en català.",
         "Em dic Teresa López García.",
@@ -52,7 +58,7 @@ URL = sys.argv[2] if len(sys.argv) > 2 else "ws://localhost:7860/ws"
 FROM_NUMBER, VOICE, LINES = SCENARIOS[SCENARIO]
 # What the web page adds to the `start` message (clinic_agent/screen.py): that it is a screen, and the form.
 WEB = {"screen": "1", "prefill": json.dumps({"name": "Josefa Domínguez Navarro", "national_id": "48064716Y"}),
-       **({"pipeline": os.environ["PIPELINE"]} if os.getenv("PIPELINE") else {})} if SCENARIO == "web" else {}
+       **({"pipeline": os.environ["PIPELINE"]} if os.getenv("PIPELINE") else {})} if SCENARIO in ("web", "calendar") else {}
 DG = {"Authorization": f"Token {config.DEEPGRAM_API_KEY}"}
 
 

@@ -17,18 +17,16 @@ export function useNow(everyMs = 1000): number {
 /** The agent's words reach the log a sentence at a time, a moment before they are heard. They are shown at the
  *  speed the voice says them (about sixteen characters a second, measured over the logged calls), word by word. */
 export function useRevealed(text: string, charsPerSec = 16): string {
-  const [shown, setShown] = useState(0);
-  const target = text.length;
-  const behind = shown < target;
-  useEffect(() => {
-    if (target === 0) setShown(0);
-  }, [target]);
+  const [state, setState] = useState({ shown: 0, of: "" });
+  // Text that does not continue what is already on the screen is a new reply: it starts from its first letter.
+  const shown = text.startsWith(state.of.slice(0, state.shown)) ? Math.min(state.shown, text.length) : 0;
+  const behind = shown < text.length;
   useEffect(() => {
     if (!behind) return;
-    const timer = setInterval(() => setShown((n) => n + 1), 1000 / charsPerSec);
+    const timer = setInterval(() => setState((s) => ({ shown: (text.startsWith(s.of.slice(0, s.shown)) ? Math.min(s.shown, text.length) : 0) + 1, of: text })), 1000 / charsPerSec);
     return () => clearInterval(timer);
-  }, [behind, charsPerSec]);
-  if (shown >= target) return text;
+  }, [behind, charsPerSec, text]);
+  if (!behind) return text;
   return text.slice(0, Math.max(text.lastIndexOf(" ", shown), 0));
 }
 
